@@ -75,6 +75,23 @@ Changes for porting: build parameters, tool and script environment ...
 
     Rerun game headed again
 
+#### To update with newer release:
+
+    1. make a new branch from master: core-release-xxxxx
+
+    2. manually copy new release code ONTO this new branch
+
+    3. ignore Readme.MD and check build.gradle (because we made change to compile)
+
+    4. PR core-release-xxxxxx to master
+
+    5. update master Readme.MD with release info
+
+    6. merge master to feature-tientn-j-lang
+
+    7. rebuild and run
+
+
 ------------------
 
 ## License
