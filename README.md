@@ -1,4 +1,4 @@
-##TienTN Notes:
+## [TienTN Notes:]
 
 ---------------
 I make a board game based on TripA, this game will be more 'territory building' than the original.
