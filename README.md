@@ -1,6 +1,13 @@
-## [TienTN Notes:]
+## TienTN JBoard Game 
+
+A java game using Swing and Docker instances. Territories buidling and board based, turn based war games.
+
+I have played a lot of strategy series, from Civilization and EU4, IronHearts, Victoria ... But they are over complicated, so I think it's time to create a version of my own.
 
 ---------------
+
+### Notes:
+
 I make a board game based on TripA, this game will be more 'territory building' than the original.
 
 Other feature: with multiple language support
