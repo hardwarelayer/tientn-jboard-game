@@ -6,6 +6,8 @@ import games.strategy.triplea.ResourceLoader;
 import games.strategy.triplea.attachments.UnitAttachment;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.net.URL;
 import java.time.Instant;
 import java.util.Optional;
@@ -34,7 +36,9 @@ public final class TooltipProperties {
       final Optional<InputStream> inputStream = UrlStreams.openStream(url);
       if (inputStream.isPresent()) {
         try {
-          properties.load(inputStream.get());
+          //TienTN: I change this to load UTF8 tooltips, because default load is ISO-8859-1
+          //properties.load(inputStream.get());
+          properties.load(new InputStreamReader(inputStream.get(), Charset.forName("UTF-8")));
         } catch (final IOException e) {
           log.log(Level.SEVERE, "Error reading: " + PROPERTY_FILE, e);
         }

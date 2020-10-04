@@ -164,6 +164,11 @@ subprojects {
             check 'UnsynchronizedOverridesSynchronized', CheckSeverity.ERROR
             check 'WaitNotInLoop', CheckSeverity.ERROR
             disable 'UnusedVariable' // Workaround for https://github.com/google/error-prone/issues/1250
+            disable 'UnnecessaryLambda' //TienTN add for JDK15, verify case
+            disable 'SameNameButDifferent' //TienTN add for JDK15, http-server:run case
+            disable 'PreferJavaTimeOverload' //TienTN add for game headed:run case
+            disable 'JavaTimeDefaultTimeZone' //same as above
+            disable 'StreamResourceLeak' //same as above
         }
         options.errorprone.errorproneArgs = ['-Xep:Finally:OFF'] // Workaround for https://github.com/google/error-prone/issues/1257
         options.incremental = true

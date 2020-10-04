@@ -1,4 +1,4 @@
-## TienTN JBoard Game 
+## TienTN JBoard Game
 
 A java game using Swing and Docker instances. Territories buidling and board based, turn based war games.
 
@@ -21,29 +21,61 @@ This branch 'master' will always be used to keep up with newer releases of the c
 Good luck with the game :)
 
 Current version: 0.1
+
 Current core release: 2.3.21874
+
 History of core update:
+
 2.3.21874 2020/10/04
 
-[![TripleA license](https://img.shields.io/github/license/triplea-game/triplea.svg?style=flat-square)](https://github.com/triplea-game/triplea/blob/master/LICENSE)
-[![Build Status](https://travis-ci.com/triplea-game/triplea.svg?branch=master)](https://travis-ci.com/triplea-game/triplea)
-[![Total Alerts](https://img.shields.io/lgtm/alerts/g/triplea-game/triplea.svg?logo=lgtm&logoWidth=18&style=flat-square)](https://lgtm.com/projects/g/triplea-game/triplea/alerts)
-[![Maintainability](https://api.codeclimate.com/v1/badges/fa814ed45202485a92bf/maintainability)](https://codeclimate.com/github/triplea-game/triplea/maintainability)
 
-## [Download and install TripleA](http://triplea-game.org/download/)
-TripleA is a free to play, volunteer run, 100% open source gaming community.
+### Porting:
 
-![screenshot from 2018-02-08 22-58-33](https://user-images.githubusercontent.com/12397753/36015523-a4e28a24-0d23-11e8-84c0-c4bd0ee19ce0.png)
+This is my porting of tripleA to MacOSX Catalina, JDK15, Docker 2400(48506), gradle 6.6.1
 
-  - ***Contact-us***:
-    - [Forums: Questions & Help](https://forums.triplea-game.org/category/10/help-questions)
-    - [Bug Tracker](https://github.com/triplea-game/triplea/issues/new)
-  - ***Technical Documentation***:
-    - Map Making, Admin, and Developer Docs are on the [wiki](https://github.com/triplea-game/triplea/wiki)
+Changes for porting: build parameters, tool and script environment ...
 
-## Developer Getting Sarted
 
-[Setup Guide](/docs/development/README.md)
+### Features:
+
+2020-10-04: load tooltip.properties with UTF-8
+
+
+### Running locally:
+
+    %cd database
+
+    %./start_docker_db
+
+    %docker ps
+
+    %./load_sample_data
+
+    %./connect_to_docker_db
+
+    %cd ..
+
+    %./gradlew clean
+
+    %./gradlew spotlessApply
+
+    %./gradlew lobby-server:run
+
+    %./gradlew game-headed:run
+
+#### Setting game client:
+
+    Go to Engine Reference
+
+    Go to testing
+
+      Change Lobby URI Override: -> Localserver (http://localhost:8080)
+
+      Save and close
+
+    Rerun game headed again
+
+------------------
 
 ## License
 
