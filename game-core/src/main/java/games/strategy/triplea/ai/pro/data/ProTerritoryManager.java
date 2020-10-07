@@ -35,6 +35,7 @@ import org.triplea.java.collections.CollectionUtils;
 import org.triplea.util.Tuple;
 
 /** Manages info about territories. */
+@SuppressWarnings("deprecation") //JBG: disable Observable warning
 public class ProTerritoryManager {
 
   private final ProOddsCalculator calc;

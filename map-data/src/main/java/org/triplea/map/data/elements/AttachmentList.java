@@ -16,7 +16,7 @@ import org.triplea.generic.xml.reader.annotations.TagList;
 @AllArgsConstructor
 public class AttachmentList {
   @TagList(names = {"Attachment", "Attatchment"})
-  @XmlElement(name = "attachment")
+  //@XmlElement(name = "attachment")
   private List<Attachment> attachments;
 
   @Getter
@@ -35,7 +35,7 @@ public class AttachmentList {
 
     @XmlAttribute @Attribute private String type;
 
-    @XmlElement(name = "option")
+    //@XmlElement(name = "option")
     @TagList
     private List<Option> options;
 

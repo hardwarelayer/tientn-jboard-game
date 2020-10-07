@@ -11,6 +11,8 @@ import org.triplea.java.ChangeOnNextMajorRelease;
 @ChangeOnNextMajorRelease(
     "This should be reworked so that it doesn't inherit from CheckGeneralBattleEnd")
 public class CheckStalemateBattleEnd extends CheckGeneralBattleEnd {
+  private static final long serialVersionUID = 5004515340964828564L;
+
   public CheckStalemateBattleEnd(final BattleState battleState, final BattleActions battleActions) {
     super(battleState, battleActions);
   }

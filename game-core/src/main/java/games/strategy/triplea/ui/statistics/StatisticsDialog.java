@@ -17,7 +17,9 @@ import org.knowm.xchart.XYChartBuilder;
 import org.knowm.xchart.style.Styler;
 import org.triplea.swing.JTabbedPaneBuilder;
 
+@SuppressWarnings("deprecation") //JBG: disable Observable warning
 public class StatisticsDialog extends JPanel {
+  private static final long serialVersionUID = 5004515340964828564L;
 
   private final XYChartBuilder xyChartDefaults =
       new XYChartBuilder().theme(Styler.ChartTheme.Matlab).xAxisTitle("#Rounds");

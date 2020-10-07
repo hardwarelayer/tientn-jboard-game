@@ -17,6 +17,7 @@ import org.triplea.java.RemoveOnNextMajorRelease;
  */
 @RemoveOnNextMajorRelease
 public class CheckGeneralBattleEndOld extends CheckGeneralBattleEnd {
+  private static final long serialVersionUID = 5004515340964828564L;
 
   public CheckGeneralBattleEndOld(
       final BattleState battleState, final BattleActions battleActions) {

@@ -1,11 +1,16 @@
 package games.strategy.triplea.ui.panel.move;
 
+import static games.strategy.triplea.image.UnitImageFactory.ImageKey;
+import games.strategy.triplea.ui.UiContext;
+import games.strategy.triplea.ui.TooltipProperties;
+
 import com.google.common.collect.ImmutableList;
 import games.strategy.engine.data.GameData;
 import games.strategy.engine.data.GamePlayer;
 import games.strategy.engine.data.MoveDescription;
 import games.strategy.engine.data.Route;
 import games.strategy.engine.data.Territory;
+import games.strategy.triplea.attachments.TerritoryAttachment;
 import games.strategy.engine.data.Unit;
 import games.strategy.engine.data.UnitType;
 import games.strategy.triplea.Properties;
@@ -36,12 +41,14 @@ import games.strategy.triplea.ui.unit.scroller.UnitScroller;
 import games.strategy.triplea.util.TransportUtils;
 import games.strategy.triplea.util.UnitCategory;
 import games.strategy.triplea.util.UnitSeparator;
+import games.strategy.ui.OverlayIcon;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.math.BigDecimal;
+import java.util.Optional;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -56,10 +63,18 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import javax.swing.JScrollPane;
+import javax.swing.BorderFactory;
 import javax.swing.SwingUtilities;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import lombok.Getter;
 import lombok.Setter;
 import org.triplea.java.ObjectUtils;
@@ -68,12 +83,15 @@ import org.triplea.java.collections.CollectionUtils;
 import org.triplea.java.collections.IntegerMap;
 import org.triplea.swing.JLabelBuilder;
 import org.triplea.swing.jpanel.JPanelBuilder;
+import javax.swing.SwingConstants;
 import org.triplea.swing.key.binding.KeyCode;
 import org.triplea.swing.key.binding.SwingKeyBinding;
+
 
 /** The action panel displayed during the combat and non-combat move actions. */
 public class MovePanel extends AbstractMovePanel {
   private static final long serialVersionUID = 5004515340964828564L;
+
   private static final int defaultMinTransportCost = 5;
   /**
    * Adds or removes 10 units (used to remove 1/deselectNumber of total units (useful for splitting
@@ -126,6 +144,8 @@ public class MovePanel extends AbstractMovePanel {
           if (t == null) {
             return;
           }
+          final boolean isShiftDown = mouseDetails.isShiftDown();
+          final boolean isControlDown = mouseDetails.isControlDown();
           final boolean rightMouse = mouseDetails.isRightButton();
           final boolean isMiddleMouseButton = mouseDetails.getButton() == MouseEvent.BUTTON2;
           final boolean noSelectedTerritory = (firstSelectedTerritory == null);
@@ -135,11 +155,18 @@ public class MovePanel extends AbstractMovePanel {
           data.acquireReadLock();
           try {
             // de select units
-            if (rightMouse && !noSelectedTerritory && !map.wasLastActionDraggingAndReset()) {
+            if (!isControlDown && rightMouse && !noSelectedTerritory && !map.wasLastActionDraggingAndReset()) {
               deselectUnits(units, t, mouseDetails);
+            }
+            else if (isControlDown && rightMouse && 
+              (noSelectedTerritory || isFirstSelectedTerritory)) {
+              //JBG: click owned territory, show JBG territory info dialog
+              //JOptionPane.showMessageDialog(null, "Owned territory");
+              //showJBGTerritoryInfo(units, t, mouseDetails);
             } else if (!isMiddleMouseButton
                 && !rightMouse
                 && (noSelectedTerritory || isFirstSelectedTerritory)) {
+              //JBG: click owned territory, show units move dialog
               selectUnitsToMove(units, t, mouseDetails);
             } else if (!rightMouse && mouseDetails.isControlDown() && !isFirstSelectedTerritory) {
               selectWayPoint(t);

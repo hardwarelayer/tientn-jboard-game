@@ -16,11 +16,11 @@ import org.triplea.generic.xml.reader.annotations.TagList;
 @AllArgsConstructor
 public class Map {
 
-  @XmlElement(name = "territory")
+  //@XmlElement(name = "territory")
   @TagList
   private List<Territory> territories;
 
-  @XmlElement(name = "connection")
+  //@XmlElement(name = "connection")
   @TagList
   private List<Connection> connections;
 

@@ -20,7 +20,7 @@ import org.triplea.generic.xml.reader.annotations.TagList;
 @AllArgsConstructor
 public class PropertyList {
 
-  @XmlElement(name = "property")
+  //@XmlElement(name = "property")
   @TagList
   private List<Property> properties;
 
@@ -36,11 +36,11 @@ public class PropertyList {
     @XmlAttribute @Attribute private Integer min;
     @XmlAttribute @Attribute private Integer max;
 
-    @XmlElement(name = "value")
+    //@XmlElement(name = "value")
     @Tag
     private Property.Value valueProperty;
 
-    @XmlElement(name = "number")
+    //@XmlElement(name = "number")
     @Tag(names = "number")
     private XmlNumberTag numberProperty;
 

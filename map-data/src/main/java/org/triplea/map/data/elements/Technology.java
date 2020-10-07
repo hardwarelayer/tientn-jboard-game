@@ -19,7 +19,7 @@ public class Technology {
 
   @XmlElement @Tag private Technologies technologies;
 
-  @XmlElement(name = "playerTech")
+  //@XmlElement(name = "playerTech")
   @TagList
   private List<PlayerTech> playerTechs;
 
@@ -28,7 +28,7 @@ public class Technology {
   @NoArgsConstructor
   @AllArgsConstructor
   public static class Technologies {
-    @XmlElement(name = "techname")
+    //@XmlElement(name = "techname")
     @TagList
     private List<TechName> techNames;
 
@@ -49,7 +49,7 @@ public class Technology {
   public static class PlayerTech {
     @XmlAttribute @Attribute private String player;
 
-    @XmlElement(name = "category")
+    //@XmlElement(name = "category")
     @TagList
     private List<Category> categories;
 
@@ -60,7 +60,7 @@ public class Technology {
     public static class Category {
       @XmlAttribute @Attribute private String name;
 
-      @XmlElement(name = "tech")
+      //@XmlElement(name = "tech")
       @TagList
       private List<Tech> techs;
 

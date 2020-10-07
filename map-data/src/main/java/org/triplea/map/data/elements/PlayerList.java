@@ -16,11 +16,11 @@ import org.triplea.generic.xml.reader.annotations.TagList;
 @AllArgsConstructor
 public class PlayerList {
 
-  @XmlElement(name = "player")
+  //@XmlElement(name = "player")
   @TagList
   private List<Player> players;
 
-  @XmlElement(name = "alliance")
+  //@XmlElement(name = "alliance")
   @TagList
   private List<Alliance> alliances;
 

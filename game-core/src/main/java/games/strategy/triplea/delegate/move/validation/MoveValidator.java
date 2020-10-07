@@ -48,6 +48,7 @@ import org.triplea.java.collections.IntegerMap;
 
 /** Provides some static methods for validating movement. */
 public class MoveValidator {
+  private static final long serialVersionUID = 5004515340964828564L;
 
   public static final String TRANSPORT_HAS_ALREADY_UNLOADED_UNITS_IN_A_PREVIOUS_PHASE =
       "Transport has already unloaded units in a previous phase";

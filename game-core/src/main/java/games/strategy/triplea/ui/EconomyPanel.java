@@ -25,6 +25,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 import org.triplea.java.collections.IntegerMap;
 
+@SuppressWarnings("deprecation") //JBG: disable Observable warning
 class EconomyPanel extends AbstractStatPanel {
   private static final long serialVersionUID = -7713792841831042952L;
   private final List<ResourceStat> resourceStats = new ArrayList<>();

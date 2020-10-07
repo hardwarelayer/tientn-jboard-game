@@ -51,6 +51,7 @@ import java.util.stream.Collectors;
 import org.triplea.java.collections.CollectionUtils;
 
 /** Pro non-combat move AI. */
+@SuppressWarnings("deprecation") //JBG: disable Observable warning
 class ProNonCombatMoveAi {
 
   private final ProOddsCalculator calc;

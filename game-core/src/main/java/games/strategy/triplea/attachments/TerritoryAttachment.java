@@ -49,6 +49,8 @@ public class TerritoryAttachment extends DefaultAttachment {
   private boolean navalBase = false;
   private boolean airBase = false;
   private boolean kamikazeZone = false;
+  private int researchLevel = 0;
+  private int economyLevel = 0;
   private int unitProduction = 0;
   private boolean blockadeZone = false;
   private List<TerritoryEffect> territoryEffect = new ArrayList<>();
@@ -210,6 +212,32 @@ public class TerritoryAttachment extends DefaultAttachment {
   }
 
   /** Convenience method since TerritoryAttachment.get could return null. */
+  public static int getResearchLevel(final Territory t) {
+    final TerritoryAttachment ta = TerritoryAttachment.get(t);
+    if (ta == null) {
+      return 0;
+    }
+    return ta.getResearchLevel();
+  }
+
+  public int getResearchLevel() {
+    return researchLevel;
+  }
+
+  /** Convenience method since TerritoryAttachment.get could return null. */
+  public static int getEconomyLevel(final Territory t) {
+    final TerritoryAttachment ta = TerritoryAttachment.get(t);
+    if (ta == null) {
+      return 0;
+    }
+    return ta.getEconomyLevel();
+  }
+
+  public int getEconomyLevel() {
+    return economyLevel;
+  }
+
+  /** Convenience method since TerritoryAttachment.get could return null. */
   public static int getUnitProduction(final Territory t) {
     final TerritoryAttachment ta = TerritoryAttachment.get(t);
     if (ta == null) {
@@ -355,6 +383,73 @@ public class TerritoryAttachment extends DefaultAttachment {
   private void setProductionOnly(final String value) {
     production = getInt(value);
   }
+
+
+  /**
+   * JBG: set production
+   */
+  public void manualSetProduction(final String value) {
+    setProduction(value);
+  }
+  /** Convenience method since TerritoryAttachment.get could return null. */
+  public static void manualSetProduction(final Territory t, final String value) {
+    final TerritoryAttachment ta = TerritoryAttachment.get(t);
+    if (ta != null) {
+      ta.manualSetProduction(value);
+    }
+  }
+  /**
+   * JBG: set economy level
+   */
+  public void manualSetEconomyLevel(final String value) {
+    setEconomyLevel(value);
+  }
+  /** Convenience method since TerritoryAttachment.get could return null. */
+  public static void manualSetEconomyLevel(final Territory t, final String value) {
+    final TerritoryAttachment ta = TerritoryAttachment.get(t);
+    if (ta != null) {
+      ta.manualSetEconomyLevel(value);
+    }
+  }
+  private void setEconomyLevel(final String value) {
+    economyLevel = getInt(value);
+  }
+  private void setEconomyLevel(final Integer value) {
+    economyLevel = value;
+  }
+  private void resetEconomyLevel() {
+    economyLevel = 0;
+  }
+  private void setEconomyLevelOnly(final String value) {
+    economyLevel = getInt(value);
+  }
+
+  /**
+   * JBG: set research level
+   */
+  public void manualSetResearchLevel(final String value) {
+    setResearchLevel(value);
+  }
+  /** Convenience method since TerritoryAttachment.get could return null. */
+  public static void manualSetResearchLevel(final Territory t, final String value) {
+    final TerritoryAttachment ta = TerritoryAttachment.get(t);
+    if (ta != null) {
+      ta.manualSetResearchLevel(value);
+    }
+  }
+  private void setResearchLevel(final String value) {
+    researchLevel = getInt(value);
+  }
+  private void setResearchLevel(final Integer value) {
+    researchLevel = value;
+  }
+  private void resetResearchLevel() {
+    researchLevel = 0;
+  }
+  private void setResearchLevelOnly(final String value) {
+    researchLevel = getInt(value);
+  }
+
 
   private void setUnitProduction(final int value) {
     unitProduction = value;
@@ -749,6 +844,45 @@ public class TerritoryAttachment extends DefaultAttachment {
         sb.append(br);
       }
     }
+
+    //if (researchLevel > 0 || (resources != null && resources.toString().length() > 0)) {
+      sb.append("Research Level: ");
+      sb.append(br);
+      if (researchLevel > 0) {
+        sb.append("&nbsp;&nbsp;&nbsp;&nbsp;").append(researchLevel).append(" RUs");
+        sb.append(br);
+      }
+      if (resources != null) {
+        if (useHtml) {
+          sb.append("&nbsp;&nbsp;&nbsp;&nbsp;")
+              .append(
+                  resources.toStringForHtml().replaceAll("<br>", "<br>&nbsp;&nbsp;&nbsp;&nbsp;"));
+        } else {
+          sb.append(resources.toString());
+        }
+        sb.append(br);
+      }
+    //}
+
+    //if (economyLevel > 0 || (resources != null && resources.toString().length() > 0)) {
+      sb.append("Economy Level: ");
+      sb.append(br);
+      if (economyLevel > 0) {
+        sb.append("&nbsp;&nbsp;&nbsp;&nbsp;").append(economyLevel).append(" EUs");
+        sb.append(br);
+      }
+      if (resources != null) {
+        if (useHtml) {
+          sb.append("&nbsp;&nbsp;&nbsp;&nbsp;")
+              .append(
+                  resources.toStringForHtml().replaceAll("<br>", "<br>&nbsp;&nbsp;&nbsp;&nbsp;"));
+        } else {
+          sb.append(resources.toString());
+        }
+        sb.append(br);
+      }
+    //}
+
     if (!territoryEffect.isEmpty()) {
       sb.append("Territory Effects: ");
       sb.append(br);
@@ -786,6 +920,22 @@ public class TerritoryAttachment extends DefaultAttachment {
                 this::getProduction,
                 this::resetProduction))
         .put("productionOnly", MutableProperty.ofWriteOnlyString(this::setProductionOnly))
+        .put(
+            "researchLevel",
+            MutableProperty.of(
+                this::setResearchLevel,
+                this::setResearchLevel,
+                this::getResearchLevel,
+                this::resetResearchLevel))
+        .put("researchLevelOnly", MutableProperty.ofWriteOnlyString(this::setResearchLevelOnly))
+        .put(
+            "economyLevel",
+            MutableProperty.of(
+                this::setEconomyLevel,
+                this::setEconomyLevel,
+                this::getEconomyLevel,
+                this::resetEconomyLevel))
+        .put("economyLevelOnly", MutableProperty.ofWriteOnlyString(this::setEconomyLevelOnly))
         .put(
             "victoryCity",
             MutableProperty.ofMapper(

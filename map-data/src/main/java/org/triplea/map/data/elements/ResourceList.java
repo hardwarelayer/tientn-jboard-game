@@ -16,7 +16,7 @@ import org.triplea.generic.xml.reader.annotations.TagList;
 @AllArgsConstructor
 public class ResourceList {
 
-  @XmlElement(name = "resource")
+  //@XmlElement(name = "resource")
   @TagList
   private List<Resource> resources;
 

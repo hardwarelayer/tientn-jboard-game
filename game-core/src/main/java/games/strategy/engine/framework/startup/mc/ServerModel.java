@@ -84,6 +84,7 @@ import org.triplea.util.Version;
 
 /** Represents a network-aware game server to which multiple clients may connect. */
 @Log
+@SuppressWarnings("deprecation") //JBG: disable Observable warning
 public class ServerModel extends Observable implements IConnectionChangeListener {
   public static final RemoteName SERVER_REMOTE_NAME =
       new RemoteName(

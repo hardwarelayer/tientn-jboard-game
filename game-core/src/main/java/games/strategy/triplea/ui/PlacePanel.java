@@ -37,6 +37,7 @@ import javax.swing.SwingUtilities;
 import org.triplea.java.collections.CollectionUtils;
 import org.triplea.swing.SwingComponents;
 
+@SuppressWarnings("deprecation") //JBG: disable Observable warning
 class PlacePanel extends AbstractMovePanel implements GameDataChangeListener {
   private static final long serialVersionUID = -4411301492537704785L;
   private final JLabel actionLabel = new JLabel();

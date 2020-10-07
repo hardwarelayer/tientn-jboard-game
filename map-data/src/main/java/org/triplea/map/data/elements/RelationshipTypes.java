@@ -16,7 +16,7 @@ import org.triplea.generic.xml.reader.annotations.TagList;
 @AllArgsConstructor
 public class RelationshipTypes {
 
-  @XmlElement(name = "relationshipType")
+  //@XmlElement(name = "relationshipType")
   @TagList
   private List<RelationshipType> relationshipTypes;
 

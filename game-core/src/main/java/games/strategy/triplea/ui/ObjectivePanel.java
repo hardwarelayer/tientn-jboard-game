@@ -52,6 +52,7 @@ import org.triplea.util.FileNameUtils;
  * not.
  */
 @Log
+@SuppressWarnings("deprecation") //JBG: disable Observable warning
 public class ObjectivePanel extends AbstractStatPanel {
   private static final long serialVersionUID = 3759819236905645520L;
   private Map<String, Map<ICondition, String>> statsObjective;

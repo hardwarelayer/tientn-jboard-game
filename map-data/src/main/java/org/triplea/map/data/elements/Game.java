@@ -14,7 +14,7 @@ import org.triplea.generic.xml.reader.annotations.Tag;
  * without semantic meaning.
  */
 @Getter
-@XmlRootElement(name = "game")
+//@XmlRootElement(name = "game")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,7 +22,7 @@ public class Game {
   @XmlElement @Tag private Info info;
   @XmlElement @Tag private Triplea triplea;
 
-  @XmlElement(name = "attachmentList")
+  //@XmlElement(name = "attachmentList")
   @Tag(names = {"attachmentList", "attatchmentList"})
   private AttachmentList attachmentList;
 

@@ -37,6 +37,7 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
+@SuppressWarnings("deprecation") //JBG: disable Observable warning
 class StatPanel extends AbstractStatPanel {
   private static final long serialVersionUID = 4340684166664492498L;
 

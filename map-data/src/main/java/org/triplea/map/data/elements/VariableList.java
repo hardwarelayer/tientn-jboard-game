@@ -17,7 +17,7 @@ import org.triplea.generic.xml.reader.annotations.TagList;
 @AllArgsConstructor
 public class VariableList {
 
-  @XmlElement(name = "variable")
+  //@XmlElement(name = "variable")
   @TagList
   private List<Variable> variables;
 
@@ -28,7 +28,7 @@ public class VariableList {
   public static class Variable {
     @XmlAttribute @Attribute private String name;
 
-    @XmlElement(name = "element")
+    //@XmlElement(name = "element")
     @TagList
     private List<Element> elements;
 

@@ -133,6 +133,7 @@ subprojects {
 
     tasks.withType(JavaCompile).configureEach {
         options.compilerArgs += [
+            //'-Xlint:none', //TienTN: I disable warning because when compile with JDK15, so much annotation warnings
             '-Xlint:all,-processing',
             '-Xmaxwarns', '15'
         ]
@@ -169,8 +170,11 @@ subprojects {
             disable 'PreferJavaTimeOverload' //TienTN add for game headed:run case
             disable 'JavaTimeDefaultTimeZone' //same as above
             disable 'StreamResourceLeak' //same as above
+            disable 'UnnecessaryAnonymousClass' //for some deprecated warning
         }
-        options.errorprone.errorproneArgs = ['-Xep:Finally:OFF'] // Workaround for https://github.com/google/error-prone/issues/1257
+        options.errorprone.errorproneArgs = [
+                '-Xep:Finally:OFF' // Workaround for https://github.com/google/error-prone/issues/1257
+                ]
         options.incremental = true
     }
 

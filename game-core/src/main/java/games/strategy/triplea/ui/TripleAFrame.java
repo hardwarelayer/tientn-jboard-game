@@ -165,6 +165,7 @@ import org.triplea.util.Tuple;
 
 /** Main frame for the triple a game. */
 @Log
+@SuppressWarnings("deprecation") //JBG: disable Observable warning
 public final class TripleAFrame extends JFrame implements QuitHandler {
   private static final long serialVersionUID = 7640069668264418976L;
 

@@ -17,7 +17,7 @@ import org.triplea.generic.xml.reader.annotations.TagList;
 @AllArgsConstructor
 public class GamePlay {
 
-  @XmlElement(name = "delegate")
+  //@XmlElement(name = "delegate")
   @TagList
   private List<Delegate> delegates;
 
@@ -39,7 +39,7 @@ public class GamePlay {
   @NoArgsConstructor
   @AllArgsConstructor
   public static class Sequence {
-    @XmlElement(name = "step")
+    //@XmlElement(name = "step")
     @TagList
     private List<Step> steps;
 
@@ -54,7 +54,7 @@ public class GamePlay {
       @XmlAttribute @Attribute private Integer maxRunCount;
       @XmlAttribute @Attribute private String display;
 
-      @XmlElement(name = "stepProperty")
+      //@XmlElement(name = "stepProperty")
       @TagList
       private List<StepProperty> stepProperties;
 

@@ -45,6 +45,7 @@ import org.triplea.java.collections.CollectionUtils;
 import org.triplea.java.collections.IntegerMap;
 
 /** A very weak ai, based on some simple rules. */
+@SuppressWarnings("deprecation") //JBG: disable Observable warning
 public class WeakAi extends AbstractAi {
 
   public WeakAi(final String name) {

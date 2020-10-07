@@ -16,7 +16,7 @@ import org.triplea.generic.xml.reader.annotations.TagList;
 @AllArgsConstructor
 public class TerritoryEffectList {
 
-  @XmlElement(name = "territoryEffect")
+  //@XmlElement(name = "territoryEffect")
   @TagList
   private List<TerritoryEffect> territoryEffects;
 

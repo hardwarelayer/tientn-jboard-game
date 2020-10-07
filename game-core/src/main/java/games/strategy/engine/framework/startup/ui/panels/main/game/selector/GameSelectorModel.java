@@ -23,6 +23,7 @@ import lombok.Setter;
  * Model class that tracks the currently 'selected' game. This is the info that appears in the game
  * selector panel on the staging screens, eg: map, round, filename.
  */
+@SuppressWarnings("deprecation") //JBG: disable Observable warning
 public class GameSelectorModel extends Observable implements GameSelector {
 
   private final Function<URI, Optional<GameData>> gameParser;

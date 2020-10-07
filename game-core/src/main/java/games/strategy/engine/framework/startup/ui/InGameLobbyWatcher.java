@@ -33,6 +33,7 @@ import org.triplea.lobby.common.GameDescription;
  * <p>This class opens its own connection to the lobby, and its own messenger.
  */
 @Log
+@SuppressWarnings("deprecation") //JBG: disable Observable warning
 public class InGameLobbyWatcher {
   private boolean isShutdown = false;
   @Getter private String gameId;

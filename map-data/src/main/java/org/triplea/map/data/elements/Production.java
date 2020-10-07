@@ -16,27 +16,27 @@ import org.triplea.generic.xml.reader.annotations.TagList;
 @AllArgsConstructor
 public class Production {
 
-  @XmlElement(name = "productionRule")
+  //@XmlElement(name = "productionRule")
   @TagList
   private List<ProductionRule> productionRules;
 
-  @XmlElement(name = "repairRule")
+  //@XmlElement(name = "repairRule")
   @TagList
   private List<RepairRule> repairRules;
 
-  @XmlElement(name = "repairFrontier")
+  //@XmlElement(name = "repairFrontier")
   @TagList
   private List<RepairFrontier> repairFrontiers;
 
-  @XmlElement(name = "productionFrontier")
+  //@XmlElement(name = "productionFrontier")
   @TagList
   private List<ProductionFrontier> productionFrontiers;
 
-  @XmlElement(name = "playerProduction")
+  //@XmlElement(name = "playerProduction")
   @TagList
   private List<PlayerProduction> playerProductions;
 
-  @XmlElement(name = "playerRepair")
+  //@XmlElement(name = "playerRepair")
   @TagList
   private List<PlayerRepair> playerRepairs;
 
@@ -47,11 +47,11 @@ public class Production {
   public static class ProductionRule {
     @XmlAttribute @Attribute private String name;
 
-    @XmlElement(name = "cost")
+    //@XmlElement(name = "cost")
     @TagList
     private List<Cost> costs;
 
-    @XmlElement(name = "result")
+    //@XmlElement(name = "result")
     @TagList
     private List<Result> results;
 
@@ -81,11 +81,11 @@ public class Production {
   public static class RepairRule {
     @XmlAttribute @Attribute private String name;
 
-    @XmlElement(name = "cost")
+    //@XmlElement(name = "cost")
     @TagList
     private List<ProductionRule.Cost> costs;
 
-    @XmlElement(name = "result")
+    //@XmlElement(name = "result")
     @TagList
     private List<ProductionRule.Result> results;
 

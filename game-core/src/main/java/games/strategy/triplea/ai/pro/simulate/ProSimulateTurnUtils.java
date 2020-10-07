@@ -33,6 +33,7 @@ import javax.annotation.Nullable;
 import org.triplea.java.collections.CollectionUtils;
 
 /** Pro AI simulate turn utilities. */
+@SuppressWarnings("deprecation") //JBG: disable Observable warning
 public final class ProSimulateTurnUtils {
   private ProSimulateTurnUtils() {}
 

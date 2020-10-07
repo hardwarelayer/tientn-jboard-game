@@ -15,7 +15,7 @@ import org.triplea.generic.xml.reader.annotations.TagList;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UnitList {
-  @XmlElement(name = "unit")
+  //@XmlElement(name = "unit")
   @TagList
   private List<Unit> units;
 

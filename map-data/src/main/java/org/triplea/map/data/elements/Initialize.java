@@ -27,7 +27,7 @@ public class Initialize {
   @NoArgsConstructor
   @AllArgsConstructor
   public static class OwnerInitialize {
-    @XmlElement(name = "territoryOwner")
+    //@XmlElement(name = "territoryOwner")
     @TagList
     private List<TerritoryOwner> territoryOwners;
 
@@ -46,7 +46,7 @@ public class Initialize {
   @NoArgsConstructor
   @AllArgsConstructor
   public static class UnitInitialize {
-    @XmlElement(name = "unitPlacement")
+    //@XmlElement(name = "unitPlacement")
     @TagList
     private List<UnitPlacement> unitPlacements;
 
@@ -82,7 +82,7 @@ public class Initialize {
   @NoArgsConstructor
   @AllArgsConstructor
   public static class ResourceInitialize {
-    @XmlElement(name = "resourceGiven")
+    //@XmlElement(name = "resourceGiven")
     @TagList
     private List<ResourceGiven> resourcesGiven;
 
@@ -102,7 +102,7 @@ public class Initialize {
   @NoArgsConstructor
   @AllArgsConstructor
   public static class RelationshipInitialize {
-    @XmlElement(name = "relationship")
+    //@XmlElement(name = "relationship")
     @TagList
     private List<Relationship> relationships;
 

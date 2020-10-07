@@ -38,6 +38,7 @@ import org.triplea.java.PredicateBuilder;
 import org.triplea.java.collections.CollectionUtils;
 
 /** Used to move units and make changes to game state. */
+@SuppressWarnings("deprecation") //JBG: disable Observable warning
 public class MovePerformer implements Serializable {
   private static final long serialVersionUID = 3752242292777658310L;
 

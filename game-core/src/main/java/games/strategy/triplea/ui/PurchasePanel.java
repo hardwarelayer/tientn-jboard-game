@@ -53,6 +53,8 @@ public class PurchasePanel extends ActionPanel {
         public void actionPerformed(final ActionEvent e) {
           final GamePlayer player = getCurrentPlayer();
           final GameData data = getData();
+          
+          //show the dialog with tabbed for produce
           purchase =
               TabbedProductionPanel.getProduction(
                   player,
@@ -62,6 +64,7 @@ public class PurchasePanel extends ActionPanel {
                   purchase,
                   getMap().getUiContext());
           purchasedUnits.setUnitsFromProductionRuleMap(purchase, player);
+
           if (purchase.totalValues() == 0) {
             purchasedLabel.setText("");
             buyButton.setText(BUY);

@@ -133,6 +133,7 @@ public class ActionButtons extends JPanel {
     final String displayText = (airBorne ? " Airborne" : (nonCombat ? " Non" : ""));
     movePanel.setDisplayText(displayText + " Combat Move");
     movePanel.setMoveType(airBorne ? MoveType.SPECIAL : MoveType.DEFAULT);
+
     changeTo(gamePlayer, movePanel);
   }
 

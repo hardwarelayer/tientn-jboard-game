@@ -1,6 +1,7 @@
 package games.strategy.triplea.ui.panels.map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static games.strategy.triplea.image.UnitImageFactory.ImageKey;
 
 import games.strategy.engine.data.Change;
 import games.strategy.engine.data.ChangeAttachmentChange;
@@ -10,6 +11,7 @@ import games.strategy.engine.data.GamePlayer;
 import games.strategy.engine.data.ResourceCollection;
 import games.strategy.engine.data.Route;
 import games.strategy.engine.data.Territory;
+import games.strategy.triplea.attachments.TerritoryAttachment;
 import games.strategy.engine.data.Unit;
 import games.strategy.engine.data.events.GameDataChangeListener;
 import games.strategy.engine.data.events.TerritoryListener;
@@ -25,12 +27,16 @@ import games.strategy.triplea.ui.screen.SmallMapImageManager;
 import games.strategy.triplea.ui.screen.Tile;
 import games.strategy.triplea.ui.screen.TileManager;
 import games.strategy.triplea.ui.screen.UnitsDrawer;
+import games.strategy.triplea.ui.TerritoryManagerPanel;
+import games.strategy.triplea.ui.TooltipProperties;
 import games.strategy.triplea.util.UnitCategory;
 import games.strategy.triplea.util.UnitSeparator;
 import games.strategy.ui.ImageScrollModel;
 import games.strategy.ui.ImageScrollerLargeView;
 import games.strategy.ui.ImageScrollerSmallView;
+import games.strategy.ui.OverlayIcon;
 import games.strategy.ui.Util;
+import java.awt.Component;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Cursor;
@@ -68,7 +74,23 @@ import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.swing.SwingUtilities;
+import javax.swing.JOptionPane;
 import javax.swing.Timer;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import javax.swing.JScrollPane;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import org.triplea.swing.JLabelBuilder;
+import org.triplea.swing.jpanel.JPanelBuilder;
+import javax.swing.SwingConstants;
+import org.triplea.swing.key.binding.KeyCode;
+import org.triplea.swing.key.binding.SwingKeyBinding;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -78,6 +100,7 @@ import org.triplea.java.collections.CollectionUtils;
 import org.triplea.util.Tuple;
 
 /** Responsible for drawing the large map and keeping it updated. */
+@SuppressWarnings("deprecation") //JBG: disable Observable warning
 public class MapPanel extends ImageScrollerLargeView {
   private static final long serialVersionUID = -3571551538356292556L;
   private final List<MapSelectionListener> mapSelectionListeners = new ArrayList<>();
@@ -89,6 +112,7 @@ public class MapPanel extends ImageScrollerLargeView {
 
   private @Nullable Territory highlightedTerritory;
   private final TerritoryHighlighter territoryHighlighter = new TerritoryHighlighter();
+  private final TerritoryManagerPanel terrManager;
   private final ImageScrollerSmallView smallView;
   // units the mouse is currently over
   private Tuple<Territory, List<Unit>> currentUnits;
@@ -171,6 +195,7 @@ public class MapPanel extends ImageScrollerLargeView {
     super(uiContext.getMapData().getMapDimensions(), model);
     this.uiContext = uiContext;
     this.smallView = smallView;
+
     tileManager = new TileManager(uiContext);
     scale = uiContext.getScale();
     routeDrawer = new MapRouteDrawer(this, uiContext.getMapData());
@@ -179,6 +204,9 @@ public class MapPanel extends ImageScrollerLargeView {
             smallView, uiContext.getMapImage().getSmallMapImage(), tileManager);
     movementFuelCost = new ResourceCollection(data);
     setGameData(data);
+
+    //JBG:
+    terrManager = new TerritoryManagerPanel(gameData, this, uiContext);
 
     ((ThreadPoolExecutor) executor).setKeepAliveTime(2L, TimeUnit.SECONDS);
     ((ThreadPoolExecutor) executor).allowCoreThreadTimeOut(true);
@@ -212,6 +240,19 @@ public class MapPanel extends ImageScrollerLargeView {
             final @Nullable Territory terr = getTerritory(x, y);
             if (terr != null) {
               notifyTerritorySelected(terr, md);
+            }
+
+            //JBG:
+            final boolean isShiftDown = md.isShiftDown();
+            final boolean isControlDown = md.isControlDown();
+            if ( SwingUtilities.isRightMouseButton(e) ) {
+             //JOptionPane.showMessageDialog(null, "Right mouse");
+
+
+              if (isControlDown) {
+                notifyTerritoryManagementSelect(terr, md);
+              }
+
             }
             if (e.getButton() == 4 || e.getButton() == 5) {
               // the numbers 4 and 5 stand for the corresponding mouse button
@@ -491,6 +532,12 @@ public class MapPanel extends ImageScrollerLargeView {
     for (final MapSelectionListener msl : mapSelectionListeners) {
       msl.territorySelected(t, me);
     }
+  }
+
+  private void notifyTerritoryManagementSelect(final Territory t, final MouseDetails md) {
+    //JBG: click owned territory, show JBG territory info dialog
+    //JOptionPane.showMessageDialog(null, "Owned territory");
+    terrManager.showJBGTerritoryInfo(t, md);
   }
 
   private void notifyMouseMoved(final Territory t, final MouseDetails me) {

@@ -21,6 +21,7 @@ import javax.swing.border.EtchedBorder;
 import org.triplea.java.collections.IntegerMap;
 
 /** Panel used to display the current players resources. */
+@SuppressWarnings("deprecation") //JBG: disable Observable warning
 public class ResourceBar extends AbstractStatPanel implements GameDataChangeListener {
   private static final long serialVersionUID = -7713792841831042952L;
 
