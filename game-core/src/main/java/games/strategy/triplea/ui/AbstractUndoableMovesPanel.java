@@ -219,6 +219,7 @@ public abstract class AbstractUndoableMovesPanel extends JPanel {
     @Override
     public void actionPerformed(final ActionEvent e) {
       movePanel.cancelMove();
+System.out.println("AbstractUndoableMovesPanel.java actionPerformed");
       if (!movePanel.getMap().isShowing(move.getEnd())) {
         movePanel.getMap().centerOn(move.getEnd());
       }

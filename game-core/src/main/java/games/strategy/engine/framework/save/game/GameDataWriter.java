@@ -34,6 +34,7 @@ public class GameDataWriter {
       final File file) {
 
     try (OutputStream fout = new FileOutputStream(file)) {
+System.out.println("GameDataWriter.writeToFile: "+file.getAbsolutePath() );
       GameDataWriter.writeToOutputStream(gameData, fout, delegateExecutionManager);
     } catch (final IOException e) {
       log.log(Level.SEVERE, "Failed to save game to file: " + file.getAbsolutePath(), e);

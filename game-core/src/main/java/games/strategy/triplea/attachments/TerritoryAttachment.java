@@ -30,6 +30,8 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+import games.strategy.engine.data.JBGConstants;
+
 /** An attachment for instances of {@link Territory}. */
 public class TerritoryAttachment extends DefaultAttachment {
   private static final long serialVersionUID = 9102862080104655281L;
@@ -51,6 +53,10 @@ public class TerritoryAttachment extends DefaultAttachment {
   private boolean kamikazeZone = false;
   private int researchLevel = 0;
   private int economyLevel = 0;
+  private int justHasBattle = 0;
+  private int turnOfLastBattle = 0;
+  private String researchBuildingList = "";
+  private String economyBuildingList = "";
   private int unitProduction = 0;
   private boolean blockadeZone = false;
   private List<TerritoryEffect> territoryEffect = new ArrayList<>();
@@ -60,6 +66,31 @@ public class TerritoryAttachment extends DefaultAttachment {
   public TerritoryAttachment(
       final String name, final Attachable attachable, final GameData gameData) {
     super(name, attachable, gameData);
+
+    this.economyBuildingList = getDefaultEconomyBuildingList();
+    this.researchBuildingList = getDefaultResearchBuildingList();
+  }
+
+  private String getDefaultEconomyBuildingList() {
+    StringBuilder sB1 = new StringBuilder();
+    for (int i = 0; i < 20; i++) {
+      if (i > 0) {
+        sB1.append("|"); //note when split |, use \\|
+      }
+      sB1.append("0");
+    }
+    return sB1.toString();
+  }
+
+  private String getDefaultResearchBuildingList() {
+    StringBuilder sB1 = new StringBuilder();
+    for (int i = 0; i < 20; i++) {
+      if (i > 0) {
+        sB1.append("|"); //note when split |, use \\|
+      }
+      sB1.append("0");
+    }
+    return sB1.toString();
   }
 
   public static boolean doWeHaveEnoughCapitalsToProduce(
@@ -238,6 +269,37 @@ public class TerritoryAttachment extends DefaultAttachment {
   }
 
   /** Convenience method since TerritoryAttachment.get could return null. */
+  public static String getEconomyBuildingList(final Territory t) {
+    final TerritoryAttachment ta = TerritoryAttachment.get(t);
+    if (ta == null) {
+      return "";
+    }
+    return ta.getEconomyBuildingList();
+  }
+
+  public String getEconomyBuildingList() {
+    if (economyBuildingList == null) {
+      economyBuildingList = getDefaultEconomyBuildingList();
+    }
+    return economyBuildingList;
+  }
+
+  /** Convenience method since TerritoryAttachment.get could return null. */
+  public static String getResearchBuildingList(final Territory t) {
+    final TerritoryAttachment ta = TerritoryAttachment.get(t);
+    if (ta == null) {
+      return "";
+    }
+    return ta.getResearchBuildingList();
+  }
+  public String getResearchBuildingList() {
+    if (researchBuildingList == null) {
+      researchBuildingList = getDefaultResearchBuildingList();
+    }
+    return researchBuildingList;
+  }
+
+  /** Convenience method since TerritoryAttachment.get could return null. */
   public static int getUnitProduction(final Territory t) {
     final TerritoryAttachment ta = TerritoryAttachment.get(t);
     if (ta == null) {
@@ -248,6 +310,20 @@ public class TerritoryAttachment extends DefaultAttachment {
 
   public int getUnitProduction() {
     return unitProduction;
+  }
+
+  public int getJustHasBattle() {
+    return justHasBattle;
+  }
+
+  public int getTurnOfLastBattle() {
+    return turnOfLastBattle;
+  }
+  public boolean isLastBattleInEffect(final int iTurn) {
+    if (turnOfLastBattle > 0)
+        if (turnOfLastBattle + JBGConstants.MAX_FRONTLINE_ICON_VISIBLE_TURNS > iTurn)
+          return true;
+    return false;
   }
 
   private void setResources(final String value) throws GameParseException {
@@ -422,6 +498,104 @@ public class TerritoryAttachment extends DefaultAttachment {
   }
   private void setEconomyLevelOnly(final String value) {
     economyLevel = getInt(value);
+  }
+
+  /**
+   * JBG: set just has battle
+   */
+  public void manualSetJustHasBattle(final String value) {
+    setJustHasBattle(value);
+  }
+  /** Convenience method since TerritoryAttachment.get could return null. */
+  public static void manualSetJustHasBattle(final Territory t, final String value) {
+    final TerritoryAttachment ta = TerritoryAttachment.get(t);
+    if (ta != null) {
+      ta.manualSetJustHasBattle(value);
+    }
+  }
+  private void setJustHasBattle(final String value) {
+    justHasBattle = getInt(value);
+  }
+  private void setJustHasBattle(final Integer value) {
+    justHasBattle = value;
+  }
+  private void resetJustHasBattle() {
+    justHasBattle = 0;
+  }
+  private void setJustHasBattleOnly(final String value) {
+    justHasBattle = getInt(value);
+  }
+  /**
+   * JBG: set turn of last battle
+   */
+  public void manualSetTurnOfLastBattle(final String value) {
+    setTurnOfLastBattle(value);
+  }
+  /** Convenience method since TerritoryAttachment.get could return null. */
+  public static void manualSetTurnOfLastBattle(final Territory t, final String value) {
+    final TerritoryAttachment ta = TerritoryAttachment.get(t);
+    if (ta != null) {
+      ta.manualSetTurnOfLastBattle(value);
+    }
+  }
+  private void setTurnOfLastBattle(final String value) {
+    turnOfLastBattle = getInt(value);
+  }
+  private void setTurnOfLastBattle(final Integer value) {
+    turnOfLastBattle = value;
+  }
+  private void resetTurnOfLastBattle() {
+    turnOfLastBattle = 0;
+  }
+  private void setTurnOfLastBattleOnly(final String value) {
+    turnOfLastBattle = getInt(value);
+  }
+
+
+  /**
+   * JBG: set economy building list
+   */
+  public void manualSetEconomyBuildingList(final String value) {
+    setEconomyBuildingList(value);
+  }
+  /** Convenience method since TerritoryAttachment.get could return null. */
+  public static void manualSetEconomyBuildingList(final Territory t, final String value) {
+    final TerritoryAttachment ta = TerritoryAttachment.get(t);
+    if (ta != null) {
+      ta.manualSetEconomyBuildingList(value);
+    }
+  }
+  private void setEconomyBuildingList(final String value) {
+    economyBuildingList = value;
+  }
+  private void resetEconomyBuildingList() {
+    economyBuildingList = "";
+  }
+  private void setEconomyBuildingListOnly(final String value) {
+    economyBuildingList = value;
+  }
+
+  /**
+   * JBG: set research building list
+   */
+  public void manualSetResearchBuildingList(final String value) {
+    setResearchBuildingList(value);
+  }
+  /** Convenience method since TerritoryAttachment.get could return null. */
+  public static void manualSetResearchBuildingList(final Territory t, final String value) {
+    final TerritoryAttachment ta = TerritoryAttachment.get(t);
+    if (ta != null) {
+      ta.manualSetResearchBuildingList(value);
+    }
+  }
+  private void setResearchBuildingList(final String value) {
+    researchBuildingList = value;
+  }
+  private void resetResearchBuildingList() {
+    researchBuildingList = "";
+  }
+  private void setResearchBuildingListOnly(final String value) {
+    researchBuildingList = value;
   }
 
   /**
@@ -929,6 +1103,14 @@ public class TerritoryAttachment extends DefaultAttachment {
                 this::resetResearchLevel))
         .put("researchLevelOnly", MutableProperty.ofWriteOnlyString(this::setResearchLevelOnly))
         .put(
+            "researchBuildingList",
+            MutableProperty.of(
+                this::setResearchBuildingList,
+                this::setResearchBuildingList,
+                this::getResearchBuildingList,
+                this::resetResearchBuildingList))
+        .put("researchBuildingListOnly", MutableProperty.ofWriteOnlyString(this::setResearchBuildingListOnly))
+        .put(
             "economyLevel",
             MutableProperty.of(
                 this::setEconomyLevel,
@@ -936,6 +1118,30 @@ public class TerritoryAttachment extends DefaultAttachment {
                 this::getEconomyLevel,
                 this::resetEconomyLevel))
         .put("economyLevelOnly", MutableProperty.ofWriteOnlyString(this::setEconomyLevelOnly))
+        .put(
+            "economyBuildingList",
+            MutableProperty.of(
+                this::setEconomyBuildingList,
+                this::setEconomyBuildingList,
+                this::getEconomyBuildingList,
+                this::resetEconomyBuildingList))
+        .put("economyBuildingListOnly", MutableProperty.ofWriteOnlyString(this::setEconomyBuildingListOnly))
+        .put(
+            "justHasBattle",
+            MutableProperty.of(
+                this::setJustHasBattle,
+                this::setJustHasBattle,
+                this::getJustHasBattle,
+                this::resetJustHasBattle))
+        .put("justHasBattleOnly", MutableProperty.ofWriteOnlyString(this::setJustHasBattleOnly))
+        .put(
+            "turnOfLastBattle",
+            MutableProperty.of(
+                this::setTurnOfLastBattle,
+                this::setTurnOfLastBattle,
+                this::getTurnOfLastBattle,
+                this::resetTurnOfLastBattle))
+        .put("turnOfLastBattleOnly", MutableProperty.ofWriteOnlyString(this::setTurnOfLastBattleOnly))
         .put(
             "victoryCity",
             MutableProperty.ofMapper(

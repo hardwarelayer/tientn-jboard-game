@@ -39,7 +39,8 @@ import org.triplea.java.collections.CollectionUtils;
 import org.triplea.java.collections.IntegerMap;
 
 /** At the end of the turn collect income. */
-@AutoSave(afterStepStart = true)
+//JBG change to false
+@AutoSave(afterStepStart = false)
 public class EndTurnDelegate extends AbstractEndTurnDelegate {
   private static final Predicate<RulesAttachment> availableUses = ra -> ra.getUses() != 0;
 

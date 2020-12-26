@@ -170,7 +170,7 @@ public class GameProperties extends GameDataComponent {
             return (List<IEditableProperty<?>>) ois.readObject();
           } catch (final ClassNotFoundException e) {
             throw new IOException(e);
-          }
+          } 
         });
   }
 

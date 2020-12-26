@@ -78,6 +78,9 @@ public class GameSelectorModel extends Observable implements GameSelector {
         "Programming error, expected file to have already been checked to exist: "
             + file.getAbsolutePath());
 
+    //JBG
+    System.out.println("File name is: "+file.getName());
+
     // if the file name is xml, load it as a new game
     if (file.getName().toLowerCase().endsWith("xml")) {
       load(file.toURI());
@@ -86,6 +89,7 @@ public class GameSelectorModel extends Observable implements GameSelector {
       final GameData newData = GameDataManager.loadGame(file);
       newData.setSaveGameFileName(file.getName());
       this.fileName = file.getName();
+
       setGameData(newData);
     }
   }

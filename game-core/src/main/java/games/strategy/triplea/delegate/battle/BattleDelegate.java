@@ -57,7 +57,8 @@ import org.triplea.java.collections.IntegerMap;
 import org.triplea.util.Tuple;
 
 /** Delegate to track and fight all battles. */
-@AutoSave(beforeStepStart = true, afterStepEnd = true)
+//JBG: change to false
+@AutoSave(beforeStepStart = false, afterStepEnd = false)
 public class BattleDelegate extends BaseTripleADelegate implements IBattleDelegate {
   private BattleTracker battleTracker = new BattleTracker();
   private boolean needToInitialize = true;

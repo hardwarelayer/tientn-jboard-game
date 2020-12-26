@@ -6,7 +6,8 @@ import games.strategy.engine.delegate.IDelegateBridge;
 import java.util.Collection;
 
 /** At the end of the turn collect NO income. */
-@AutoSave(afterStepEnd = true)
+//JBG change to false
+@AutoSave(afterStepEnd = false)
 public class NoPuEndTurnDelegate extends EndTurnDelegate {
   @Override
   protected int getProduction(final Collection<Territory> territories) {

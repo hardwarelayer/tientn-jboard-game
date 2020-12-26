@@ -44,7 +44,8 @@ import org.triplea.util.Tuple;
  *
  * <p>Responsible for checking the validity of a move, and for moving the units.
  */
-@AutoSave(afterStepEnd = true)
+//JBG: change to false
+@AutoSave(afterStepEnd = false)
 public class MoveDelegate extends AbstractMoveDelegate {
 
   public static final String CLEANING_UP_DURING_MOVEMENT_PHASE =

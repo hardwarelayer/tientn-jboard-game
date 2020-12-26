@@ -41,7 +41,6 @@ public final class GameDataManager {
   public static GameData loadGame(final File file) throws IOException {
     checkNotNull(file);
     checkArgument(file.exists());
-
     try (InputStream fis = new FileInputStream(file);
         InputStream is = new BufferedInputStream(fis)) {
       return loadGame(is);
@@ -96,6 +95,7 @@ public final class GameDataManager {
       final GameData data = (GameData) input.readObject();
       data.postDeSerialize();
       loadDelegates(input, data);
+
       return data;
     } catch (final ClassNotFoundException cnfe) {
       throw new IOException(cnfe.getMessage());
@@ -140,7 +140,6 @@ public final class GameDataManager {
   public static void saveGame(final OutputStream os, final GameData gameData) throws IOException {
     checkNotNull(os);
     checkNotNull(gameData);
-
     saveGame(os, gameData, true);
   }
 

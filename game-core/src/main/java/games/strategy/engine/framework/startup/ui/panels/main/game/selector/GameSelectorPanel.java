@@ -43,6 +43,7 @@ import org.triplea.swing.JButtonBuilder;
 import org.triplea.swing.SwingAction;
 import org.triplea.swing.SwingComponents;
 import org.triplea.swing.jpanel.GridBagConstraintsBuilder;
+import java.io.File;
 
 /**
  * Left hand side panel of the launcher screen that has various info, like selected game and engine
@@ -51,17 +52,26 @@ import org.triplea.swing.jpanel.GridBagConstraintsBuilder;
 public final class GameSelectorPanel extends JPanel implements Observer {
   private static final long serialVersionUID = -4598107601238030020L;
 
+  private final String KANJI_SAVE_EXTENSION = ".kj";
+
   private final GameSelectorModel model;
+  private final JBGKanjiSelectorModel kanjiModel;
   private final IGamePropertiesCache gamePropertiesCache = new FileBackedGamePropertiesCache();
   private final Map<String, Object> originalPropertiesMap = new HashMap<>();
   private final JLabel nameText = new JLabel();
   private final JLabel versionText = new JLabel();
   private final JLabel saveGameText = new JLabel();
   private final JLabel roundText = new JLabel();
+  private final JLabel kanjiText = new JLabel();
   private final JButton loadSavedGame =
       new JButtonBuilder()
           .title("Open Saved Game")
           .toolTip("Open a previously saved game, or an autosave.")
+          .build();
+  private final JButton loadKanjiData =
+      new JButtonBuilder()
+          .title("Open Kanji Data")
+          .toolTip("Open kanji list for learning.")
           .build();
   private final JButton loadNewGame =
       new JButtonBuilder()
@@ -80,6 +90,7 @@ public final class GameSelectorPanel extends JPanel implements Observer {
 
   public GameSelectorPanel(final GameSelectorModel model) {
     this.model = model;
+    this.kanjiModel = new JBGKanjiSelectorModel();
     final GameData data = model.getGameData();
     if (data != null) {
       setOriginalPropertiesMap(data);
@@ -88,12 +99,12 @@ public final class GameSelectorPanel extends JPanel implements Observer {
 
     setLayout(new GridBagLayout());
 
+/*
     final JLabel logoLabel =
         new JLabel(
             new ImageIcon(
                 ResourceLoader.loadImageAssert(Path.of("launch_screens", "triplea-logo.png"))));
 
-    int row = 0;
     add(
         logoLabel,
         new GridBagConstraintsBuilder(0, row)
@@ -101,7 +112,9 @@ public final class GameSelectorPanel extends JPanel implements Observer {
             .insets(new Insets(10, 10, 3, 5))
             .build());
     row++;
-
+*/
+    int row = 0;
+    
     add(new JLabel("Java Version:"), buildGridCell(0, row, new Insets(10, 10, 3, 5)));
     add(
         new JLabel(SystemProperties.getJavaVersion()),
@@ -126,6 +139,10 @@ public final class GameSelectorPanel extends JPanel implements Observer {
     add(roundText, buildGridCell(1, row, new Insets(0, 0, 3, 0)));
     row++;
 
+    add(new JLabel("Kanji:"), buildGridCell(0, row, new Insets(0, 10, 3, 5)));
+    add(kanjiText, buildGridCell(1, row, new Insets(0, 0, 3, 0)));
+    row++;
+
     add(new JLabel("Loaded Savegame:"), buildGridCell(0, row, new Insets(20, 10, 3, 5)));
     row++;
 
@@ -136,6 +153,10 @@ public final class GameSelectorPanel extends JPanel implements Observer {
     row++;
 
     add(loadSavedGame, buildGridRow(0, row, new Insets(0, 10, 10, 10)));
+    row++;
+
+    add(loadKanjiData, buildGridRow(0, row, new Insets(0, 10, 10, 10)));
+    loadKanjiData.setEnabled(false);
     row++;
 
     final JButton downloadMapButton =
@@ -219,6 +240,12 @@ public final class GameSelectorPanel extends JPanel implements Observer {
               final Point point = loadSavedGame.getLocation();
               menu.show(GameSelectorPanel.this, point.x + loadSavedGame.getWidth(), point.y);
             }
+          }
+        });
+    loadKanjiData.addActionListener(
+        e -> {
+          if (canSelectLocalGameData()) {
+            selectKanjiDataFile();
           }
         });
     mapOptions.addActionListener(
@@ -379,8 +406,80 @@ public final class GameSelectorPanel extends JPanel implements Observer {
                     .build()
                     .run(
                         () -> {
+                          int ttlKj = 0;
+
                           model.load(file);
                           setOriginalPropertiesMap(model.getGameData());
+                          String sKJFileName = file.getAbsolutePath() + KANJI_SAVE_EXTENSION;
+                          File kjFile = new File(sKJFileName);
+                          if (kjFile.exists()) {
+                            System.out.println("Load kanji extension of save game: " + sKJFileName);
+                            GameData gd = model.getGameData();
+                            if (gd != null) {
+                              try {
+                                gd.acquireWriteLock();
+                                ttlKj = gd.setKanjis( kanjiModel.load(kjFile) );
+                              }
+                              finally {
+                                gd.releaseWriteLock();
+                              }
+                            }
+                          }
+                          kanjiText.setText(String.valueOf(ttlKj) + " 文字");
+
+                          if (ttlKj < 1) {
+                            loadKanjiData.setEnabled(true);
+                          }
+
+                        }));
+  }
+
+  private void selectKanjiDataFile() {
+    JBGKanjiFileSelector.builder()
+        .fileDoesNotExistAction(
+            file ->
+                DialogBuilder.builder()
+                    .parent(this)
+                    .title("Kanji Data File Not Found")
+                    .errorMessage("File does not exist: " + file.getAbsolutePath())
+                    .showDialog())
+        .build()
+        .selectKanjiFile(JOptionPane.getFrameForComponent(this))
+        .ifPresent(
+            file ->
+                TaskRunner.builder()
+                    .waitDialogTitle("Loading Kanji Data")
+                    .exceptionHandler(
+                        e ->
+                            SwingComponents.showDialogWithLinks(
+                                DialogWithLinksParams.builder()
+                                    .title("Failed To Load Kanji Data")
+                                    .dialogType(DialogWithLinksTypes.ERROR)
+                                    .dialogText(
+                                        String.format(
+                                            "<html>Error: %s<br/><br/>"
+                                                + "If this is not expected, please "
+                                                + "file a <a href=%s>bug report</a><br/>"
+                                                + "and attach the error message above and the "
+                                                + "save game you are trying to load.",
+                                            e.getMessage(), UrlConstants.GITHUB_ISSUES))
+                                    .build()))
+                    .build()
+                    .run(
+                        () -> {
+                          int ttlKj = 0;
+                          GameData gd = model.getGameData();
+                          if (gd != null) {
+                            try {
+                              gd.acquireWriteLock();
+                              ttlKj = gd.setKanjis( kanjiModel.load(file) );
+                            }
+                            finally {
+                              gd.releaseWriteLock();
+                            }
+                          }
+                          kanjiText.setText(String.valueOf(ttlKj) + " 文字");
+                          loadKanjiData.setEnabled(false);
                         }));
   }
 
@@ -406,6 +505,7 @@ public final class GameSelectorPanel extends JPanel implements Observer {
           // only for new games, not saved games, we set the default options, and set them only once
           // (the first time it is loaded)
           gamePropertiesCache.loadCachedGamePropertiesInto(model.getGameData());
+          loadKanjiData.setEnabled(true);
         }
       }
     } catch (final InterruptedException e) {

@@ -23,6 +23,7 @@ import games.strategy.triplea.ui.screen.drawable.ReliefMapDrawable;
 import games.strategy.triplea.ui.screen.drawable.SeaZoneOutlineDrawable;
 import games.strategy.triplea.ui.screen.drawable.TerritoryEffectDrawable;
 import games.strategy.triplea.ui.screen.drawable.TerritoryNameDrawable;
+import games.strategy.triplea.ui.screen.drawable.JBGTerritoryMaskLayerDrawable;
 import games.strategy.triplea.ui.screen.drawable.VcDrawable;
 import games.strategy.triplea.util.UnitCategory;
 import games.strategy.triplea.util.UnitSeparator;
@@ -202,6 +203,41 @@ public class TileManager {
     }
   }
 
+  /** Re-renders all tiles with JBG effects. */
+  public void resetJBGEffectOnTiles(final GameData data, final MapData mapData) {
+    data.acquireReadLock();
+    try {
+      synchronized (mutex) {
+        for (final Tile tile : tiles) {
+          tile.clear();
+          final int x = tile.getBounds().x / TILE_SIZE;
+          final int y = tile.getBounds().y / TILE_SIZE;
+          tile.addDrawable(new BaseMapDrawable(x, y, uiContext));
+          tile.addDrawable(new ReliefMapDrawable(x, y, uiContext));
+        }
+        for (final Territory territory : data.getMap().getTerritories()) {
+          //clearTerritory(territory);
+          drawJBGTerritoryEffects(territory, data, mapData);
+        }
+        // add the decorations
+        final Map<Image, List<Point>> decorations = mapData.getDecorations();
+        for (final Entry<Image, List<Point>> entry : decorations.entrySet()) {
+          final Image img = entry.getKey();
+          for (final Point p : entry.getValue()) {
+            final DecoratorDrawable drawable = new DecoratorDrawable(p, img);
+            final Rectangle bounds =
+                new Rectangle(p.x, p.y, img.getWidth(null), img.getHeight(null));
+            for (final Tile t : getTiles(bounds)) {
+              t.addDrawable(drawable);
+            }
+          }
+        }
+      }
+    } finally {
+      data.releaseReadLock();
+    }
+  }
+
   /** Re-renders all tiles that intersect any of the specified territories. */
   public void updateTerritories(
       final Collection<Territory> territories, final GameData data, final MapData mapData) {
@@ -286,6 +322,15 @@ public class TileManager {
       drawing.add(new SeaZoneOutlineDrawable(territory.getName()));
     }
     drawing.add(new TerritoryNameDrawable(territory.getName(), uiContext));
+    //JBG
+    if (ta != null) {
+      drawing.add(new JBGTerritoryMaskLayerDrawable(territory, uiContext, ta));
+    }
+    /*
+    else {
+      drawing.add(new JBGTerritoryMaskLayerDrawable(territory, uiContext));
+    }
+    */
     if (ta != null && ta.isCapital() && mapData.drawCapitolMarkers()) {
       final GamePlayer capitalOf = data.getPlayerList().getPlayerId(ta.getCapital());
       drawing.add(new CapitolMarkerDrawable(capitalOf, territory, uiContext));
@@ -300,6 +345,85 @@ public class TileManager {
     }
     territoryDrawables.put(territory.getName(), drawing);
     territoryTiles.put(territory.getName(), drawnOn);
+  }
+
+  private void drawJBGTerritoryEffects(
+      final Territory territory, final GameData data, final MapData mapData) {
+    final TerritoryAttachment ta = TerritoryAttachment.get(territory);
+    final Set<Tile> drawnOn = new HashSet<>();
+    final Set<IDrawable> drawing = new HashSet<>();
+
+    if (territoryOverlays.get(territory.getName()) != null) {
+      drawing.add(territoryOverlays.get(territory.getName()));
+    }
+    if (uiContext.getShowTerritoryEffects()) {
+      drawTerritoryEffects(territory, mapData, drawing);
+    }
+    if (uiContext.getShowUnits()) {
+      drawUnits(territory, mapData, drawnOn, drawing);
+    }
+    drawing.add(new BattleDrawable(territory.getName()));
+    if (!territory.isWater()) {
+      drawing.add(new LandTerritoryDrawable(territory.getName()));
+    } else {
+      if (ta != null) {
+        // Kamikaze Zones
+        if (ta.getKamikazeZone()) {
+          drawing.add(new KamikazeZoneDrawable(territory, uiContext));
+        }
+        // Blockades
+        if (ta.getBlockadeZone()) {
+          drawing.add(new BlockadeZoneDrawable(territory));
+        }
+        // Convoy Routes
+        if (ta.getConvoyRoute()) {
+          drawing.add(new ConvoyZoneDrawable(territory.getOwner(), territory, uiContext));
+        }
+        // Convoy Centers
+        if (ta.getProduction() > 0) {
+          drawing.add(new ConvoyZoneDrawable(territory.getOwner(), territory, uiContext));
+        }
+      }
+      drawing.add(new SeaZoneOutlineDrawable(territory.getName()));
+    }
+    drawing.add(new TerritoryNameDrawable(territory.getName(), uiContext));
+
+    //JBG
+    if (!territory.isWater()) {
+      //drawing water battle is not easy, because it not has TA
+      if (ta != null) {
+        if (ta.getTurnOfLastBattle() > 0) {
+          //System.out.println(territory.getName() + " " + String.valueOf(ta.getTurnOfLastBattle()));
+        }
+        drawing.add(new JBGTerritoryMaskLayerDrawable(territory, uiContext, ta));
+      }
+      else {
+        //System.out.println(territory.getName() + "s' TA is null");
+      }
+    }
+    /*
+    else {
+      drawing.add(new JBGTerritoryMaskLayerDrawable(territory, uiContext));
+    }
+    */
+
+    if (ta != null && ta.isCapital() && mapData.drawCapitolMarkers()) {
+      final GamePlayer capitalOf = data.getPlayerList().getPlayerId(ta.getCapital());
+      drawing.add(new CapitolMarkerDrawable(capitalOf, territory, uiContext));
+    }
+    if (ta != null && (ta.getVictoryCity() != 0)) {
+      drawing.add(new VcDrawable(territory));
+    }
+
+
+    // add to the relevant tiles
+    for (final Tile tile : getTiles(mapData.getBoundingRect(territory.getName()))) {
+      drawnOn.add(tile);
+      tile.addDrawables(drawing);
+    }
+    territoryDrawables.put(territory.getName(), drawing);
+    territoryTiles.put(territory.getName(), drawnOn);
+
   }
 
   private static void drawTerritoryEffects(

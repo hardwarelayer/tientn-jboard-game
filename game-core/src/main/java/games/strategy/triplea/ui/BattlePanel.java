@@ -218,7 +218,9 @@ public final class BattlePanel extends ActionPanel {
         () -> {
           removeAll();
           if (battleDisplay != null) {
-            getMap().centerOn(battleDisplay.getBattleLocation());
+            //JBG: 
+            //disable the map moving on AI steps
+            //getMap().centerOn(battleDisplay.getBattleLocation());
             battleDisplay.listBattle(steps);
           }
         });

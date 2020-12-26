@@ -5,6 +5,10 @@ import com.google.common.base.MoreObjects;
 import games.strategy.engine.data.events.GameDataChangeListener;
 import games.strategy.engine.data.events.TerritoryListener;
 import games.strategy.engine.data.properties.GameProperties;
+import games.strategy.engine.data.JBGKanjiItem;
+import games.strategy.triplea.ui.history.JBGTurnHistoryParser;
+import games.strategy.engine.data.JBGConstants;
+
 import games.strategy.engine.delegate.IDelegate;
 import games.strategy.engine.framework.GameDataManager;
 import games.strategy.engine.framework.IGameLoader;
@@ -23,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Collections;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -30,6 +35,8 @@ import javax.swing.SwingUtilities;
 import org.triplea.io.IoUtils;
 import org.triplea.util.Tuple;
 import org.triplea.util.Version;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Central place to find all the information for a running game.
@@ -88,7 +95,7 @@ public class GameData implements Serializable {
   // NullRelation any other relations are map designer created.
   private final RelationshipTypeList relationshipTypeList = new RelationshipTypeList(this);
   private final GameProperties properties = new GameProperties(this);
-  private final UnitsList unitsList = new UnitsList();
+  private final UnitsList unitsList = new UnitsList();  
   private final TechnologyFrontier technologyFrontier =
       new TechnologyFrontier("allTechsForGame", this);
   private final IGameLoader loader = new TripleA();
@@ -98,6 +105,17 @@ public class GameData implements Serializable {
   private final Map<String, TerritoryEffect> territoryEffectList = new HashMap<>();
   private final BattleRecordsList battleRecordsList = new BattleRecordsList(this);
   private transient GameDataEventListeners gameDataEventListeners = new GameDataEventListeners();
+
+  //JBG
+  private List<JBGKanjiItem> kanjis = null;
+  @Setter @Getter private int jCoinAmount = 0;
+  @Setter @Getter private String humanPlayerName = "";
+  private List<String> lstPlayerNameByOrder = new ArrayList<>();
+  private List<String> lstPlayerTurnByOrder = new ArrayList<>();
+  @Setter @Getter private String currentTurnNews = "";
+  @Setter @Getter private String lastTurnNews = "";
+  @Getter private int jbgInternalTurnStep = 0;
+  private Map<String, Integer> lastBattleTurnOfTerritories = new HashMap<>();
 
   private void readObject(final ObjectInputStream in) throws IOException, ClassNotFoundException {
     // The process of deserializing makes use of this lock,
@@ -133,6 +151,152 @@ public class GameData implements Serializable {
   public UnitsList getUnits() {
     return unitsList;
   }
+
+  /** JBG. */
+  public List<JBGKanjiItem> getKanjis() {
+    return kanjis;
+  }
+  public int setKanjis(List<JBGKanjiItem> kj) {
+    this.kanjis = kj;
+    return kj.size();
+  }
+  private void loadPlayerNamesByOrder() {
+
+    if (lstPlayerNameByOrder.size() > 1) return;
+
+    GameSequence gseq = getSequence();
+    for (int i = 0; i < gseq.size(); i++) {
+      GameStep gs = gseq.getStep(i);
+      GamePlayer gp = gs.getPlayerId();
+
+      if (gp != null && gs != null) {
+        String stepName = gs.getDisplayName();
+        String playerName = gp.getName();
+        boolean bIsHuman = gp.getWhoAmI().contains("Human");
+        if (bIsHuman && humanPlayerName.length() < 1) {
+          humanPlayerName = playerName;
+        }
+        if (!lstPlayerNameByOrder.contains(playerName)) {
+          lstPlayerNameByOrder.add(playerName);
+        }
+        if (!stepName.contains("Bid ")) {
+          if (!lstPlayerTurnByOrder.contains(stepName)) {
+            lstPlayerTurnByOrder.add(stepName);
+          }
+        }
+
+      }
+
+    }
+  }
+  public void showSteps() {
+    loadPlayerNamesByOrder();
+    /*
+    System.out.println("---showPlayerNames");
+    for (String s: lstPlayerNameByOrder) {
+      if (s.equals(humanPlayerName)) 
+        System.out.println(s + "(Human)");
+      else
+        System.out.println(s);
+    }
+    System.out.println("---showPlayerTurns");
+    for (String s: lstPlayerTurnByOrder) {
+      System.out.println(s);
+    }
+    */
+  }
+  private String getNews(final boolean isLastTurn) {
+    JBGTurnHistoryParser parser = new JBGTurnHistoryParser();
+    int iPos = getHumanPlayerInTurnSequence();
+    return parser.parseHTML(this, isLastTurn, iPos, getPrevHumanAIPlayerNames());
+  }
+  public void resetTurnNews() {
+    currentTurnNews = "";
+    lastTurnNews = "";
+  }
+  public boolean makeCurrentTurnNews() {
+    this.jbgInternalTurnStep++;
+
+    currentTurnNews = getNews(false);
+    return true;
+  }
+  public boolean makeLastTurnNews() {
+    lastTurnNews = getNews(true);
+    return true;
+  }
+  public String getTurnNews(boolean isHtml) {
+    String s_section_break = "---\n";
+    if (isHtml)
+      s_section_break = "<br/>";
+    if (getHumanPlayerInTurnSequence() == JBGConstants.TURN_SEQ_MIDDLE && lastTurnNews.length() > 0) {
+      return new StringBuilder(
+        lastTurnNews + 
+        s_section_break + 
+        currentTurnNews
+        ).toString();
+    }
+    return currentTurnNews;
+  }
+  public boolean isLastPlayer(final String plName) {
+    String lastName = lstPlayerNameByOrder.get(lstPlayerNameByOrder.size()-1);
+    if (lastName.equals(plName)) return true;
+    return false;
+  }
+  public boolean isHumanPlayer(final String plName) {
+    if (humanPlayerName.equals(plName)) return true;
+    return false;
+  }
+  public String getPrevHumanAIPlayerName() {
+    //get the list of AI player names from turn sequence
+    //these player go before human
+    int iPos = 0;
+    List<String> lst = new ArrayList<>();
+    for (String s: lstPlayerNameByOrder) {
+      if (s.equals(humanPlayerName)) {
+        if (iPos > 0) {
+          return lstPlayerNameByOrder.get(iPos-1);
+        }
+      }
+      iPos++;
+    }
+    return "";
+  }
+  public List<String> getPrevHumanAIPlayerNames() {
+    //get the list of AI player names from turn sequence
+    //these player go before human
+    List<String> lst = new ArrayList<>();
+    for (String s: lstPlayerNameByOrder) {
+      if (s.equals(humanPlayerName)) {
+        break;
+      }
+      else {
+        lst.add(s);
+      }
+    }
+    return lst;
+  }
+  public int getHumanPlayerInTurnSequence() {
+    int iPos = 0;
+    int iSize = lstPlayerNameByOrder.size();
+    for (String s: lstPlayerNameByOrder) {
+      if (s.equals(humanPlayerName)) {
+        if (iPos > 0) {
+          if (iPos <= iSize - 1) {
+            return JBGConstants.TURN_SEQ_MIDDLE; //middle of seq
+          }
+          else {
+            return JBGConstants.TURN_SEQ_LAST; //end of seq
+          }
+        }
+        else {
+          return JBGConstants.TURN_SEQ_FIRST; //beginning of seq
+        }
+      }
+      iPos++;
+    }
+    return JBGConstants.TURN_SEQ_LAST;
+  }
+  //end JBG
 
   /** Returns list of Players in the game. */
   public PlayerList getPlayerList() {
@@ -385,6 +549,10 @@ public class GameData implements Serializable {
     return battleRecordsList;
   }
 
+  public Map<String, Integer> getLastBattleTurnOfTerritories() {
+    return lastBattleTurnOfTerritories;
+  }
+
   /**
    * Call this before starting the game and before the game data has been sent to the clients in
    * order to make any final modifications to the game data. For example, this method will remove
@@ -446,6 +614,7 @@ public class GameData implements Serializable {
         .add("gameVersion", gameVersion)
         .add("loader", loader)
         .add("playerList", playerList)
+        .add("JCointAmount", jCoinAmount)
         .toString();
   }
 

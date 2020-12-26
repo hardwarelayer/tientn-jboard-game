@@ -75,6 +75,7 @@ public class ActionButtons extends JPanel {
     repairPanel = new RepairPanel(data, map);
     placePanel = new PlacePanel(data, map, parent);
     techPanel = new TechPanel(data, map);
+    
     endTurnPanel = new EndTurnPanel(data, map);
     moveForumPosterPanel = new MoveForumPosterPanel(data, map);
     politicsPanel = new PoliticsPanel(data, map, parent);

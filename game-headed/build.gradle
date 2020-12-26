@@ -50,11 +50,29 @@ task downloadAssets {
             from zipTree(file("$projectDir/.assets/assets.zip"))
             into "$projectDir/assets/"
         }
-    }
+   }
 }
+
+//TienTN: my custom sound in .jbg/assets/sounds folder, outside this project folder
+//Please prepare the files before building game-headed
 
 run {
     dependsOn downloadAssets
+
+    task overwriteFile(type: Exec) {
+              commandLine 'rm -f ./assets/sounds/generic/required_your_turn_series/*.mp3'
+    }
+
+    task sync(type: Sync) {
+            from "$projectDir/jbg/assets/sounds/required_your_turn_series/"
+            into "$projectDir/assets/sounds/generic/required_your_turn_series/"
+
+            task sync2( type: Sync ) {
+              from "$projectDir/jbg/assets/sounds/game_start/"
+              into "$projectDir/assets/sounds/generic/game_start/"
+            }
+    }
+
 }
 
 task downloadPlatformInstallerAssets(group: 'release', dependsOn: downloadAssets) {

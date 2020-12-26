@@ -27,7 +27,7 @@ import games.strategy.triplea.ui.screen.SmallMapImageManager;
 import games.strategy.triplea.ui.screen.Tile;
 import games.strategy.triplea.ui.screen.TileManager;
 import games.strategy.triplea.ui.screen.UnitsDrawer;
-import games.strategy.triplea.ui.TerritoryManagerPanel;
+import games.strategy.triplea.ui.JBGTerritoryManagerPanel;
 import games.strategy.triplea.ui.TooltipProperties;
 import games.strategy.triplea.util.UnitCategory;
 import games.strategy.triplea.util.UnitSeparator;
@@ -112,7 +112,7 @@ public class MapPanel extends ImageScrollerLargeView {
 
   private @Nullable Territory highlightedTerritory;
   private final TerritoryHighlighter territoryHighlighter = new TerritoryHighlighter();
-  private final TerritoryManagerPanel terrManager;
+  private final JBGTerritoryManagerPanel terrManager;
   private final ImageScrollerSmallView smallView;
   // units the mouse is currently over
   private Tuple<Territory, List<Unit>> currentUnits;
@@ -206,7 +206,7 @@ public class MapPanel extends ImageScrollerLargeView {
     setGameData(data);
 
     //JBG:
-    terrManager = new TerritoryManagerPanel(gameData, this, uiContext);
+    terrManager = new JBGTerritoryManagerPanel(gameData, this, uiContext);
 
     ((ThreadPoolExecutor) executor).setKeepAliveTime(2L, TimeUnit.SECONDS);
     ((ThreadPoolExecutor) executor).allowCoreThreadTimeOut(true);
@@ -245,15 +245,30 @@ public class MapPanel extends ImageScrollerLargeView {
             //JBG:
             final boolean isShiftDown = md.isShiftDown();
             final boolean isControlDown = md.isControlDown();
+
             if ( SwingUtilities.isRightMouseButton(e) ) {
-             //JOptionPane.showMessageDialog(null, "Right mouse");
+                if (!wasLastActionDraggingAndResetForJBG()) {
 
+                  if (terr != null && !terr.isWater()) {
+                    final String territoryOwnerName = terr.getOwner().getName();
+                    String currentHumanPlayerName =  "";
+                    try {
+                      data.acquireReadLock();
+                      currentHumanPlayerName = data.getHumanPlayerName();
+                    }
+                    finally {
+                      data.releaseReadLock();
+                    }
+                    if (territoryOwnerName.equals( currentHumanPlayerName )) {
+                      notifyTerritoryManagementSelect(terr, md);
+                    }
+                  }
 
-              if (isControlDown) {
-                notifyTerritoryManagementSelect(terr, md);
-              }
+                }
 
             }
+            //
+
             if (e.getButton() == 4 || e.getButton() == 5) {
               // the numbers 4 and 5 stand for the corresponding mouse button
               lastActive = is4Pressed && is5Pressed ? (e.getButton() == 4 ? 5 : 4) : -1;
@@ -537,7 +552,7 @@ public class MapPanel extends ImageScrollerLargeView {
   private void notifyTerritoryManagementSelect(final Territory t, final MouseDetails md) {
     //JBG: click owned territory, show JBG territory info dialog
     //JOptionPane.showMessageDialog(null, "Owned territory");
-    terrManager.showJBGTerritoryInfo(t, md);
+    terrManager.showModifyJBGTerritoryInfo(t, md);
   }
 
   private void notifyMouseMoved(final Territory t, final MouseDetails me) {
@@ -610,6 +625,13 @@ public class MapPanel extends ImageScrollerLargeView {
 
   public void resetMap() {
     tileManager.resetTiles(gameData, uiContext.getMapData());
+    SwingUtilities.invokeLater(this::repaint);
+    initSmallMap();
+  }
+
+  //JBG
+  public void reDrawJBGEffects() {
+    tileManager.resetJBGEffectOnTiles(gameData, uiContext.getMapData());
     SwingUtilities.invokeLater(this::repaint);
     initSmallMap();
   }
@@ -771,6 +793,19 @@ public class MapPanel extends ImageScrollerLargeView {
         }
       }
     }
+
+
+    //JBG
+    /*
+    g2d.setFont(new Font("Arial", Font.PLAIN, 12));
+    g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+    g2d.setColor(Color.DARK_GRAY);
+
+    g2d.drawString("Frontline", 2, 10);
+    */
+    //
+
+
     // draw the tiles nearest us first
     // then draw farther away
     updateUndrawnTiles(undrawnTiles, 30);

@@ -38,6 +38,7 @@ import org.triplea.swing.SwingComponents;
 @Log
 public class ResourceLoader implements Closeable {
   public static final String ASSETS_FOLDER = "assets";
+  public static final String JBG_ASSETS_FOLDER = "jbg/assets";
 
   private final URLClassLoader loader;
   private final String mapPrefix;
@@ -74,6 +75,11 @@ public class ResourceLoader implements Closeable {
    */
   public static Image loadImageAssert(final Path path) {
     return ImageLoader.getImage(Path.of(ASSETS_FOLDER).resolve(path).toFile());
+  }
+
+  /* JBG */
+  public static Image loadImageFromJBGAssert(final Path path) {
+    return ImageLoader.getImage(Path.of(JBG_ASSETS_FOLDER).resolve(path).toFile());
   }
 
   public static ResourceLoader getGameEngineAssetLoader() {

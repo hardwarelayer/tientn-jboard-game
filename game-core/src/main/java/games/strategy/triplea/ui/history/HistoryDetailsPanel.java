@@ -111,6 +111,7 @@ public class HistoryDetailsPanel extends JPanel {
   }
 
   private void showTerritory(final Territory territory) {
+System.out.println("HistoryDetailsPanel.java showTerritory");
     if (!mapPanel.isShowing(territory)) {
       mapPanel.centerOn(territory);
     }

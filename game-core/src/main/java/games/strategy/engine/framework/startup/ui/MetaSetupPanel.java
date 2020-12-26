@@ -30,6 +30,16 @@ public class MetaSetupPanel extends SetupPanel {
   private static final long serialVersionUID = 3926503672972937677L;
 
   public MetaSetupPanel(final SetupPanelModel model) {
+    final JButton startLocal =
+        new JButtonBuilder("Start Local Game")
+            .biggerFont()
+            .toolTipText(
+                "<html>Start a game on this computer. <br>"
+                    + "You can play against a friend sitting besides you (hotseat mode), <br>"
+                    + "or against one of the AIs.</html>")
+            .actionListener(model::showLocal)
+            .build();
+/*
     final JButton connectToLobby =
         new JButtonBuilder("Play Online")
             .biggerFont()
@@ -38,14 +48,6 @@ public class MetaSetupPanel extends SetupPanel {
                     + "TripleA is MEANT to be played Online against other humans. <br>"
                     + "Any other way is not as fun!</html>")
             .actionListener(model::login)
-            .build();
-    final JButton startLocal =
-        new JButtonBuilder("Start Local Game")
-            .toolTipText(
-                "<html>Start a game on this computer. <br>"
-                    + "You can play against a friend sitting besides you (hotseat mode), <br>"
-                    + "or against one of the AIs.</html>")
-            .actionListener(model::showLocal)
             .build();
 
     final JButton startPbf =
@@ -80,6 +82,7 @@ public class MetaSetupPanel extends SetupPanel {
                     + "so long as you know their IP address.</html>")
             .actionListener(() -> new Thread(model::showClient).start())
             .build();
+*/
     final JButton enginePreferences =
         new JButtonBuilder("Engine Preferences")
             .toolTipText("<html>Configure certain options related to the engine.")
@@ -102,9 +105,10 @@ public class MetaSetupPanel extends SetupPanel {
     add(mainContents);
     mainContents.setLayout(new GridBagLayout());
     int row = 0;
-    mainContents.add(connectToLobby, buildConstraintForRow(row));
-    row++;
     mainContents.add(startLocal, buildConstraintForRow(row));
+    row++;
+/*
+    mainContents.add(connectToLobby, buildConstraintForRow(row));
     row++;
     mainContents.add(startPbf, buildConstraintForRow(row));
     row++;
@@ -114,6 +118,7 @@ public class MetaSetupPanel extends SetupPanel {
     row++;
     mainContents.add(connectToHostedGame, buildConstraintForRow(row));
     row++;
+*/
     mainContents.add(enginePreferences, buildConstraintForRow(row));
     row++;
     mainContents.add(mapCreator, buildConstraintForRow(row));

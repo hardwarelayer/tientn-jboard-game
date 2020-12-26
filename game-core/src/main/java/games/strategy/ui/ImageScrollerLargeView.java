@@ -59,6 +59,8 @@ public class ImageScrollerLargeView extends JComponent {
    * back to false.
    */
   private boolean wasLastActionDragging = false;
+  //JBG: I don't need to interfere wasLastActionDragging
+  private boolean wasLastActionDraggingForJBG = false;
 
   private final ActionListener timerAction =
       new ActionListener() {
@@ -194,6 +196,7 @@ public class ImageScrollerLargeView extends JComponent {
             if ((e.getModifiersEx() & (InputEvent.BUTTON3_DOWN_MASK | InputEvent.BUTTON2_DOWN_MASK))
                 != 0) {
               wasLastActionDragging = true;
+              wasLastActionDraggingForJBG = true;
               inside = false;
               // read in location
               final int x = e.getX();
@@ -236,6 +239,15 @@ public class ImageScrollerLargeView extends JComponent {
   public boolean wasLastActionDraggingAndReset() {
     if (wasLastActionDragging) {
       wasLastActionDragging = false;
+      wasLastActionDraggingForJBG = false;
+      return true;
+    }
+    return false;
+  }
+
+  public boolean wasLastActionDraggingAndResetForJBG() {
+    if (wasLastActionDraggingForJBG) {
+      wasLastActionDraggingForJBG = false;
       return true;
     }
     return false;
@@ -247,6 +259,7 @@ public class ImageScrollerLargeView extends JComponent {
    */
   public void notifyUnitsAreSelected() {
     wasLastActionDragging = false;
+    wasLastActionDraggingForJBG = false;
   }
 
   /** For subclasses needing to set the location of the image. */

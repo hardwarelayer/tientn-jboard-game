@@ -137,6 +137,7 @@ subprojects {
             '-Xlint:all,-processing',
             '-Xmaxwarns', '15'
         ]
+        options.warnings = false
         options.encoding = 'UTF-8'
         options.errorprone {
             check 'ByteBufferBackingArray', CheckSeverity.ERROR

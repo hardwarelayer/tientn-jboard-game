@@ -1012,6 +1012,7 @@ public final class TripleAFrame extends JFrame implements QuitHandler {
     final String ok = movePhase ? "End Move Phase" : "Kill Planes";
     final String cancel = movePhase ? "Keep Moving" : "Change Placement";
     final String[] options = {cancel, ok};
+
     mapPanel.centerOn(airCantLand.iterator().next());
     final int choice =
         EventThreadJOptionPane.showOptionDialog(
@@ -1050,6 +1051,7 @@ public final class TripleAFrame extends JFrame implements QuitHandler {
     final String ok = "Done Moving";
     final String cancel = "Keep Moving";
     final String[] options = {cancel, ok};
+
     this.mapPanel.centerOn(unitsCantFight.iterator().next());
     final int choice =
         EventThreadJOptionPane.showOptionDialog(
@@ -2010,6 +2012,8 @@ public final class TripleAFrame extends JFrame implements QuitHandler {
   }
 
   private void showHistory() {
+    if (true) return;
+
     inHistory.set(true);
     inGame.set(false);
     setWidgetActivation();
@@ -2276,6 +2280,7 @@ public final class TripleAFrame extends JFrame implements QuitHandler {
   public Collection<Unit> moveFightersToCarrier(
       final Collection<Unit> fighters, final Territory where) {
     messageAndDialogThreadPool.waitForAll();
+
     mapPanel.centerOn(where);
     final AtomicReference<JScrollPane> panelRef = new AtomicReference<>();
     final AtomicReference<UnitChooser> chooserRef = new AtomicReference<>();

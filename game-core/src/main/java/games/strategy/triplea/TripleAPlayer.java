@@ -56,6 +56,11 @@ import org.triplea.java.concurrency.AsyncRunner;
 import org.triplea.sound.ClipPlayer;
 import org.triplea.sound.SoundPath;
 import org.triplea.util.Tuple;
+import javax.swing.JOptionPane;
+import games.strategy.triplea.ui.panels.map.MapPanel;
+
+import games.strategy.triplea.ui.history.JBGTurnLogPaper;
+
 
 /**
  * As a rule, nothing that changes GameData should be in here. It should be using a Change done in a
@@ -132,6 +137,18 @@ public abstract class TripleAPlayer extends AbstractHumanPlayer {
     ui.requiredTurnSeries(this.getGamePlayer());
     enableEditModeMenu();
     boolean badStep = false;
+
+    //JBG
+    GameData gData = getGameData();
+    if (gData != null) {
+      try {
+        gData.acquireWriteLock();
+        gData.setHumanPlayerName(this.getName());
+      } finally {
+        gData.releaseWriteLock();
+      }
+    }
+
     if (name.endsWith("Tech")) {
       tech();
     } else if (GameStep.isPurchaseOrBidStep(name)) {
@@ -141,6 +158,27 @@ public abstract class TripleAPlayer extends AbstractHumanPlayer {
         // TODO only do forum post if there is a combat
       }
     } else if (name.endsWith("Move")) {
+      //JBG
+      if (!name.contains("NonCombat") && gData != null) {
+        try {
+          //acquireWrite, dont use together with acquireRead or it will be blocked
+          gData.acquireWriteLock();
+          gData.makeCurrentTurnNews();
+        }
+        finally {
+          gData.releaseWriteLock();
+        }
+        buildNewspaper();
+        try {
+          gData.acquireWriteLock();
+          gData.resetTurnNews();
+        }
+        finally {
+          gData.releaseWriteLock();
+        }
+      }
+      //JOptionPane.showMessageDialog(null, name, "JBG: ", JOptionPane.INFORMATION_MESSAGE);
+
       final boolean nonCombat = GameStepPropertiesHelper.isNonCombatMove(getGameData(), false);
       move(nonCombat, name);
       if (!nonCombat) {
@@ -172,6 +210,15 @@ public abstract class TripleAPlayer extends AbstractHumanPlayer {
     if (badStep) {
       throw new IllegalArgumentException("Unrecognized step name:" + name);
     }
+  }
+
+  private void buildNewspaper() {
+    MapPanel mapPanel = ui.getMapPanel();
+    mapPanel.reDrawJBGEffects();
+    GameData gameData = getGameData();
+    String curPlayer = this.getName();
+    JBGTurnLogPaper turnLog = new JBGTurnLogPaper(null);
+    turnLog.showNewsDialog(gameData);
   }
 
   private void enableEditModeMenu() {

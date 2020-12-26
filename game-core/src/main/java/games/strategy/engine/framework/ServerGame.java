@@ -421,15 +421,41 @@ public class ServerGame extends AbstractGame {
       autoSaveAfter(stepName);
     }
     endStep();
+
+    //JBG
+    final String stepName = currentStep.getName();
+    //System.out.println("*********run step: " + stepName);
+    if (stepName.contains("EndTurn")) {
+      GamePlayer gp = currentStep.getPlayerId();
+      //System.out.println("Complete turn for " + gp.getName());
+      if (gameData.isLastPlayer(gp.getName())) {
+        //System.out.println("Last player!");
+        try {
+          gameData.acquireWriteLock();
+          gameData.makeLastTurnNews();
+        }
+        finally {
+          gameData.releaseWriteLock();
+        }
+      }
+      if (gameData.isHumanPlayer(gp.getName())) {
+        //System.out.println("Human player!");
+      }
+    }
+    //
+
     if (isGameOver) {
       return;
     }
     if (gameData.getSequence().next()) {
       gameData.getHistory().getHistoryWriter().startNextRound(gameData.getSequence().getRound());
+      //JBG disable autosave
+      /*
       saveGame(
           gameData.getSequence().getRound() % 2 == 0
               ? launchAction.getAutoSaveFileUtils().getEvenRoundAutoSaveFile()
               : launchAction.getAutoSaveFileUtils().getOddRoundAutoSaveFile());
+      */
     }
     if (autoSaveThisDelegate && !currentStep.getName().endsWith("Move")) {
       autoSaveAfter(currentDelegate);
@@ -516,6 +542,12 @@ public class ServerGame extends AbstractGame {
     try {
       final IDelegate delegate = getCurrentStep().getDelegate();
       delegate.setDelegateBridgeAndPlayer(bridge);
+/*
+System.out.println("------------------Start step---------------------");
+for (final Player gp : gamePlayers.values()) {
+  System.out.println(gp.getGamePlayer().toString());
+}
+*/
       delegate.start();
     } finally {
       delegateExecutionManager.leaveDelegateExecution();

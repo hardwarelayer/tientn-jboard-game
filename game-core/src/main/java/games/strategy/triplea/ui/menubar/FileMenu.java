@@ -3,6 +3,8 @@ package games.strategy.triplea.ui.menubar;
 import games.strategy.engine.data.GameData;
 import games.strategy.engine.data.GamePlayer;
 import games.strategy.engine.data.GameStep;
+import games.strategy.engine.data.JBGKanjiItem;
+
 import games.strategy.engine.framework.IGame;
 import games.strategy.engine.framework.system.SystemProperties;
 import games.strategy.engine.framework.ui.SaveGameFileChooser;
@@ -21,9 +23,19 @@ import javax.swing.KeyStroke;
 import org.triplea.swing.JMenuItemBuilder;
 import org.triplea.swing.SwingAction;
 import org.triplea.swing.key.binding.KeyCode;
+import java.util.List;
+import java.util.Arrays;
+import java.util.ArrayList;
+import java.io.IOException;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.util.stream.Stream;
+import java.util.stream.Collectors;
+import java.nio.charset.Charset;
 
 final class FileMenu extends JMenu {
   private static final long serialVersionUID = -3855695429784752428L;
+  private final String KANJI_SAVE_EXTENSION = ".kj";
 
   private final GameData gameData;
   private final TripleAFrame frame;
@@ -54,11 +66,63 @@ final class FileMenu extends JMenu {
               final File f = SaveGameFileChooser.getSaveGameLocation(frame, gameData);
               if (f != null) {
                 game.saveGame(f);
+                saveKanjiToFile(f.getAbsolutePath());
                 JOptionPane.showMessageDialog(
                     frame, "Game Saved", "Game Saved", JOptionPane.INFORMATION_MESSAGE);
               }
             })
         .build();
+  }
+
+  private String convertListStringToCSV(List<String> data) {
+      return data.stream().collect(Collectors.joining(","));
+  }
+
+  private String convertKanjiItemToCSV(JBGKanjiItem kItem) {
+    StringBuilder sb = new StringBuilder();
+    sb.append(kItem.getId().toString());
+    sb.append(",");
+    sb.append(kItem.getKanji());
+    sb.append(",");
+    sb.append(kItem.getHiragana());
+    sb.append(",");
+    sb.append(kItem.getHv());
+    sb.append(",");
+    sb.append(kItem.getMeaning());
+    sb.append(",");
+    sb.append(String.valueOf(kItem.getTestCount()));
+    sb.append(",");
+    sb.append(String.valueOf(kItem.getCorrectCount()));
+    sb.append(",");
+    sb.append(String.valueOf(kItem.getWeightValue()));
+    return sb.toString();
+  }
+
+  private void saveKanjiToFile(final String fileName) {
+    final String sKanjiSaveFile = fileName + KANJI_SAVE_EXTENSION;
+    List<JBGKanjiItem> lstKanjis = null;
+
+      try {
+        this.gameData.acquireReadLock();
+        lstKanjis = this.gameData.getKanjis();
+      }
+      finally {
+        this.gameData.releaseReadLock();
+      }
+
+      File csvOutputFile = new File(sKanjiSaveFile);
+      try (PrintWriter pw = new PrintWriter(csvOutputFile, Charset.forName("UTF-8"))) {
+        for (int i = 0; i < lstKanjis.size(); i++) {
+          String sRow = convertKanjiItemToCSV(lstKanjis.get(i));
+          pw.println(sRow);
+          System.out.println(sRow);
+        }
+      } catch (FileNotFoundException e) {
+        System.out.println(e.getMessage());
+      }
+      catch (IOException e) {
+        System.out.println("saveKanjiToFile error: " + e.getMessage());
+      }
   }
 
   private JMenuItem addPostPbem() {
