@@ -185,9 +185,15 @@ public class JBGTerritoryManagerPanel  extends ActionPanel {
     super(data, map);
     this.uiContext = uiContext;
 
-    kanjiList = JBGKanjiUnits.getInstance(data).getData();
+    getNewKanjiList();
 
     data.showSteps();
+  }
+
+  public List<JBGKanjiItem> getNewKanjiList() {
+    GameData tData = getData();
+    this.kanjiList = JBGKanjiUnits.getInstance(tData).getData();
+    return this.kanjiList;
   }
 
   @Override

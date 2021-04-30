@@ -164,6 +164,10 @@ public interface JBGConstants {
     entry(19, "Army University")
     );
 
+  static final int KANJI_TOTAL_SUBSET_SIZE = 20;
+  static final int KANJI_MIN_TEST_CORRECT = 10;
+  static final String KANJI_COMMA_DELIMITER = ",";
+
   //for jCoint price calculation
   static final double BUILDING_ECO_PRICE_MULTIPLIER = 0.75;
   static final double BUILDING_RES_PRICE_MULTIPLIER = 1.0;

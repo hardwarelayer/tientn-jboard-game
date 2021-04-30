@@ -91,7 +91,7 @@ public class JBGKanjiSelectorModel extends Observable {
       try (BufferedReader br = new BufferedReader(s)) {
           String line;
           while ((line = br.readLine()) != null) {
-            System.out.println(line); 
+            //System.out.println(line); 
             String[] values = line.split(COMMA_DELIMITER, 8);
             //id of item will be auto generated on object creation
             JBGKanjiItem item = new JBGKanjiItem(values[0], values[1], values[2], values[3]);
@@ -118,7 +118,7 @@ public class JBGKanjiSelectorModel extends Observable {
       try (BufferedReader br = new BufferedReader(s)) {
           String line;
           while ((line = br.readLine()) != null) {
-            System.out.println(line);
+            //System.out.println(line);
             String[] values = line.split(COMMA_DELIMITER, 8);
             JBGKanjiItem item = new JBGKanjiItem(
               values[0], //id in string format

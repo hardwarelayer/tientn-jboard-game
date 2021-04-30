@@ -176,7 +176,7 @@ public class JBGWordMatchPanel {
   JLabel lblJCoinAmount;
 
   public JBGWordMatchPanel(JBGTerritoryManagerPanel p) {
-    this.kanjiList = p.getKanjiList();
+    this.kanjiList = p.getNewKanjiList();
     this.parent = p;
   }
 
@@ -247,15 +247,15 @@ public class JBGWordMatchPanel {
     lblSelHV.setText(sWordMatchEmptyValue);
     lblSelViet.setText(sWordMatchEmptyValue);
 
-    kanjiListCtl.setSelectedIndex(-1);
-    hiraListCtl.setSelectedIndex(-1);
-    hvListCtl.setSelectedIndex(-1);
-    vnListCtl.setSelectedIndex(-1);
-
     kanjiListCtl.clearSelection();
     hiraListCtl.clearSelection();
     hvListCtl.clearSelection();
     vnListCtl.clearSelection();
+
+    kanjiListCtl.setSelectedIndex(-1);
+    hiraListCtl.setSelectedIndex(-1);
+    hvListCtl.setSelectedIndex(-1);
+    vnListCtl.setSelectedIndex(-1);
   }
 
   private void removeItemFromList(JList lst, final int idx) {
@@ -366,7 +366,7 @@ public class JBGWordMatchPanel {
   protected JList<String> makeScrollList(final String sColName, JPanel panel, GridBagLayout gridbag, GridBagConstraints c) {
     DefaultListModel<String> listModel = new DefaultListModel<String>();
 
-    for (JBGKanjiItem kanjiItem: kanjiList) {
+    for (JBGKanjiItem kanjiItem: this.kanjiList) {
       switch (sColName) {
       case KANJI_LIST_NAME:
         listModel.addElement(kanjiItem.getKanji());

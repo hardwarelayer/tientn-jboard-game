@@ -51,4 +51,13 @@ public class JBGKanjiItem implements Serializable {
     }
   }
 
+  @Override
+  public String toString() {
+    return new StringBuilder(
+      this.kanji + "|" +  
+      this.meaning + "|" +  
+      String.valueOf(this.testCount) + "|" + String.valueOf(this.correctCount) + "|" + String.valueOf(this.weightValue)
+      ).toString();
+  }
+
 }

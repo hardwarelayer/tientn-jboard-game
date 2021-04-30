@@ -5,6 +5,7 @@ import games.strategy.engine.data.UnitType;
 import games.strategy.triplea.ResourceLoader;
 import games.strategy.triplea.attachments.UnitAttachment;
 import games.strategy.engine.data.GameData;
+import games.strategy.engine.data.JBGConstants;
 import games.strategy.engine.data.JBGKanjiItem;
 
 import java.io.IOException;
@@ -20,6 +21,7 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.concurrent.ThreadLocalRandom;
 
 import lombok.extern.java.Log;
 import java.util.logging.Level;
@@ -29,10 +31,6 @@ import org.triplea.util.LocalizeHtml;
 /** Generates unit tooltips based on the content of the map's {@code tooltips.properties} file. */
 @Log
 public final class JBGKanjiUnits {
-  // Filename
-  private static final int TOTAL_SUBSET_SIZE = 20;
-  private static final int MIN_TEST_CORRECT = 10;
-  private static final String COMMA_DELIMITER = ",";
   // Properties
   private static JBGKanjiUnits kjp = null;
   private static Instant timestamp = Instant.EPOCH;
@@ -56,28 +54,64 @@ public final class JBGKanjiUnits {
     }
   }
 
-  private void sortOriginKanjis(boolean bReverse) {
+  private void sortKanjisByCorrectCount(List<JBGKanjiItem> lst, boolean bReverse) {
     //java 8+
     if (!bReverse)
-      this.originRecords.sort((r1, r2) -> r1.getCorrectCount() - r2.getCorrectCount());
+      lst.sort((r1, r2) -> r1.getCorrectCount() - r2.getCorrectCount());
     else
-      this.originRecords.sort((r1, r2) -> r2.getCorrectCount() - r1.getCorrectCount());
+      lst.sort((r1, r2) -> r2.getCorrectCount() - r1.getCorrectCount());
+  }
+
+  //Random.nextBoolean is not work
+  private boolean randomBoolean(){
+    return Math.random() < 0.5;
+  }
+
+  private int randomBetween(final int min, final int max) {
+    return ThreadLocalRandom.current().nextInt(min, max + 1);
   }
 
   private void buildSubSetRecords() {
+    List<JBGKanjiItem> lstKnownItems = new ArrayList<>();
+    List<JBGKanjiItem> lstNewItems = new ArrayList<>();
+    int iKnownItemsCount = randomBetween(5, 10);
+
     this.subsetRecords = new ArrayList<>();
     //sort desc by correct count, so we'll traverse top down when load
-    sortOriginKanjis(true);
+    sortKanjisByCorrectCount(this.originRecords, true);
     int iCount = 0;
     for (JBGKanjiItem item: this.originRecords) {
-      if (item.getCorrectCount() < MIN_TEST_CORRECT) {
-        this.subsetRecords.add(item);
+      if (item.getCorrectCount() < JBGConstants.KANJI_MIN_TEST_CORRECT) {
+        lstNewItems.add(item);
         iCount++;
       }
-      if (iCount > TOTAL_SUBSET_SIZE) {
+      else {
+        //get all known items into one list
+        lstKnownItems.add(item);
+      }
+      if (iCount > JBGConstants.KANJI_TOTAL_SUBSET_SIZE) {
         break;
       }
     }
+
+    //at the beginning, this is small to zero number
+    if (lstKnownItems.size() < iKnownItemsCount) {
+      iKnownItemsCount = lstKnownItems.size();
+    }
+    //sort this list from lowest correct to highest
+    //so we can get newly known items first, to repeat studying
+    sortKanjisByCorrectCount(lstKnownItems, false);
+
+    for (int i=0; i < lstKnownItems.size(); i++) {
+      this.subsetRecords.add(lstKnownItems.get(i)); 
+      if (this.subsetRecords.size() >= iKnownItemsCount)
+        break;
+    }
+    //new words
+    for (int i=0; i < JBGConstants.KANJI_TOTAL_SUBSET_SIZE-iKnownItemsCount; i++) {
+      this.subsetRecords.add(lstNewItems.get(i));
+    }
+
   }
 
   public static JBGKanjiUnits getInstance(GameData data) {
@@ -131,7 +165,7 @@ public final class JBGKanjiUnits {
           String line;
           while ((line = br.readLine()) != null) {
             //System.out.println(line);
-            String[] values = line.split(COMMA_DELIMITER);
+            String[] values = line.split(KANJI_COMMA_DELIMITER);
             originRecords.add(Arrays.asList(values));
           }
       }
