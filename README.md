@@ -91,6 +91,20 @@ Changes for porting: build parameters, tool and script environment ...
 
     7. rebuild and run
 
+### Run standalone game locally:
+
+    1. Not need docker or db
+
+    2. use ./run.sh
+
+    ####Note: current java version
+
+        java version "15" 2020-09-15
+
+        Java(TM) SE Runtime Environment (build 15+36-1562)
+
+        Java HotSpot(TM) 64-Bit Server VM (build 15+36-1562, mixed mode, sharing)
+
 
 ------------------
 

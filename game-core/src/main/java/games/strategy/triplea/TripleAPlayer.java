@@ -171,7 +171,8 @@ public abstract class TripleAPlayer extends AbstractHumanPlayer {
         buildNewspaper();
         try {
           gData.acquireWriteLock();
-          gData.resetTurnNews();
+          //disable this, to keep for displaying later in territory canvas
+          //gData.resetTurnNews(); 
         }
         finally {
           gData.releaseWriteLock();

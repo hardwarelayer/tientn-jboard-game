@@ -129,6 +129,35 @@ public class JBGTurnHistoryParser {
     return sb.toString();
   }
 
+  public String parseSinglePlayerTurn(final GameData data, final boolean isLastTurn, final int posType, final String playerName) {
+    Collection<GamePlayer> playersAllowed = new ArrayList<GamePlayer>();
+    playersAllowed.add(data.getPlayerList().getPlayerId(playerName));
+    List<JBGAnalyzableTurnEntry> lst = parseFullTurn(data, true, playersAllowed);
+
+    StringBuilder sb = new StringBuilder();
+    StringBuilder sbDetailedNews = new StringBuilder();
+    for (JBGAnalyzableTurnEntry e: lst) {
+
+      if (isLastTurn) {
+        if (posType == JBGConstants.TURN_SEQ_FIRST || posType == JBGConstants.TURN_SEQ_LAST) {
+          sb.append(e.writeBattlesHeadlines(false) + "\n\n");
+          sbDetailedNews.append(e.toStringWithBasicNews() + "\n");
+        }
+        else if (posType == JBGConstants.TURN_SEQ_MIDDLE) {
+            sb.append(e.writeBattlesHeadlines(false) + "\n\n");
+            sbDetailedNews.append(e.toStringWithBasicNews() + "\n");
+        }        
+      }
+      else {
+        sb.append(e.writeBattlesHeadlines(false) + "\n\n");
+        sbDetailedNews.append(e.toStringWithBasicNews() + "\n");
+      }
+
+    }
+    sb.append("<p>Detail News:<p>" + sbDetailedNews.toString());
+    return sb.toString();
+  }
+
   private void addHeadline(final String ln, StringBuilder sb) {
     if (ln.indexOf(JBGConstants.JBGTURN_NEWS_SMALLATTACK_PREFIX) == 0) {
       sb.append(
@@ -184,6 +213,46 @@ public class JBGTurnHistoryParser {
     return sb.toString();
   }
 
+  public String parseHTMLSinglePlayerTurn(final GameData data, final boolean isLastTurn, final int posType, final String playerName) {
+    Collection<GamePlayer> playersAllowed = new ArrayList<GamePlayer>();
+    playersAllowed.add(data.getPlayerList().getPlayerId(playerName));
+    List<JBGAnalyzableTurnEntry> lst = parseFullTurn(data, true, playersAllowed);
+
+    StringBuilder sb = new StringBuilder();
+    StringBuilder sbDetailedNews = new StringBuilder();
+    sb.append("<p>");
+    for (JBGAnalyzableTurnEntry e: lst) {
+
+      if (isLastTurn) {
+        if (posType == JBGConstants.TURN_SEQ_FIRST || posType == JBGConstants.TURN_SEQ_LAST) {
+          List<String> lstHeadlines = e.writeBattlesHeadlines(true);
+          for (String ln: lstHeadlines) {
+            addHeadline(ln, sb);
+          }
+          sbDetailedNews.append(e.toHTMLWithBasicNews());
+        }
+        else if (posType == JBGConstants.TURN_SEQ_MIDDLE) {
+            List<String> lstHeadlines = e.writeBattlesHeadlines(true);
+            for (String ln: lstHeadlines) {
+              addHeadline(ln, sb);
+            }
+            sbDetailedNews.append(e.toHTMLWithBasicNews());
+        }        
+      }
+      else {
+        List<String> lstHeadlines = e.writeBattlesHeadlines(true);
+        for (String ln: lstHeadlines) {
+          addHeadline(ln, sb);
+        }
+        sbDetailedNews.append(e.toHTMLWithBasicNews());
+      }
+
+    }
+    sb.append("</p><br/>"); //class row
+
+    sb.append("<center><span class=\"headline-detail\">Detailed News from our frontline correspondences</span></center>" + sbDetailedNews.toString());
+    return sb.toString();
+  }
 
   public void append(final String string) {
     stringBuilder.append(string);

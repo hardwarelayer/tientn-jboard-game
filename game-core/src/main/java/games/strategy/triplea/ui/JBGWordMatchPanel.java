@@ -115,6 +115,11 @@ import javax.swing.JScrollPane;
 import javax.swing.JButton;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.AbstractAction;
+import javax.swing.InputMap;
+import javax.swing.ActionMap;
+import javax.swing.JComponent;
+import javax.swing.KeyStroke;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -134,7 +139,10 @@ import java.awt.Insets;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.InputEvent;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -153,31 +161,91 @@ public class JBGWordMatchPanel {
   private final String sWordMatchEmptyValue = "....................";
   @Getter private JBGTerritoryManagerPanel parent = null;
 
-  private static final String KANJI_LIST_NAME = "kanji";
-  private static final String HIRA_LIST_NAME = "hira";
-  private static final String HV_LIST_NAME = "hv";
-  private static final String MEANING_LIST_NAME = "meaning";
+  private static final String UP = "Up";
+  private static final String DOWN = "Down";
+  private static final String NO_1 = "NO_1";
+  private static final String NO_2 = "NO_2";
+  private static final String NO_3 = "NO_3";
+  private static final String NO_4 = "NO_4";
+  private static final String START_KEY = "START_KEY";
+  private static final String LOAD_NORMAL_KEY = "LOAD_NORMAL_KEY";
+  private static final String LOAD_NEW_KEY = "LOAD_NEW_KEY";
+
+  private static final String NAME_LIST_KANJI = "kanji";
+  private static final String NAME_LIST_HIRAGANA = "hira";
+  private static final String NAME_LIST_HANVIET = "hv";
+  private static final String NAME_LIST_MEANING = "meaning";
 
   private static final String MATCH_WORD_OK = "OK";
   private static final String MATCH_WORD_NG = "NG";
 
   private boolean bWordMatchStart = false;
   private List<JBGKanjiItem> kanjiList = null;
+  int     iCurrentSelectedList = 1;
+
 
   JList<String> kanjiListCtl;
   JList<String> hiraListCtl;
   JList<String> hvListCtl;
   JList<String> vnListCtl;
 
+  JLabel lblSneakpeek;
   JLabel lblSelKanji;
   JLabel lblSelHiragana;
   JLabel lblSelHV;
   JLabel lblSelViet;
   JLabel lblJCoinAmount;
 
+  JButton btnLoadNormalKanji;
+  JButton btnLoadNewKanji;
+
+  private static class ListKeyAction extends AbstractAction {
+    JBGWordMatchPanel masterModel = null;
+      public ListKeyAction(String name, JBGWordMatchPanel model) {//, BoundedRangeModel model, int scrollableIncrement) {
+          super(name);
+          System.out.println("List Key Action constructing ...");
+          this.masterModel = model;
+          //this.vScrollBarModel = model;
+          //this.scrollableIncrement = scrollableIncrement;
+      }
+
+      @Override
+      public void actionPerformed(ActionEvent ae) {
+          String name = getValue(AbstractAction.NAME).toString();
+          //int value = vScrollBarModel.getValue();
+          if (name.equals(UP)) {
+            this.masterModel.processUpKeyInList();
+          } else if (name.equals(DOWN)) {
+            this.masterModel.processDownKeyInList();
+          } else if (name.equals(NO_1)) {
+            this.masterModel.chooseKanjiList();
+          } else if (name.equals(NO_2)) {
+            this.masterModel.chooseHiraganaList();
+          } else if (name.equals(NO_3)) {
+            this.masterModel.chooseHanVietList();
+          } else if (name.equals(NO_4)) {
+            this.masterModel.chooseMeaningList();
+          } else if (name.equals(START_KEY)) {
+            this.masterModel.doStartGame();
+          } else if (name.equals(LOAD_NORMAL_KEY)) {
+            this.masterModel.doLoadNormalKanji();
+          } else if (name.equals(LOAD_NEW_KEY)) {
+            this.masterModel.doLoadNewKanji();
+          }
+     }
+  }
+
   public JBGWordMatchPanel(JBGTerritoryManagerPanel p) {
-    this.kanjiList = p.getNewKanjiList();
     this.parent = p;
+    loadNormalKanji();
+  }
+
+  public void loadNormalKanji() {
+    this.kanjiList = parent.getNewKanjiList(false);
+  }
+
+  public void loadNewKanji() {
+    this.kanjiList = parent.getNewKanjiList(true);    
   }
 
   protected JButton makebutton(String name,
@@ -208,12 +276,29 @@ public class JBGWordMatchPanel {
     lbl.setMaximumSize(new Dimension(width, height));
   }
 
-  protected JLabel makeLabel(String name, JPanel panel, GridBagLayout gridbag, GridBagConstraints c) {
+  protected JLabel makeLabel(String name, JPanel panel, GridBagLayout gridbag, GridBagConstraints c, final boolean doubleWidth) {
      JLabel lbl = new JLabel(name);
      gridbag.setConstraints(lbl, c);
-     setLabelSize(lbl, 200, 20);
+     setLabelSize(lbl, 200, doubleWidth?40:20);
      panel.add(lbl);
      return lbl;
+  }
+
+  private String getContentOfKanjiWord(final String kanji) {
+    for (JBGKanjiItem item: this.kanjiList) {
+      if (kanji.equals(item.getKanji())) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(item.getKanji());
+        sb.append("-");
+        sb.append(item.getHiragana());
+        sb.append("-");
+        sb.append(item.getHv());
+        sb.append("-");
+        sb.append(item.getMeaning());
+        return sb.toString();
+      }
+    }
+    return "Not found";
   }
 
   private String[] isSelectedWordMatched(final String kanji, final String hira, final String hv, final String meaning) {
@@ -258,12 +343,109 @@ public class JBGWordMatchPanel {
     vnListCtl.setSelectedIndex(-1);
   }
 
+  public void chooseKanjiList() {
+    iCurrentSelectedList = 1;
+    kanjiListCtl.setSelectedIndex(0);
+    kanjiListCtl.grabFocus();
+  }
+
+  public void chooseHiraganaList() {
+    iCurrentSelectedList = 2;
+    hiraListCtl.setSelectedIndex(0);
+    hiraListCtl.grabFocus();
+  }
+
+  public void chooseHanVietList() {
+    iCurrentSelectedList = 3;
+    hvListCtl.setSelectedIndex(0);
+    hvListCtl.grabFocus();
+  }
+
+  public void chooseMeaningList() {
+    iCurrentSelectedList = 4;
+    vnListCtl.setSelectedIndex(0);
+    vnListCtl.grabFocus();
+  }
+
+  public void processUpKeyInList() {
+    int iListIdx = -1;
+    switch (iCurrentSelectedList) {
+      case 1:
+        iListIdx = kanjiListCtl.getSelectedIndex();
+        if (iListIdx + 1 < kanjiListCtl.getModel().getSize()) {
+          iListIdx += 1;
+          kanjiListCtl.setSelectedIndex(iListIdx);
+        }
+        break;
+      case 2:
+        iListIdx = hiraListCtl.getSelectedIndex();
+        if (iListIdx + 1 < hiraListCtl.getModel().getSize()) {
+          iListIdx += 1;
+          hiraListCtl.setSelectedIndex(iListIdx);
+        }
+        break;
+      case 3:
+        iListIdx = hvListCtl.getSelectedIndex();
+        if (iListIdx + 1 < hvListCtl.getModel().getSize()) {
+          iListIdx += 1;
+          hvListCtl.setSelectedIndex(iListIdx);
+        }
+        break;
+      case 4:
+        iListIdx = vnListCtl.getSelectedIndex();
+        if (iListIdx + 1 < vnListCtl.getModel().getSize()) {
+          iListIdx += 1;
+          vnListCtl.setSelectedIndex(iListIdx);
+        }
+        break;
+    }
+  }
+
+  public void processDownKeyInList() {
+    int iListIdx = -1;
+    switch (iCurrentSelectedList) {
+      case 1:
+        iListIdx = kanjiListCtl.getSelectedIndex();
+        if (iListIdx > 0) {
+          iListIdx -= 1;
+          kanjiListCtl.setSelectedIndex(iListIdx);
+        }
+        break;
+      case 2:
+        iListIdx = hiraListCtl.getSelectedIndex();
+        if (iListIdx > 0) {
+          iListIdx -= 1;
+          hiraListCtl.setSelectedIndex(iListIdx);
+        }
+        break;
+      case 3:
+        iListIdx = hvListCtl.getSelectedIndex();
+        if (iListIdx > 0) {
+          iListIdx -= 1;
+          hvListCtl.setSelectedIndex(iListIdx);
+        }
+        break;
+      case 4:
+        iListIdx = vnListCtl.getSelectedIndex();
+        if (iListIdx > 0) {
+          iListIdx -= 1;
+          vnListCtl.setSelectedIndex(iListIdx);
+        }
+        break;
+    }
+  }
+
   private void removeItemFromList(JList lst, final int idx) {
     DefaultListModel model = (DefaultListModel) lst.getModel();
     model.remove(idx);
   }
 
-  private boolean validateKanjiSelection() {
+  public void showSneakpeek(final String kanjiWord) {
+    final String sVal = getContentOfKanjiWord(kanjiWord); 
+    lblSneakpeek.setText(sVal);
+  }
+
+  public boolean validateKanjiSelection() {
     boolean allFieldSet = true;
 
     final int iKanjiSel = kanjiListCtl.getSelectedIndex();
@@ -300,6 +482,17 @@ public class JBGWordMatchPanel {
 
         final String[] matchRes = isSelectedWordMatched(kanji, hira, hv, viet);
         if (matchRes[1].equals(MATCH_WORD_OK) && matchRes[0].length() > 0) {
+
+          StringBuilder sb = new StringBuilder();
+          sb.append(kanji);
+          sb.append("-");
+          sb.append(hira);
+          sb.append("-");
+          sb.append(hv);
+          sb.append("-");
+          sb.append(viet);
+          lblSneakpeek.setText(sb.toString());
+
           //remove the correct matched word set from lists
           removeItemFromList(kanjiListCtl, iKanjiSel);
           removeItemFromList(hiraListCtl, iHiraSel);
@@ -329,21 +522,32 @@ public class JBGWordMatchPanel {
 
     if (!this.bWordMatchStart) return false;
 
+    lblSneakpeek.setText(sWordMatchEmptyValue);
+
     switch (sColName) {
-      case KANJI_LIST_NAME:
+      case NAME_LIST_KANJI:
         lblSelKanji.setText(value);
+        chooseHiraganaList();
         break;
-      case HIRA_LIST_NAME:
+      case NAME_LIST_HIRAGANA:
         lblSelHiragana.setText(value);
+        chooseHanVietList();
         break;
-      case HV_LIST_NAME:
+      case NAME_LIST_HANVIET:
         lblSelHV.setText(value);
+        chooseMeaningList();
         break;
-      case MEANING_LIST_NAME:
-        lblSelViet.setText(value);
+      case NAME_LIST_MEANING:
+        if (lblSelViet.getText().equals(value)) {
+          //double enter on same item on this list, equals to SHIFT+ENTER
+          validateKanjiSelection();
+        }
+        else {
+          lblSelViet.setText(value);
+        }
         break;
     }
-    return validateKanjiSelection();
+    return true;//validateKanjiSelection();
   }
 
   private DefaultListModel<String> shuffleListModel(DefaultListModel<String> mdl) {
@@ -363,25 +567,38 @@ public class JBGWordMatchPanel {
     shuffleListModel( (DefaultListModel<String>) this.vnListCtl.getModel() );
   }
 
-  protected JList<String> makeScrollList(final String sColName, JPanel panel, GridBagLayout gridbag, GridBagConstraints c) {
-    DefaultListModel<String> listModel = new DefaultListModel<String>();
-
+  private void reloadList(final JList<String> lstObj, final String sColName) {
+    DefaultListModel<String> listModel = (DefaultListModel<String>) lstObj.getModel();
+    if (listModel.getSize() > 0)
+      listModel.removeAllElements();
+  
     for (JBGKanjiItem kanjiItem: this.kanjiList) {
       switch (sColName) {
-      case KANJI_LIST_NAME:
+      case NAME_LIST_KANJI:
         listModel.addElement(kanjiItem.getKanji());
         break;
-      case HIRA_LIST_NAME:
+      case NAME_LIST_HIRAGANA:
         listModel.addElement(kanjiItem.getHiragana());
         break;
-      case HV_LIST_NAME:
+      case NAME_LIST_HANVIET:
         listModel.addElement(kanjiItem.getHv());
         break;
-      case MEANING_LIST_NAME:
+      case NAME_LIST_MEANING:
         listModel.addElement(kanjiItem.getMeaning());
         break;
       }
     }
+  }
+
+  private void reloadAllLists() {
+    reloadList(kanjiListCtl, NAME_LIST_KANJI);
+    reloadList(hiraListCtl, NAME_LIST_HIRAGANA);
+    reloadList(hvListCtl, NAME_LIST_HANVIET);
+    reloadList(vnListCtl, NAME_LIST_MEANING);
+  }
+
+  protected JList<String> makeScrollList(final String sColName, JPanel panel, GridBagLayout gridbag, GridBagConstraints c, final int width) {
+    DefaultListModel<String> listModel = new DefaultListModel<String>();
 
     //not shuffle here, let's user have a time to learn before shuffle (start Button)
     //listModel = shuffleListModel(listModel);
@@ -389,9 +606,42 @@ public class JBGWordMatchPanel {
     final JList<String> lstObj = new JList<>(listModel); //data has type Object[]
     lstObj.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     lstObj.setSelectedIndex(-1);
-    lstObj.setFont(new Font("Arial", Font.PLAIN, 17));
-    lstObj.setVisibleRowCount(15);
+    lstObj.setFont(new Font("Arial", Font.PLAIN, 15));
+    lstObj.setVisibleRowCount(20);
     lstObj.setName(sColName);
+
+    lstObj.addKeyListener(new KeyAdapter() {
+         @Override
+         public void keyReleased(KeyEvent ke) {
+            JList list = (JList) ke.getSource();
+            final String lstName = list.getName();
+            JBGWordMatchPanel parent = JBGWordMatchPanel.this;
+            final boolean bIsShift = ( (ke.getModifiers() & InputEvent.SHIFT_MASK) != 0 )?true:false;
+            if(ke.getKeyCode() == KeyEvent.VK_ENTER && bIsShift) {
+              parent.validateKanjiSelection();
+            }
+            else if (ke.getKeyCode() == KeyEvent.VK_ENTER) {
+              //System.out.println("SPACE key on list " + list.getName());
+              Object selObj = list.getSelectedValue();
+              if (selObj != null) {
+                final String selVal = selObj.toString();
+                //System.out.println(lstName + " " + selVal);
+                parent.updateSelectedKanjis(lstName, selVal);
+              }
+            }
+            else if (ke.getKeyCode() == KeyEvent.VK_SLASH && bIsShift) {
+              //question
+              if (lstName.equals(NAME_LIST_KANJI)) {
+                Object selObj = list.getSelectedValue();
+                if (selObj != null) {
+                    final String selVal = selObj.toString();
+                    parent.showSneakpeek(selVal);
+                  }
+              }
+            }
+
+         }
+      });
 
     ListSelectionListener listSelFnc = new ListSelectionListener() {
       @Override
@@ -412,6 +662,9 @@ public class JBGWordMatchPanel {
       }
     };
     lstObj.addListSelectionListener(listSelFnc);
+    //setPrototypeCellValue will prevent the list resize on values
+    final String spacingWord = "AA";
+    lstObj.setPrototypeCellValue(spacingWord.repeat(width));
 
     JScrollPane listScroller = new JScrollPane(lstObj);
 
@@ -419,6 +672,31 @@ public class JBGWordMatchPanel {
     panel.add(listScroller);
 
     return lstObj;
+  }
+
+  private void doStartGame() {
+    shuffleAllListModels();
+    btnLoadNormalKanji.setEnabled(false);
+    btnLoadNewKanji.setEnabled(false);
+    clearWordListSelection();
+    bWordMatchStart = true;
+    chooseKanjiList();
+  }
+
+  private void doLoadNormalKanji() {
+    if (!bWordMatchStart) {
+      loadNormalKanji();
+      reloadAllLists();
+      clearWordListSelection();
+    }
+  }
+
+  private void doLoadNewKanji() {
+    if (!bWordMatchStart) {
+      loadNewKanji();
+      reloadAllLists();
+      clearWordListSelection();
+    }
   }
 
   //JBG
@@ -430,9 +708,9 @@ public class JBGWordMatchPanel {
     GridBagLayout gridbag = new GridBagLayout();
     GridBagConstraints c = new GridBagConstraints();
 
-    panel.setBorder(BorderFactory.createEmptyBorder(2, 1, 2, 1));
+    panel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
     //panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-    panel.setFont(new Font("Arial", Font.PLAIN, 14));
+    panel.setFont(new Font("Arial", Font.PLAIN, 15));
     panel.setLayout(gridbag);
 
     c.fill = GridBagConstraints.BOTH;
@@ -442,67 +720,93 @@ public class JBGWordMatchPanel {
     c.gridx = 0; //col
     c.gridy = 0; //row
     c.gridwidth = 2; //column span
-    makeLabel("Kanji matching task", panel, gridbag, c);
+    makeLabel("Kanji matching task", panel, gridbag, c, false);
 
     c.weightx = 1.0; //spacing
     c.gridx = 2; //col
     c.gridy = 0; //row
     c.gridwidth = 1; //column span
-    makeLabel("JCoin:", panel, gridbag, c);
+    makeLabel("JCoin:", panel, gridbag, c, false);
 
     c.weightx = 1.0; //spacing
     c.gridx = 3; //col
     c.gridy = 0; //row
     c.gridwidth = 1; //column span
-    this.lblJCoinAmount = makeLabel(String.valueOf(parent.getJCoin()), panel, gridbag, c);
+    this.lblJCoinAmount = makeLabel(String.valueOf(parent.getJCoin()), panel, gridbag, c, true);
+    this.lblJCoinAmount.setFont(new Font("Arial", Font.BOLD, 17));
+    this.lblJCoinAmount.setForeground(Color.BLUE);
 
     c.weightx = 1.0;
     c.gridx = 0;
     c.gridy = 1;
     c.gridwidth = 4;
-    makeLabel("Selected:", panel, gridbag, c);
+    this.lblSneakpeek = makeLabel(sWordMatchEmptyValue, panel, gridbag, c, true);
+    this.lblSneakpeek.setFont(new Font("Arial", Font.PLAIN, 17));
 
+    c.weightx = 1.0;
     c.gridx = 0;
     c.gridy = 2;
-    c.gridwidth = 1;
-    this.lblSelKanji = makeLabel(sWordMatchEmptyValue, panel, gridbag, c);
-    c.gridx = 1;
-    this.lblSelHiragana = makeLabel(sWordMatchEmptyValue, panel, gridbag, c);
-    c.gridx = 2;
-    this.lblSelHV = makeLabel(sWordMatchEmptyValue, panel, gridbag, c);
-    c.gridx = 3;
-    this.lblSelViet = makeLabel(sWordMatchEmptyValue, panel, gridbag, c);
+    c.gridwidth = 4;
+    makeLabel("Selected parts:", panel, gridbag, c, false);
 
-    c.weightx = 1.0;
     c.gridx = 0;
     c.gridy = 3;
     c.gridwidth = 1;
-    this.kanjiListCtl = makeScrollList(KANJI_LIST_NAME, panel, gridbag, c);
+    this.lblSelKanji = makeLabel(sWordMatchEmptyValue, panel, gridbag, c, true);
+    this.lblSelKanji.setFont(new Font("Arial", Font.PLAIN, 20));
+ 
+    c.gridx = 1;
+    this.lblSelHiragana = makeLabel(sWordMatchEmptyValue, panel, gridbag, c, true);
+    this.lblSelHiragana.setFont(new Font("Arial", Font.PLAIN, 17));
+    c.gridx = 2;
+    this.lblSelHV = makeLabel(sWordMatchEmptyValue, panel, gridbag, c, true);
+    this.lblSelHV.setFont(new Font("Arial", Font.PLAIN, 17));
+    c.gridx = 3;
+    this.lblSelViet = makeLabel(sWordMatchEmptyValue, panel, gridbag, c, true);
+    this.lblSelViet.setFont(new Font("Arial", Font.PLAIN, 17));
+
+    c.weightx = 1.0;
+    c.gridx = 0;
+    c.gridy = 4;
+    c.gridwidth = 1;
+    this.kanjiListCtl = makeScrollList(NAME_LIST_KANJI, panel, gridbag, c, 1);
 
     c.weightx = 1.0;
     c.gridx = 1;
-    c.gridy = 3;
+    c.gridy = 4;
     c.gridwidth = 1;
-    this.hiraListCtl = makeScrollList(HIRA_LIST_NAME, panel, gridbag, c);
+    this.hiraListCtl = makeScrollList(NAME_LIST_HIRAGANA, panel, gridbag, c, 6);
 
     c.weightx = 1.0;
     c.gridx = 2;
-    c.gridy = 3;
+    c.gridy = 4;
     c.gridwidth = 1;
-    this.hvListCtl = makeScrollList(HV_LIST_NAME, panel, gridbag, c);
+    this.hvListCtl = makeScrollList(NAME_LIST_HANVIET, panel, gridbag, c, 15);
 
     c.weightx = 1.0;
     c.gridx = 3;
-    c.gridy = 3;
+    c.gridy = 4;
     c.gridwidth = 1;
-    this.vnListCtl = makeScrollList(MEANING_LIST_NAME, panel, gridbag, c);
+    this.vnListCtl = makeScrollList(NAME_LIST_MEANING, panel, gridbag, c, 15);
+
+    ActionListener loadNormalKanjiListenerFnc = new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        doLoadNormalKanji();
+      }
+    };
+
+    ActionListener loadNewKanjiListenerFnc = new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        doLoadNewKanji();
+      }
+    };
 
     ActionListener startListenerFnc = new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        shuffleAllListModels();
-        clearWordListSelection();
-        bWordMatchStart = true;
+        doStartGame();
       }
     };
 
@@ -513,19 +817,48 @@ public class JBGWordMatchPanel {
       }
     };
 
-    c.gridy = 4;
+    c.gridy = 5;
     c.gridx = 0;
-    c.gridwidth = 2;
-    makeButtonWithAction("Start", panel, gridbag, c, startListenerFnc);
+    c.gridwidth = 1;
+    btnLoadNormalKanji = makeButtonWithAction("(L)正常漢字", panel, gridbag, c, loadNormalKanjiListenerFnc);
+    c.gridx = 1;
+    c.gridwidth = 1;
+    btnLoadNewKanji = makeButtonWithAction("(N)新漢字", panel, gridbag, c, loadNewKanjiListenerFnc);
+    c.gridx = 2;
+    c.gridwidth = 1;
+    makeButtonWithAction("(S)開始", panel, gridbag, c, startListenerFnc);
     c.gridx = 3;
-    c.gridwidth = 2;
-    makeButtonWithAction("Reset", panel, gridbag, c, resetListenerFnc);
-
+    c.gridwidth = 1;
+    makeButtonWithAction("リセット", panel, gridbag, c, resetListenerFnc);
 
     final JScrollPane unitsPane = new JScrollPane();
     unitsPane.setBorder(BorderFactory.createEmptyBorder());
-    unitsPane.getVerticalScrollBar().setUnitIncrement(20);
+    unitsPane.getVerticalScrollBar().setUnitIncrement(1);
     unitsPane.setViewportView(panel);
+
+    InputMap inMap = unitsPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+    ActionMap actMap = unitsPane.getActionMap();
+
+    inMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_1, 0), NO_1);
+    inMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_2, 0), NO_2);
+    inMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_3, 0), NO_3);
+    inMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_4, 0), NO_4);
+    inMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_S, 0), START_KEY);
+    inMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_L, 0), LOAD_NORMAL_KEY);
+    inMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_N, 0), LOAD_NEW_KEY);
+
+    inMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), UP);
+    inMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), DOWN);
+
+    actMap.put(UP, new ListKeyAction(UP, this));
+    actMap.put(DOWN, new ListKeyAction(DOWN, this));
+    actMap.put(NO_1, new ListKeyAction(NO_1, this));
+    actMap.put(NO_2, new ListKeyAction(NO_2, this));
+    actMap.put(NO_3, new ListKeyAction(NO_3, this));
+    actMap.put(NO_4, new ListKeyAction(NO_4, this));
+    actMap.put(START_KEY, new ListKeyAction(START_KEY, this));
+    actMap.put(LOAD_NORMAL_KEY, new ListKeyAction(LOAD_NORMAL_KEY, this));
+    actMap.put(LOAD_NEW_KEY, new ListKeyAction(LOAD_NEW_KEY, this));
 
     return unitsPane;
   }

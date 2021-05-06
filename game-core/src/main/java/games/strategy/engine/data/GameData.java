@@ -210,8 +210,16 @@ public class GameData implements Serializable {
     int iPos = getHumanPlayerInTurnSequence();
     return parser.parseHTML(this, isLastTurn, iPos, getPrevHumanAIPlayerNames());
   }
+  private String getNewsForPlayer(final boolean isLastTurn, final String playerName) {
+    JBGTurnHistoryParser parser = new JBGTurnHistoryParser();
+    int iPos = getHumanPlayerInTurnSequence();
+    return parser.parseHTMLSinglePlayerTurn(this, isLastTurn, iPos, playerName);
+  }
   public void resetTurnNews() {
     currentTurnNews = "";
+    lastTurnNews = "";
+  }
+  public void resetLastTurnNews() {
     lastTurnNews = "";
   }
   public boolean makeCurrentTurnNews() {
@@ -224,11 +232,20 @@ public class GameData implements Serializable {
     lastTurnNews = getNews(true);
     return true;
   }
+  public boolean makeLastTurnNewsForSinglePlayer(final String playerName) {
+    lastTurnNews = getNewsForPlayer(true, playerName);
+    return true;
+  }
   public String getTurnNews(boolean isHtml) {
     String s_section_break = "---\n";
     if (isHtml)
       s_section_break = "<br/>";
-    if (getHumanPlayerInTurnSequence() == JBGConstants.TURN_SEQ_MIDDLE && lastTurnNews.length() > 0) {
+    int iHumanPlayerIndexInTurnSequence = getHumanPlayerInTurnSequence();
+    //System.out.println(String.format("current human player index: %d", iHumanPlayerIndexInTurnSequence ));
+    if ( ( iHumanPlayerIndexInTurnSequence == JBGConstants.TURN_SEQ_MIDDLE || 
+           iHumanPlayerIndexInTurnSequence == JBGConstants.TURN_SEQ_FIRST ) && 
+        lastTurnNews.length() > 0) 
+    {
       return new StringBuilder(
         lastTurnNews + 
         s_section_break + 

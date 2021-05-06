@@ -77,6 +77,7 @@ public class JBGTerritoryViewCanvasPanel extends JPanel
     @Getter private Rectangle rcEcoIcon = null;
     @Getter private Rectangle rcWorkIcon = null;
     @Getter private Rectangle rcProdIcon = null;
+    @Getter private Rectangle rcNewsIcon = null;
 
     int iEcoLevel = 0;
     int iResLevel = 0;
@@ -126,6 +127,9 @@ public class JBGTerritoryViewCanvasPanel extends JPanel
                 }
                 if (isInRect(e.getX(), e.getY(), panel.getRcProdIcon())) {
                     refMaster.showAlert(panel, "Click production set");
+                }
+                if (isInRect(e.getX(), e.getY(), panel.getRcNewsIcon())) {
+                    refMaster.buildNewspaper(panel);
                 }
             }
         });
@@ -318,6 +322,9 @@ public class JBGTerritoryViewCanvasPanel extends JPanel
         eg.drawString(String.valueOf(this.iEcoLevel), 430, 10);
         rcProdIcon = drawIconInTile(eg, 2, 460, 0);
         eg.drawString(String.valueOf(this.iProdLevel), 490, 10);
+
+        rcNewsIcon = drawIconInTile(eg, 4, 520, 0);
+
     }
 
     private boolean isInRect(int x, int y, Rectangle r) {
@@ -349,6 +356,11 @@ public class JBGTerritoryViewCanvasPanel extends JPanel
         case 3: //work
             x_offset = 0;
             y_offset = 10;
+            break;
+        case 4: //news
+            x_offset = 10;
+            y_offset = 10;
+            break;
         }
         drawTilePart(g, t, x, y, x_offset, y_offset, icon_width, icon_height, icon_show_width, icon_show_height);
 

@@ -62,7 +62,7 @@ public final class JBGKanjiUnits {
       lst.sort((r1, r2) -> r2.getCorrectCount() - r1.getCorrectCount());
   }
 
-  //Random.nextBoolean is not work
+  //Random.nextBoolean is not working
   private boolean randomBoolean(){
     return Math.random() < 0.5;
   }
@@ -71,7 +71,8 @@ public final class JBGKanjiUnits {
     return ThreadLocalRandom.current().nextInt(min, max + 1);
   }
 
-  private void buildSubSetRecords() {
+  //JBGConstants.KANJI_MIN_TEST_CORRECT
+  private void buildSubSetRecords(final int iMinTestCorrect) {
     List<JBGKanjiItem> lstKnownItems = new ArrayList<>();
     List<JBGKanjiItem> lstNewItems = new ArrayList<>();
     int iKnownItemsCount = randomBetween(5, 10);
@@ -81,7 +82,7 @@ public final class JBGKanjiUnits {
     sortKanjisByCorrectCount(this.originRecords, true);
     int iCount = 0;
     for (JBGKanjiItem item: this.originRecords) {
-      if (item.getCorrectCount() < JBGConstants.KANJI_MIN_TEST_CORRECT) {
+      if (item.getCorrectCount() < iMinTestCorrect) {
         lstNewItems.add(item);
         iCount++;
       }
@@ -125,7 +126,13 @@ public final class JBGKanjiUnits {
 
   public List<JBGKanjiItem> getData() {
     //System.out.println("total rows: " + String.valueOf(originRecords.size()));
-    buildSubSetRecords();
+    buildSubSetRecords(JBGConstants.KANJI_MIN_TEST_CORRECT);
+    return this.subsetRecords;
+  }
+
+  public List<JBGKanjiItem> getNewData() {
+    //System.out.println("total rows: " + String.valueOf(originRecords.size()));
+    buildSubSetRecords(5); //lay cac tu dung tu 5 lan tro xuong cho toi 0 (chua hoc)
     return this.subsetRecords;
   }
 

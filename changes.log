@@ -1,0 +1,16 @@
+From 2021/04/15:
+
+1. bug: validate word ok, but remove selected item, so if we choose an item and move list selected to another, that item will be removed if all selected words are matched -> Should remove selected words not list selected items
+[Fixed] 2. bug: can't build news if human are the first player in list
+[Done] 3. improve: build list of word by order, but each time, should include one or two random words from next steps (always same items each time is boring)
+[Done] 4. improve: options to load newer word items (normal load is word with correct < 10, new load < 3)
+[Done] 5. improve: Select word move to next list, double ENTER on last list with same selected word equals to SHIFT+ENTER
+[Done] 6. improve: bigger and better font size for WordMatch game
+[Done] 7. improve: remove default buttons(OK, cancel ... ) from our game dialog and territory dialog
+[Done] 8. improve: add newspaper icon to territory canvas, remove Newspaper button from Territory dialog
+[Done] 9. improve: add key shortcut for the WordMatch panel
+[Done] 10. improve: change kanji item logic, so if a word is reached min correct limit, but got wrong answer after that, the correct count will be reduced, thus can bring the word to test more frequently.
+11. improve: show statistics on WordMatch: total learned words / total words, avg tests / learned word, needed tests 
+12. bug: after WordMatch game, back to territory canvas and build dialog, new JCoin has not updated, must close Territory and reopen
+13. improve: after a while, we'll have a lot of jCoin each turn, need a mechanism to spend these jCoin, for example: maintenance cost of buildings, if not enough, buildings may disappear ... so we have to earn jCoin on every turn
+

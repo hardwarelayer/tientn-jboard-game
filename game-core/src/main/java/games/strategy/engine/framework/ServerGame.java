@@ -429,13 +429,28 @@ public class ServerGame extends AbstractGame {
       GamePlayer gp = currentStep.getPlayerId();
       //System.out.println("Complete turn for " + gp.getName());
       if (gameData.isLastPlayer(gp.getName())) {
-        //System.out.println("Last player!");
-        try {
-          gameData.acquireWriteLock();
-          gameData.makeLastTurnNews();
+        //System.out.println("TurnCycle: Last player is reached!");
+        if (!gameData.isHumanPlayer(gp.getName()))
+        {
+            //if the human player is the last player
+            //we need to makeLastTurnNews for only this player, 
+            //  the other players' events are in currentTurnNews which was shown at StartTurn of this player
+            try {
+              gameData.acquireWriteLock();
+              gameData.makeLastTurnNews();
+            }
+            finally {
+              gameData.releaseWriteLock();
+            }
         }
-        finally {
-          gameData.releaseWriteLock();
+        else {
+            try {
+              gameData.acquireWriteLock();
+              gameData.makeLastTurnNewsForSinglePlayer(gp.getName());
+            }
+            finally {
+              gameData.releaseWriteLock();
+            }
         }
       }
       if (gameData.isHumanPlayer(gp.getName())) {

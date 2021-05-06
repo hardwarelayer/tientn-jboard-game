@@ -49,6 +49,12 @@ public class JBGKanjiItem implements Serializable {
     if (isOK) {
       this.correctCount++;
     }
+    else {
+      //neu 1 tu da OK nhung sau do nhac lai ma bi sai thi correctCount se giam xuong
+      //no se duoc dua ra test thuong xuyen hon cac tu OK khac
+      if (this.correctCount > 0)
+        this.correctCount--;
+    }
   }
 
   @Override

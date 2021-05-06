@@ -1,0 +1,14 @@
+Check triplea's game-headed changes:
+download the version from here: https://github.com/triplea-game/triplea/releases/tag/2.5.22294
+    File "source code" (.zip)
+untar
+
+compare what is different in game-headed:
+    diff -r ./<latest-triplea>/game-headed ./<tientn-jboard-game>/game-headed 
+    diff -r ./game-core ../tripleA/2.5.22294/triplea-2.5.22294/game-core
+
+rebase:
+$ git checkout experiment
+$ git rebase master
+
+P4Merge

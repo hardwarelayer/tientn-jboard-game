@@ -48,6 +48,7 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.JScrollPane;
 import javax.swing.BorderFactory;
+import javax.swing.border.EmptyBorder;
 import javax.swing.SwingUtilities;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -154,6 +155,7 @@ public class JBGTurnLogPaper {
       }
     };
     content.setLayout(new BorderLayout());
+    content.setBorder(new EmptyBorder(0,0,0,0));
     //content.setLayout(new GridBagLayout());
     GridBagConstraints gbc = new GridBagConstraints();
     gbc.gridx = 0;

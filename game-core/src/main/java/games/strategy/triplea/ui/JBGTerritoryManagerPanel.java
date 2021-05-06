@@ -110,6 +110,7 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.JScrollPane;
 import javax.swing.BorderFactory;
+import javax.swing.border.EmptyBorder;
 import javax.swing.SwingUtilities;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -122,6 +123,7 @@ import javax.swing.JButton;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.tree.*;
+import javax.swing.UIManager;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -185,14 +187,17 @@ public class JBGTerritoryManagerPanel  extends ActionPanel {
     super(data, map);
     this.uiContext = uiContext;
 
-    getNewKanjiList();
+    //getNewKanjiList();
 
     data.showSteps();
   }
 
-  public List<JBGKanjiItem> getNewKanjiList() {
+  public List<JBGKanjiItem> getNewKanjiList(final boolean bNewKanjis) {
     GameData tData = getData();
-    this.kanjiList = JBGKanjiUnits.getInstance(tData).getData();
+    if (!bNewKanjis)
+      this.kanjiList = JBGKanjiUnits.getInstance(tData).getData();
+    else
+      this.kanjiList = JBGKanjiUnits.getInstance(tData).getNewData();
     return this.kanjiList;
   }
 
@@ -321,10 +326,10 @@ public class JBGTerritoryManagerPanel  extends ActionPanel {
             parent,
             p,
             "WordMatch for JCoin",
-            JOptionPane.DEFAULT_OPTION,
+            JOptionPane.CANCEL_OPTION,
             JOptionPane.PLAIN_MESSAGE,
             null,
-            null,
+            new Object[]{"Close WordMatch"}, //disable default focus
             null);
 
     if (territoryCanvasPanel != null) {
@@ -432,7 +437,7 @@ public class JBGTerritoryManagerPanel  extends ActionPanel {
   }
   */
 
-  private void buildNewspaper(final Component parent) {
+  public void buildNewspaper(final Component parent) {
     GameData gameData = this.getData();
     try {
       gameData.acquireReadLock();
@@ -478,9 +483,8 @@ public class JBGTerritoryManagerPanel  extends ActionPanel {
       final JPanel editPanel = valueModifyInTerritoryPanel(
         jModify_EcoLevel, jModify_ResLevel, jModify_ProdLevel, jModify_ResBuildingList, jModify_EcoBuildingList);
 
-      unitsPane.setBorder(
-        BorderFactory.createEmptyBorder());
-      //BorderFactory.createMatteBorder(1, 1, 1, 1, Color.white)
+      UIManager.put("OptionPane.border", new EmptyBorder(1, 1, 1, 1) );
+
       unitsPane.getVerticalScrollBar().setUnitIncrement(20);
       final JPanel terPanel = makeInterractiveTerritoryPanel(t, editPanel, uiContext);
       unitsPane.setViewportView(terPanel);
@@ -493,7 +497,7 @@ public class JBGTerritoryManagerPanel  extends ActionPanel {
               JOptionPane.DEFAULT_OPTION,
               JOptionPane.PLAIN_MESSAGE,
               null,
-              null,
+              new Object[]{}, //no button at all!
               null);
       if (option != JOptionPane.OK_OPTION) {
         return;
@@ -641,60 +645,12 @@ public class JBGTerritoryManagerPanel  extends ActionPanel {
     getTerritoryBasicInfo(territory);
 
     final JPanel panel = new JPanel();
-    panel.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+    panel.setBorder(new EmptyBorder(0, 0, 0, 0));
     panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
     final List<UnitCategory> units =
         UnitSeparator.getSortedUnitCategories(territory, uiContext.getMapData());
     @Nullable GamePlayer currentPlayer = null;
-
-    //panel.setLayout(new GridBagLayout());
-    panel.add(
-        new JLabel("Territory skyline"),
-        new GridBagConstraints(
-            0,
-            0,
-            1,
-            1,
-            1,
-            1,
-            GridBagConstraints.EAST,
-            GridBagConstraints.HORIZONTAL,
-            new Insets(2, 2, 2, 0),
-            0,
-            0));
-
-    ActionListener kjTestListenerFnc = new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        final int testOption = showKanjiMatchGameDialog(panel);
-      }
-    };
-    GridBagConstraints c = new GridBagConstraints();
-    c.fill = GridBagConstraints.BOTH;
-    c.fill = GridBagConstraints.HORIZONTAL; //natural height, maximum width
-    c.weightx = 1.0; //spacing
-    c.gridx = 0; //col
-    c.gridy = 0; //row
-    c.gridwidth = 2; //column span
-
-    JButton button = new JButton("Kanji Test");
-    button.addActionListener(kjTestListenerFnc);
-    panel.add(button, c);
-    ActionListener kjNewsListenerFnc = new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        buildNewspaper(panel);
-      }
-    };
-    JButton btnNews = new JButton("Newspaper");
-    btnNews.addActionListener(kjNewsListenerFnc);
-
-    c.weightx = 1.0; //spacing
-    c.gridx = 2; //col
-    c.gridy = 0; //row
-    c.gridwidth = 1; //column span
-    panel.add(btnNews, c);
 
     //tabbed section
     final JTabbedPane tabs = new JTabbedPane();
@@ -702,18 +658,16 @@ public class JBGTerritoryManagerPanel  extends ActionPanel {
         tabs,
         new GridBagConstraints(
             0,
-            1,
-            250,
-            250,
-            250,
-            250,
+            0,
+            0,0,0,0, //250, 250, 250, 250
             GridBagConstraints.WEST,
             GridBagConstraints.BOTH,
-            new Insets(2, 2, 2, 2),
+            new Insets(0, 0, 0, 0),
             0,
             0));
 
     JPanel territoryViewPanel = new JPanel();
+    territoryViewPanel.setBorder(new EmptyBorder(0,0,0,0));
 /*
     final JLabel logoLabel =
       new JLabel(
@@ -796,6 +750,8 @@ public class JBGTerritoryManagerPanel  extends ActionPanel {
     }
 
     territoryCanvasPanel.setUnits(units);
+
+    //
     
     int iBunkerTtl = countBunkerInUnitList(territory, currentPlayer);
     territoryCanvasPanel.setBunkerTotal(iBunkerTtl);
@@ -804,7 +760,6 @@ public class JBGTerritoryManagerPanel  extends ActionPanel {
     tabs.addTab("Info", infoSection);
     tabs.addTab("Build", cusObject);
     tabs.addTab("Units", unitSection);
-
 
     return panel;
   }
