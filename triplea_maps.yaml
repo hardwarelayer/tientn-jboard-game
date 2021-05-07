@@ -42,9 +42,11 @@
 - mapName: Big World
   mapCategory: BEST
   url: https://github.com/triplea-maps/big_world/archive/master.zip
-  version: 3
+  version: 4
   description: |
-    <br>WWII style map, larger version of revised.
+    <br>WWII style map, larger version of Revised.
+    <br>
+    <br>Includes a V3 Rules variant.
 - mapName: Middle Earth
   mapCategory: BEST
   url: https://github.com/triplea-maps/middle_earth/archive/master.zip
@@ -422,9 +424,9 @@
     <br>This map is the continuation of the (deprecated) Large Middle Earth map. Currently in balance testing period.
     <br>Version 2.0.7, last update 2018.10.08. for engine 1.9.0.0.11000+
 - mapName: WW2 Path to Victory
-  mapCategory: GOOD
+  mapCategory: BEST
   url: https://github.com/triplea-maps/ww2_path_to_victory/archive/master.zip
-  version: 4
+  version: 5
   img: https://raw.githubusercontent.com/triplea-maps/ww2_path_to_victory/master/map/smallMap.png
   description: |
     <br>A new World War II map, inspired by Global 1940, from the creators of G40 Balanced Mod.
@@ -1240,7 +1242,7 @@
 - mapName: World War2010
   mapCategory: EXPERIMENTAL
   url: https://github.com/triplea-maps/world_war2010/archive/master.zip
-  version: 2
+  version: 3
   img: https://raw.githubusercontent.com/triplea-maps/world_war2010/master/description/TripleA_world_war_2010_mini.png
   description: |
     <br>The year is 2010.
@@ -2051,7 +2053,7 @@
 - mapName: Global 40 House Rules
   mapCategory: EXPERIMENTAL
   url: https://github.com/triplea-maps/global_40_house_rules/archive/master.zip
-  version: 12
+  version: 13
   img: https://raw.githubusercontent.com/triplea-maps/global_40_house_rules/master/description/TripleA_ww2_global_1940_mini.png
   description:
     <br>
@@ -2133,7 +2135,7 @@
 - mapName: Warcraft War Heroes
   mapCategory: EXPERIMENTAL
   url: https://github.com/triplea-maps/warcraft_war_heroes/archive/master.zip
-  version: 4
+  version: 5
   img: https://raw.githubusercontent.com/triplea-maps/warcraft_war_heroes/master/description/MapThumbnail.png
   description: |
     <br><b><em>by Frostion</em></b>
@@ -2179,3 +2181,10 @@
    <br>Otherwise, unit types, regions, etc. have all been preserved so that players can take advantage of their previous experience with the World War II v3 map.
    <br>Initial playtesting with human opponents suggests that the map is balanced without a bid -- but the TripleA community will be the ultimate judge.
    <br>Try it and see what you think!
+- mapName: Aggression 1941
+  mapCategory: EXPERIMENTAL
+  url: https://github.com/triplea-maps/aggression_1941/archive/master.zip
+  version: 1
+  img: https://raw.githubusercontent.com/triplea-maps/aggression_1941/main/aggression_1941%20-%20Kopya.png
+  description: |
+   <br>A WWII scenario loosely based on 1941, inspired from AA50 Anniversary and Big World

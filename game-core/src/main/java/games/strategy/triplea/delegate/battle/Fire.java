@@ -13,6 +13,7 @@ import games.strategy.triplea.delegate.IExecutable;
 import games.strategy.triplea.delegate.Matches;
 import games.strategy.triplea.delegate.battle.casualty.CasualtySelector;
 import games.strategy.triplea.delegate.data.CasualtyDetails;
+import games.strategy.triplea.delegate.power.calculator.CombatValue;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -150,19 +151,24 @@ public class Fire implements IExecutable {
     if (headless) {
       annotation = "";
     } else {
-      annotation = DiceRoll.getAnnotation(units, firingPlayer, battle);
+      annotation =
+          DiceRoll.getAnnotation(
+              units, firingPlayer, battle.getTerritory(), battle.getBattleRound());
     }
+
     dice =
         DiceRoll.rollDice(
             units,
-            defending,
             firingPlayer,
             bridge,
-            battle,
             annotation,
-            territoryEffects,
-            allEnemyUnitsAliveOrWaitingToDie,
-            allFriendlyUnitsAliveOrWaitingToDie);
+            CombatValue.buildMainCombatValue(
+                allEnemyUnitsAliveOrWaitingToDie,
+                allFriendlyUnitsAliveOrWaitingToDie,
+                defending,
+                battle.getGameData(),
+                battle.getTerritory(),
+                territoryEffects));
   }
 
   private void selectCasualties(final IDelegateBridge bridge) {
@@ -253,14 +259,17 @@ public class Fire implements IExecutable {
     return CasualtySelector.selectCasualties(
         hitPlayer,
         targetsToPickFrom,
-        allEnemyUnitsNotIncludingWaitingToDie,
-        allFriendlyUnitsNotIncludingWaitingToDie,
+        CombatValue.buildMainCombatValue(
+            allFriendlyUnitsNotIncludingWaitingToDie,
+            allEnemyUnitsNotIncludingWaitingToDie,
+            !defending,
+            bridge.getData(),
+            battleSite,
+            territoryEffects),
         battleSite,
-        territoryEffects,
         bridge,
         text,
         dice,
-        !defending,
         battleId,
         headless,
         extraHits,

@@ -1,30 +1,3 @@
-## TienTN JBoard Game 
-
-A java game using Swing and Docker instances. Territories buidling and board based, turn based war games.
-
-I have played a lot of strategy series, from Civilization and EU4, IronHearts, Victoria ... But they are over complicated, so I think it's time to create a version of my own.
-
----------------
-
-### Notes:
-
-I make a board game based on TripA, this game will be more 'territory building' than the original.
-
-Other feature: with multiple language support
-
-I will try to make this game still compatible with the base TripA, for any updates.
-
-My branch is always on feature-tientn-j-lang
-
-This branch 'master' will always be used to keep up with newer releases of the core TripA releases, except this file.
-
-Good luck with the game :)
-
-Current version: 0.1
-Current core release: 2.3.21874
-History of core update:
-2.3.21874 2020/10/04
-
 [![TripleA license](https://img.shields.io/github/license/triplea-game/triplea.svg?style=flat-square)](https://github.com/triplea-game/triplea/blob/master/LICENSE)
 [![Build Status](https://travis-ci.com/triplea-game/triplea.svg?branch=master)](https://travis-ci.com/triplea-game/triplea)
 [![Total Alerts](https://img.shields.io/lgtm/alerts/g/triplea-game/triplea.svg?logo=lgtm&logoWidth=18&style=flat-square)](https://lgtm.com/projects/g/triplea-game/triplea/alerts)

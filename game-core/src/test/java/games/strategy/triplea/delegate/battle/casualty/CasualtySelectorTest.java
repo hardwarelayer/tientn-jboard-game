@@ -25,6 +25,7 @@ import games.strategy.triplea.attachments.UnitAttachment;
 import games.strategy.triplea.delegate.DiceRoll;
 import games.strategy.triplea.delegate.Matches;
 import games.strategy.triplea.delegate.data.CasualtyDetails;
+import games.strategy.triplea.delegate.power.calculator.CombatValue;
 import games.strategy.triplea.xml.TestMapGameData;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -83,17 +84,17 @@ class CasualtySelectorTest {
     whenGetRandom(bridge).thenAnswer(withValues(0));
     final Collection<Unit> casualties =
         AaCasualtySelector.getAaCasualties(
-                false,
-                planes,
                 planes,
                 defendingAa,
-                defendingAa,
+                CombatValue.buildMainCombatValue(
+                    defendingAa, planes, false, data, territory("Germany", data), List.of()),
+                CombatValue.buildAaCombatValue(planes, defendingAa, true, data),
+                "",
                 roll,
                 bridge,
                 null,
                 null,
-                territory("Germany", data),
-                null)
+                territory("Germany", data))
             .getKilled();
     assertEquals(1, casualties.size());
     thenGetRandomShouldHaveBeenCalled(bridge, times(1));
@@ -112,17 +113,17 @@ class CasualtySelectorTest {
     planes.get(0).setAlreadyMoved(BigDecimal.ONE);
     final Collection<Unit> casualties =
         AaCasualtySelector.getAaCasualties(
-                false,
-                planes,
                 planes,
                 defendingAa,
-                defendingAa,
+                CombatValue.buildMainCombatValue(
+                    defendingAa, planes, false, data, territory("Germany", data), List.of()),
+                CombatValue.buildAaCombatValue(planes, defendingAa, true, data),
+                "",
                 roll,
                 bridge,
                 null,
                 null,
-                territory("Germany", data),
-                List.of())
+                territory("Germany", data))
             .getKilled();
     assertEquals(1, casualties.size());
     thenGetRandomShouldHaveBeenCalled(bridge, times(1));
@@ -147,24 +148,23 @@ class CasualtySelectorTest {
                     UnitAttachment.get(defendingAa.iterator().next().getType())
                         .getTargetsAa(data))),
             defendingAa,
-            planes,
-            territory("Germany", data).getUnits(),
             bridge,
             territory("Germany", data),
-            true);
+            CombatValue.buildAaCombatValue(
+                planes, territory("Germany", data).getUnits(), true, bridge.getData()));
     final Collection<Unit> casualties =
         AaCasualtySelector.getAaCasualties(
-                false,
-                planes,
                 planes,
                 defendingAa,
-                defendingAa,
+                CombatValue.buildMainCombatValue(
+                    defendingAa, planes, false, data, territory("Germany", data), List.of()),
+                CombatValue.buildAaCombatValue(planes, defendingAa, true, data),
+                "",
                 roll,
                 bridge,
                 null,
                 null,
-                territory("Germany", data),
-                List.of())
+                territory("Germany", data))
             .getKilled();
     assertEquals(2, casualties.size());
     // should be 1 fighter and 1 bomber
@@ -194,25 +194,24 @@ class CasualtySelectorTest {
                     UnitAttachment.get(defendingAa.iterator().next().getType())
                         .getTargetsAa(data))),
             defendingAa,
-            planes,
-            territory("Germany", data).getUnits(),
             bridge,
             territory("Germany", data),
-            true);
+            CombatValue.buildAaCombatValue(
+                planes, territory("Germany", data).getUnits(), true, bridge.getData()));
     thenGetRandomShouldHaveBeenCalled(bridge, times(1));
     final Collection<Unit> casualties =
         AaCasualtySelector.getAaCasualties(
-                false,
-                planes,
                 planes,
                 defendingAa,
-                defendingAa,
+                CombatValue.buildMainCombatValue(
+                    defendingAa, planes, false, data, territory("Germany", data), List.of()),
+                CombatValue.buildAaCombatValue(planes, defendingAa, true, data),
+                "",
                 roll,
                 bridge,
                 null,
                 null,
-                territory("Germany", data),
-                null)
+                territory("Germany", data))
             .getKilled();
     assertEquals(2, casualties.size());
     // two extra rolls to pick which units are hit
@@ -243,24 +242,23 @@ class CasualtySelectorTest {
                     UnitAttachment.get(defendingAa.iterator().next().getType())
                         .getTargetsAa(data))),
             defendingAa,
-            planes,
-            territory("Germany", data).getUnits(),
             bridge,
             territory("Germany", data),
-            true);
+            CombatValue.buildAaCombatValue(
+                planes, territory("Germany", data).getUnits(), true, bridge.getData()));
     final Collection<Unit> casualties =
         AaCasualtySelector.getAaCasualties(
-                false,
-                planes,
                 planes,
                 defendingAa,
-                defendingAa,
+                CombatValue.buildMainCombatValue(
+                    defendingAa, planes, false, data, territory("Germany", data), List.of()),
+                CombatValue.buildAaCombatValue(planes, defendingAa, true, data),
+                "",
                 roll,
                 bridge,
                 british(data),
                 null,
-                territory("Germany", data),
-                List.of())
+                territory("Germany", data))
             .getKilled();
     assertEquals(2, casualties.size());
     // we selected all bombers
@@ -291,24 +289,23 @@ class CasualtySelectorTest {
                     UnitAttachment.get(defendingAa.iterator().next().getType())
                         .getTargetsAa(data))),
             defendingAa,
-            planes,
-            territory("Germany", data).getUnits(),
             bridge,
             territory("Germany", data),
-            true);
+            CombatValue.buildAaCombatValue(
+                planes, territory("Germany", data).getUnits(), true, bridge.getData()));
     final Collection<Unit> casualties =
         AaCasualtySelector.getAaCasualties(
-                false,
-                planes,
                 planes,
                 defendingAa,
-                defendingAa,
+                CombatValue.buildMainCombatValue(
+                    defendingAa, planes, false, data, territory("Germany", data), List.of()),
+                CombatValue.buildAaCombatValue(planes, defendingAa, true, data),
+                "",
                 roll,
                 bridge,
                 british(data),
                 null,
-                territory("Germany", data),
-                List.of())
+                territory("Germany", data))
             .getKilled();
     assertEquals(3, casualties.size());
     // we selected all bombers
@@ -339,26 +336,25 @@ class CasualtySelectorTest {
                     UnitAttachment.get(defendingAa.iterator().next().getType())
                         .getTargetsAa(data))),
             defendingAa,
-            planes,
-            territory("Germany", data).getUnits(),
             bridge,
             territory("Germany", data),
-            true);
+            CombatValue.buildAaCombatValue(
+                planes, territory("Germany", data).getUnits(), true, bridge.getData()));
     // make sure we rolled once
     thenGetRandomShouldHaveBeenCalled(bridge, times(1));
     final Collection<Unit> casualties =
         AaCasualtySelector.getAaCasualties(
-                false,
-                planes,
                 planes,
                 defendingAa,
-                defendingAa,
+                CombatValue.buildMainCombatValue(
+                    defendingAa, planes, false, data, territory("Germany", data), List.of()),
+                CombatValue.buildAaCombatValue(planes, defendingAa, true, data),
+                "",
                 roll,
                 bridge,
                 null,
                 null,
-                territory("Germany", data),
-                null)
+                territory("Germany", data))
             .getKilled();
     assertEquals(3, casualties.size());
     // a second roll for choosing which unit
@@ -393,26 +389,25 @@ class CasualtySelectorTest {
                     UnitAttachment.get(defendingAa.iterator().next().getType())
                         .getTargetsAa(data))),
             defendingAa,
-            planes,
-            territory("Germany", data).getUnits(),
             bridge,
             territory("Germany", data),
-            true);
+            CombatValue.buildAaCombatValue(
+                planes, territory("Germany", data).getUnits(), true, bridge.getData()));
     // make sure we rolled once
     thenGetRandomShouldHaveBeenCalled(bridge, times(1));
     final Collection<Unit> casualties =
         AaCasualtySelector.getAaCasualties(
-                false,
-                planes,
                 planes,
                 defendingAa,
-                defendingAa,
+                CombatValue.buildMainCombatValue(
+                    defendingAa, planes, false, data, territory("Germany", data), List.of()),
+                CombatValue.buildAaCombatValue(planes, defendingAa, true, data),
+                "",
                 roll,
                 bridge,
                 null,
                 null,
-                territory("Germany", data),
-                null)
+                territory("Germany", data))
             .getKilled();
     assertEquals(2, casualties.size());
     thenGetRandomShouldHaveBeenCalled(bridge, times(3));
@@ -442,26 +437,25 @@ class CasualtySelectorTest {
                     UnitAttachment.get(defendingAa.iterator().next().getType())
                         .getTargetsAa(data))),
             defendingAa,
-            planes,
-            territory("Germany", data).getUnits(),
             bridge,
             territory("Germany", data),
-            true);
+            CombatValue.buildAaCombatValue(
+                planes, territory("Germany", data).getUnits(), true, bridge.getData()));
     // make sure we rolled once
     thenGetRandomShouldHaveBeenCalled(bridge, times(1));
     final Collection<Unit> casualties =
         AaCasualtySelector.getAaCasualties(
-                false,
-                planes,
                 planes,
                 defendingAa,
-                defendingAa,
+                CombatValue.buildMainCombatValue(
+                    defendingAa, planes, false, data, territory("Germany", data), List.of()),
+                CombatValue.buildAaCombatValue(planes, defendingAa, true, data),
+                "",
                 roll,
                 bridge,
                 null,
                 null,
-                territory("Germany", data),
-                null)
+                territory("Germany", data))
             .getKilled();
     assertEquals(3, casualties.size());
     // should be 2 fighters and 1 bombers

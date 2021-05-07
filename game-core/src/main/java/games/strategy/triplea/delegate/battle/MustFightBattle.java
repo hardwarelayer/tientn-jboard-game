@@ -51,6 +51,7 @@ import games.strategy.triplea.delegate.battle.steps.fire.firststrike.DefensiveFi
 import games.strategy.triplea.delegate.battle.steps.fire.firststrike.OffensiveFirstStrike;
 import games.strategy.triplea.delegate.battle.steps.fire.general.DefensiveGeneral;
 import games.strategy.triplea.delegate.battle.steps.fire.general.OffensiveGeneral;
+import games.strategy.triplea.delegate.battle.steps.fire.general.TargetGroup;
 import games.strategy.triplea.delegate.battle.steps.retreat.DefensiveSubsRetreat;
 import games.strategy.triplea.delegate.battle.steps.retreat.OffensiveGeneralRetreat;
 import games.strategy.triplea.delegate.battle.steps.retreat.OffensiveSubsRetreat;
@@ -73,6 +74,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
+import lombok.Getter;
 import lombok.extern.java.Log;
 import org.triplea.java.PredicateBuilder;
 import org.triplea.java.RemoveOnNextMajorRelease;
@@ -104,6 +106,8 @@ public class MustFightBattle extends DependentBattle
 
   private static final long serialVersionUID = 5879502298361231540L;
 
+  private static final long MAX_ROUNDS = 10000;
+
   private final Collection<Unit> attackingWaitingToDie = new ArrayList<>();
 
   private final Collection<Unit> defendingWaitingToDie = new ArrayList<>();
@@ -115,7 +119,10 @@ public class MustFightBattle extends DependentBattle
   // and resume while in
   // the middle of a battle.
   private final ExecutionStack stack = new ExecutionStack();
+
+  @Getter(onMethod = @__({@Override}))
   private List<String> stepStrings;
+
   private List<Unit> defendingAa;
   private List<Unit> offensiveAa;
   private List<String> defendingAaTypes;
@@ -649,7 +656,8 @@ public class MustFightBattle extends DependentBattle
     }
   }
 
-  void removeCasualties(
+  @Override
+  public void removeCasualties(
       final Collection<Unit> killed,
       final ReturnFire returnFire,
       final boolean defender,
@@ -773,8 +781,8 @@ public class MustFightBattle extends DependentBattle
           battleId,
           battleSite,
           getBattleTitle(),
-          removeNonCombatants(attackingUnits, true, false),
-          removeNonCombatants(defendingUnits, false, false),
+          removeNonCombatants(attackingUnits, defendingUnits, true, false),
+          removeNonCombatants(defendingUnits, attackingUnits, false, false),
           killed,
           attackingWaitingToDie,
           defendingWaitingToDie,
@@ -810,8 +818,8 @@ public class MustFightBattle extends DependentBattle
         battleId,
         battleSite,
         getBattleTitle(),
-        removeNonCombatants(attackingUnits, true, false),
-        removeNonCombatants(defendingUnits, false, false),
+        removeNonCombatants(attackingUnits, defendingUnits, true, false),
+        removeNonCombatants(defendingUnits, attackingUnits, false, false),
         killed,
         attackingWaitingToDie,
         defendingWaitingToDie,
@@ -1571,8 +1579,10 @@ public class MustFightBattle extends DependentBattle
 
   @Override
   public void removeNonCombatants(final IDelegateBridge bridge) {
-    final List<Unit> notRemovedDefending = removeNonCombatants(defendingUnits, false, true);
-    final List<Unit> notRemovedAttacking = removeNonCombatants(attackingUnits, true, true);
+    final List<Unit> notRemovedDefending =
+        removeNonCombatants(defendingUnits, attackingUnits, false, true);
+    final List<Unit> notRemovedAttacking =
+        removeNonCombatants(attackingUnits, defendingUnits, true, true);
     final Collection<Unit> toRemoveDefending =
         CollectionUtils.difference(defendingUnits, notRemovedDefending);
     final Collection<Unit> toRemoveAttacking =
@@ -1600,7 +1610,10 @@ public class MustFightBattle extends DependentBattle
    *     as factories, aa guns, land units in a water battle.
    */
   private List<Unit> removeNonCombatants(
-      final Collection<Unit> units, final boolean attacking, final boolean removeForNextRound) {
+      final Collection<Unit> units,
+      final Collection<Unit> enemyUnits,
+      final boolean attacking,
+      final boolean removeForNextRound) {
     final List<Unit> unitList = new ArrayList<>(units);
     if (battleSite.isWater()) {
       unitList.removeAll(CollectionUtils.getMatches(unitList, Matches.unitIsLand()));
@@ -1614,7 +1627,8 @@ public class MustFightBattle extends DependentBattle
                     attacking,
                     !battleSite.isWater(),
                     (removeForNextRound ? round + 1 : round),
-                    false)
+                    false,
+                    enemyUnits.stream().map(Unit::getType).collect(Collectors.toSet()))
                 .negate()));
     // remove capturableOnEntering units (veqryn)
     unitList.removeAll(
@@ -1687,6 +1701,26 @@ public class MustFightBattle extends DependentBattle
           public void execute(final ExecutionStack stack, final IDelegateBridge bridge) {
             if (!isOver) {
               round++;
+              if (round > MAX_ROUNDS) {
+                // the battle appears to be in an infinite loop
+                throw new IllegalStateException(
+                    "Round 10,000 reached in a battle. Something must be wrong."
+                        + " Please report this to TripleA.\n"
+                        + " Attacking unit types: "
+                        + attackingUnits.stream()
+                            .map(Unit::getType)
+                            .collect(Collectors.toSet())
+                            .stream()
+                            .map(UnitType::getName)
+                            .collect(Collectors.joining(","))
+                        + ", Defending unit types: "
+                        + defendingUnits.stream()
+                            .map(Unit::getType)
+                            .collect(Collectors.toSet())
+                            .stream()
+                            .map(UnitType::getName)
+                            .collect(Collectors.joining(",")));
+              }
               // determine any AA
               updateOffensiveAaUnits();
               updateDefendingAaUnits();
