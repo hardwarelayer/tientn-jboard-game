@@ -1,5 +1,8 @@
 package games.strategy.triplea.delegate.battle.steps.fire.aa;
 
+import static games.strategy.triplea.delegate.battle.BattleState.Side.DEFENSE;
+import static games.strategy.triplea.delegate.battle.BattleState.Side.OFFENSE;
+import static games.strategy.triplea.delegate.battle.BattleState.UnitBattleFilter.ALIVE;
 import static games.strategy.triplea.delegate.battle.BattleStepStrings.AA_GUNS_FIRE_SUFFIX;
 import static games.strategy.triplea.delegate.battle.BattleStepStrings.CASUALTIES_SUFFIX;
 import static games.strategy.triplea.delegate.battle.BattleStepStrings.REMOVE_PREFIX;
@@ -7,14 +10,23 @@ import static games.strategy.triplea.delegate.battle.BattleStepStrings.SELECT_PR
 
 import games.strategy.engine.data.GamePlayer;
 import games.strategy.engine.data.Unit;
+import games.strategy.engine.delegate.IDelegateBridge;
 import games.strategy.triplea.attachments.UnitAttachment;
+import games.strategy.triplea.delegate.DiceRoll;
 import games.strategy.triplea.delegate.battle.BattleActions;
 import games.strategy.triplea.delegate.battle.BattleState;
+import games.strategy.triplea.delegate.battle.casualty.AaCasualtySelector;
 import games.strategy.triplea.delegate.battle.steps.BattleStep;
+import games.strategy.triplea.delegate.battle.steps.fire.RollDiceStep;
+import games.strategy.triplea.delegate.battle.steps.fire.SelectCasualties;
+import games.strategy.triplea.delegate.data.CasualtyDetails;
+import games.strategy.triplea.delegate.power.calculator.CombatValue;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.BiFunction;
 import lombok.AllArgsConstructor;
+import org.triplea.sound.SoundUtils;
 
 @AllArgsConstructor
 public abstract class AaFireAndCasualtyStep implements BattleStep {
@@ -47,4 +59,58 @@ public abstract class AaFireAndCasualtyStep implements BattleStep {
   abstract GamePlayer firedAtPlayer();
 
   abstract Collection<Unit> aaGuns();
+
+  public static class SelectAaCasualties
+      implements BiFunction<IDelegateBridge, SelectCasualties, CasualtyDetails> {
+
+    @Override
+    public CasualtyDetails apply(final IDelegateBridge bridge, final SelectCasualties step) {
+      return AaCasualtySelector.getAaCasualties(
+          step.getFiringGroup().getTargetUnits(),
+          step.getFiringGroup().getFiringUnits(),
+          CombatValue.buildMainCombatValue(
+              step.getBattleState().filterUnits(ALIVE, step.getSide()),
+              step.getBattleState().filterUnits(ALIVE, step.getSide().getOpposite()),
+              step.getSide() == OFFENSE,
+              step.getBattleState().getGameData(),
+              step.getBattleState().getBattleSite(),
+              step.getBattleState().getTerritoryEffects()),
+          CombatValue.buildAaCombatValue(
+              step.getBattleState().filterUnits(ALIVE, step.getSide().getOpposite()),
+              step.getBattleState().filterUnits(ALIVE, step.getSide()),
+              step.getSide() == DEFENSE,
+              step.getBattleState().getGameData()),
+          "Hits from " + step.getFiringGroup().getDisplayName() + ", ",
+          step.getFireRoundState().getDice(),
+          bridge,
+          step.getBattleState().getPlayer(step.getSide().getOpposite()),
+          step.getBattleState().getBattleId(),
+          step.getBattleState().getBattleSite());
+    }
+  }
+
+  public static class AaDiceRoller implements BiFunction<IDelegateBridge, RollDiceStep, DiceRoll> {
+
+    @Override
+    public DiceRoll apply(final IDelegateBridge bridge, final RollDiceStep step) {
+      final DiceRoll dice =
+          DiceRoll.rollAa(
+              step.getFiringGroup().getTargetUnits(),
+              step.getFiringGroup().getFiringUnits(),
+              bridge,
+              step.getBattleState().getBattleSite(),
+              CombatValue.buildAaCombatValue(
+                  step.getBattleState().filterUnits(ALIVE, step.getSide().getOpposite()),
+                  step.getBattleState().filterUnits(ALIVE, step.getSide()),
+                  step.getSide() == DEFENSE,
+                  step.getBattleState().getGameData()));
+
+      SoundUtils.playFireBattleAa(
+          step.getBattleState().getPlayer(step.getSide()),
+          step.getFiringGroup().getGroupName(),
+          dice.getHits() > 0,
+          bridge);
+      return dice;
+    }
+  }
 }

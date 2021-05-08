@@ -7,10 +7,10 @@ import games.strategy.engine.data.Territory;
 import games.strategy.engine.data.Unit;
 import games.strategy.engine.data.UnitType;
 import games.strategy.triplea.attachments.UnitAttachment;
-import games.strategy.triplea.delegate.DiceRoll;
-import games.strategy.triplea.delegate.DiceRoll.TotalPowerAndTotalRolls;
 import games.strategy.triplea.delegate.battle.UnitBattleComparator;
 import games.strategy.triplea.delegate.battle.UnitBattleComparator.CombatModifiers;
+import games.strategy.triplea.delegate.power.calculator.CombatValue;
+import games.strategy.triplea.delegate.power.calculator.TotalPowerAndTotalRolls;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -40,7 +40,7 @@ class CasualtyOrderOfLosses {
   static class Parameters {
     @Nonnull Collection<Unit> targetsToPickFrom;
     @Nonnull GamePlayer player;
-    @Nonnull Collection<Unit> enemyUnits;
+    @Nonnull CombatValue combatValue;
     @Nonnull Territory battlesite;
     @Nonnull IntegerMap<UnitType> costs;
     @Nonnull CombatModifiers combatModifiers;
@@ -105,16 +105,8 @@ class CasualtyOrderOfLosses {
     final Map<Unit, IntegerMap<Unit>> unitSupportPowerMap = new HashMap<>();
     final Map<Unit, IntegerMap<Unit>> unitSupportRollsMap = new HashMap<>();
     final Map<Unit, TotalPowerAndTotalRolls> unitPowerAndRollsMap =
-        DiceRoll.getUnitPowerAndRollsForNormalBattles(
-            sortedUnitsList,
-            new ArrayList<>(parameters.enemyUnits),
-            sortedUnitsList,
-            parameters.combatModifiers.isDefending(),
-            parameters.data,
-            parameters.battlesite,
-            parameters.combatModifiers.getTerritoryEffects(),
-            unitSupportPowerMap,
-            unitSupportRollsMap);
+        TotalPowerAndTotalRolls.getUnitPowerAndRollsForNormalBattles(
+            sortedUnitsList, parameters.combatValue, unitSupportPowerMap, unitSupportRollsMap);
 
     // Sort units starting with weakest for finding the worst units
     Collections.reverse(sortedUnitsList);
@@ -133,7 +125,8 @@ class CasualtyOrderOfLosses {
         unitTypes.add(u.getType());
         // Find unit power
         int power =
-            DiceRoll.getTotalPower(Map.of(u, originalUnitPowerAndRollsMap.get(u)), parameters.data);
+            TotalPowerAndTotalRolls.getTotalPower(
+                Map.of(u, originalUnitPowerAndRollsMap.get(u)), parameters.data);
         // Add any support power that it provides to other units
         final IntegerMap<Unit> unitSupportPowerMapForUnit = unitSupportPowerMap.get(u);
         if (unitSupportPowerMapForUnit != null) {
@@ -156,14 +149,15 @@ class CasualtyOrderOfLosses {
             // Find supported unit power with support
             final Map<Unit, TotalPowerAndTotalRolls> supportedUnitMap = new HashMap<>();
             supportedUnitMap.put(supportedUnit, strengthAndRolls);
-            final int powerWithSupport = DiceRoll.getTotalPower(supportedUnitMap, parameters.data);
+            final int powerWithSupport =
+                TotalPowerAndTotalRolls.getTotalPower(supportedUnitMap, parameters.data);
             // Find supported unit power without support
 
             final TotalPowerAndTotalRolls strengthAndRollsWithoutSupport =
                 strengthAndRolls.subtractPower(unitSupportPowerMapForUnit.getInt(supportedUnit));
             supportedUnitMap.put(supportedUnit, strengthAndRollsWithoutSupport);
             final int powerWithoutSupport =
-                DiceRoll.getTotalPower(supportedUnitMap, parameters.data);
+                TotalPowerAndTotalRolls.getTotalPower(supportedUnitMap, parameters.data);
             // Add the actual power provided by the support
             final int addedPower = powerWithSupport - powerWithoutSupport;
             power += addedPower;
@@ -181,13 +175,14 @@ class CasualtyOrderOfLosses {
             // Find supported unit power with support
             final Map<Unit, TotalPowerAndTotalRolls> supportedUnitMap = new HashMap<>();
             supportedUnitMap.put(supportedUnit, strengthAndRolls);
-            final int powerWithSupport = DiceRoll.getTotalPower(supportedUnitMap, parameters.data);
+            final int powerWithSupport =
+                TotalPowerAndTotalRolls.getTotalPower(supportedUnitMap, parameters.data);
             // Find supported unit power without support
             final TotalPowerAndTotalRolls strengthAndRollsWithoutSupport =
                 strengthAndRolls.subtractRolls(unitSupportRollsMap.get(u).getInt(supportedUnit));
             supportedUnitMap.put(supportedUnit, strengthAndRollsWithoutSupport);
             final int powerWithoutSupport =
-                DiceRoll.getTotalPower(supportedUnitMap, parameters.data);
+                TotalPowerAndTotalRolls.getTotalPower(supportedUnitMap, parameters.data);
             // Add the actual power provided by the support
             final int addedPower = powerWithSupport - powerWithoutSupport;
             power += addedPower;

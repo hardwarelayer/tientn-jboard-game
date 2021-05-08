@@ -35,12 +35,8 @@ import static games.strategy.triplea.delegate.MockDelegateBridge.thenGetRandomSh
 import static games.strategy.triplea.delegate.MockDelegateBridge.whenGetRandom;
 import static games.strategy.triplea.delegate.MockDelegateBridge.withValues;
 import static games.strategy.triplea.delegate.battle.BattleStepStrings.ATTACKER_WITHDRAW;
-import static games.strategy.triplea.delegate.battle.BattleStepStrings.FIRE;
-import static games.strategy.triplea.delegate.battle.BattleStepStrings.FIRST_STRIKE_UNITS_FIRE;
 import static games.strategy.triplea.delegate.battle.BattleStepStrings.REMOVE_CASUALTIES;
 import static games.strategy.triplea.delegate.battle.BattleStepStrings.REMOVE_SNEAK_ATTACK_CASUALTIES;
-import static games.strategy.triplea.delegate.battle.BattleStepStrings.SELECT_CASUALTIES;
-import static games.strategy.triplea.delegate.battle.BattleStepStrings.SELECT_FIRST_STRIKE_CASUALTIES;
 import static games.strategy.triplea.delegate.battle.BattleStepStrings.SUBS_SUBMERGE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -76,15 +72,16 @@ import games.strategy.triplea.attachments.TechAttachment;
 import games.strategy.triplea.attachments.TerritoryAttachment;
 import games.strategy.triplea.attachments.UnitAttachment;
 import games.strategy.triplea.delegate.battle.BattleDelegate;
-import games.strategy.triplea.delegate.battle.IBattle;
 import games.strategy.triplea.delegate.battle.IBattle.BattleType;
 import games.strategy.triplea.delegate.battle.MustFightBattle;
 import games.strategy.triplea.delegate.battle.casualty.AaCasualtySelector;
+import games.strategy.triplea.delegate.battle.steps.BattleStepsTest;
 import games.strategy.triplea.delegate.data.CasualtyDetails;
 import games.strategy.triplea.delegate.data.MoveValidationResult;
 import games.strategy.triplea.delegate.data.PlaceableUnits;
 import games.strategy.triplea.delegate.data.TechResults;
 import games.strategy.triplea.delegate.move.validation.MoveValidator;
+import games.strategy.triplea.delegate.power.calculator.CombatValue;
 import games.strategy.triplea.delegate.remote.IAbstractPlaceDelegate;
 import games.strategy.triplea.xml.TestMapGameData;
 import java.util.ArrayList;
@@ -175,24 +172,28 @@ class WW2V3Year41Test {
                     UnitAttachment.get(defendingAa.iterator().next().getType())
                         .getTargetsAa(gameData))),
             defendingAa,
-            planes,
-            territory("Germany", gameData).getUnits(),
             bridge,
             territory("Germany", gameData),
-            true);
+            CombatValue.buildAaCombatValue(
+                planes, territory("Germany", gameData).getUnits(), true, bridge.getData()));
     final Collection<Unit> casualties =
         AaCasualtySelector.getAaCasualties(
-                false,
-                planes,
                 planes,
                 defendingAa,
-                defendingAa,
+                CombatValue.buildMainCombatValue(
+                    defendingAa,
+                    planes,
+                    false,
+                    gameData,
+                    territory("Germany", gameData),
+                    List.of()),
+                CombatValue.buildAaCombatValue(planes, defendingAa, true, gameData),
+                "",
                 roll,
                 bridge,
                 null,
                 null,
-                territory("Germany", gameData),
-                null)
+                territory("Germany", gameData))
             .getKilled();
     assertEquals(2, casualties.size());
     // should be 1 fighter and 1 bomber
@@ -228,26 +229,30 @@ class WW2V3Year41Test {
                     UnitAttachment.get(defendingAa.iterator().next().getType())
                         .getTargetsAa(gameData))),
             defendingAa,
-            planes,
-            territory("Germany", gameData).getUnits(),
             bridge,
             territory("Germany", gameData),
-            true);
+            CombatValue.buildAaCombatValue(
+                planes, territory("Germany", gameData).getUnits(), true, bridge.getData()));
     // make sure we rolled once
     thenGetRandomShouldHaveBeenCalled(bridge, times(1));
     final Collection<Unit> casualties =
         AaCasualtySelector.getAaCasualties(
-                false,
-                planes,
                 planes,
                 defendingAa,
-                defendingAa,
+                CombatValue.buildMainCombatValue(
+                    defendingAa,
+                    planes,
+                    false,
+                    gameData,
+                    territory("Germany", gameData),
+                    List.of()),
+                CombatValue.buildAaCombatValue(planes, defendingAa, true, gameData),
+                "",
                 roll,
                 bridge,
                 null,
                 null,
-                territory("Germany", gameData),
-                null)
+                territory("Germany", gameData))
             .getKilled();
     assertEquals(3, casualties.size());
     // should be 1 fighter and 2 bombers
@@ -285,27 +290,31 @@ class WW2V3Year41Test {
                     UnitAttachment.get(defendingAa.iterator().next().getType())
                         .getTargetsAa(gameData))),
             defendingAa,
-            planes,
-            territory("Germany", gameData).getUnits(),
             bridge,
             territory("Germany", gameData),
-            true);
+            CombatValue.buildAaCombatValue(
+                planes, territory("Germany", gameData).getUnits(), true, bridge.getData()));
     assertEquals(2, roll.getHits());
     // make sure we rolled once
     thenGetRandomShouldHaveBeenCalled(bridge, times(1));
     final Collection<Unit> casualties =
         AaCasualtySelector.getAaCasualties(
-                false,
-                planes,
                 planes,
                 defendingAa,
-                defendingAa,
+                CombatValue.buildMainCombatValue(
+                    defendingAa,
+                    planes,
+                    false,
+                    gameData,
+                    territory("Germany", gameData),
+                    List.of()),
+                CombatValue.buildAaCombatValue(planes, defendingAa, true, gameData),
+                "",
                 roll,
                 bridge,
                 null,
                 null,
-                territory("Germany", gameData),
-                null)
+                territory("Germany", gameData))
             .getKilled();
     assertEquals(2, casualties.size());
     thenGetRandomShouldHaveBeenCalled(bridge, times(3));
@@ -691,12 +700,32 @@ class WW2V3Year41Test {
     // Attacking fighter
     final DiceRoll roll1 =
         DiceRoll.rollDice(
-            germanFighter, false, germans, delegateBridge, mock(IBattle.class), territoryEffects);
+            germanFighter,
+            germans,
+            delegateBridge,
+            "",
+            CombatValue.buildMainCombatValue(
+                List.of(),
+                germanFighter,
+                false,
+                delegateBridge.getData(),
+                mock(Territory.class),
+                territoryEffects));
     assertEquals(1, roll1.getHits());
     // Defending fighter
     final DiceRoll roll2 =
         DiceRoll.rollDice(
-            germanFighter, true, germans, delegateBridge, mock(IBattle.class), territoryEffects);
+            germanFighter,
+            germans,
+            delegateBridge,
+            "",
+            CombatValue.buildMainCombatValue(
+                List.of(),
+                germanFighter,
+                true,
+                delegateBridge.getData(),
+                mock(Territory.class),
+                territoryEffects));
     assertEquals(0, roll2.getHits());
   }
 
@@ -966,13 +995,15 @@ class WW2V3Year41Test {
   @Test
   void testAttackSubsOnSubs() {
     final String defender = "Germans";
+    final GamePlayer defenderPlayer = germans(gameData);
     final String attacker = "British";
+    final GamePlayer attackerPlayer = british(gameData);
     final Territory attacked = territory("31 Sea Zone", gameData);
     final Territory from = territory("32 Sea Zone", gameData);
     // 1 sub attacks 1 sub
-    addTo(from, submarine(gameData).create(1, british(gameData)));
-    addTo(attacked, submarine(gameData).create(1, germans(gameData)));
-    final IDelegateBridge bridge = newDelegateBridge(british(gameData));
+    addTo(from, submarine(gameData).create(1, attackerPlayer));
+    addTo(attacked, submarine(gameData).create(1, defenderPlayer));
+    final IDelegateBridge bridge = newDelegateBridge(attackerPlayer);
     advanceToStep(bridge, "CombatMove");
     moveDelegate(gameData).setDelegateBridgeAndPlayer(bridge);
     moveDelegate(gameData).start();
@@ -983,16 +1014,14 @@ class WW2V3Year41Test {
             AbstractMoveDelegate.getBattleTracker(gameData).getPendingBattle(attacked);
     final List<String> steps = battle.determineStepStrings();
     assertEquals(
-        List.of(
-                attacker + SUBS_SUBMERGE,
-                defender + SUBS_SUBMERGE,
-                attacker + FIRST_STRIKE_UNITS_FIRE,
-                defender + SELECT_FIRST_STRIKE_CASUALTIES,
-                defender + FIRST_STRIKE_UNITS_FIRE,
-                attacker + SELECT_FIRST_STRIKE_CASUALTIES,
-                REMOVE_SNEAK_ATTACK_CASUALTIES,
-                REMOVE_CASUALTIES,
-                attacker + ATTACKER_WITHDRAW)
+        BattleStepsTest.mergeSteps(
+                List.of(attacker + SUBS_SUBMERGE, defender + SUBS_SUBMERGE),
+                BattleStepsTest.firstStrikeFightStepStrings(attackerPlayer, defenderPlayer),
+                BattleStepsTest.firstStrikeFightStepStrings(defenderPlayer, attackerPlayer),
+                List.of(
+                    REMOVE_SNEAK_ATTACK_CASUALTIES,
+                    REMOVE_CASUALTIES,
+                    attacker + ATTACKER_WITHDRAW))
             .toString(),
         steps.toString());
     // fight, each sub should fire
@@ -1006,15 +1035,17 @@ class WW2V3Year41Test {
   @Test
   void testAttackSubsOnDestroyer() {
     final String defender = "Germans";
+    final GamePlayer defenderPlayer = germans(gameData);
     final String attacker = "British";
+    final GamePlayer attackerPlayer = british(gameData);
     final Territory attacked = territory("31 Sea Zone", gameData);
     final Territory from = territory("32 Sea Zone", gameData);
     // 1 sub attacks 1 sub and 1 destroyer
     // defender sneak attacks, not attacker
-    addTo(from, submarine(gameData).create(1, british(gameData)));
-    addTo(attacked, submarine(gameData).create(1, germans(gameData)));
-    addTo(attacked, destroyer(gameData).create(1, germans(gameData)));
-    final IDelegateBridge bridge = newDelegateBridge(british(gameData));
+    addTo(from, submarine(gameData).create(1, attackerPlayer));
+    addTo(attacked, submarine(gameData).create(1, defenderPlayer));
+    addTo(attacked, destroyer(gameData).create(1, defenderPlayer));
+    final IDelegateBridge bridge = newDelegateBridge(attackerPlayer);
     advanceToStep(bridge, "CombatMove");
     moveDelegate(gameData).setDelegateBridgeAndPlayer(bridge);
     moveDelegate(gameData).start();
@@ -1025,17 +1056,13 @@ class WW2V3Year41Test {
             AbstractMoveDelegate.getBattleTracker(gameData).getPendingBattle(attacked);
     final List<String> steps = battle.determineStepStrings();
     assertEquals(
-        List.of(
-                defender + SUBS_SUBMERGE,
-                defender + FIRST_STRIKE_UNITS_FIRE,
-                attacker + SELECT_FIRST_STRIKE_CASUALTIES,
-                REMOVE_SNEAK_ATTACK_CASUALTIES,
-                attacker + FIRST_STRIKE_UNITS_FIRE,
-                defender + SELECT_FIRST_STRIKE_CASUALTIES,
-                defender + FIRE,
-                attacker + SELECT_CASUALTIES,
-                REMOVE_CASUALTIES,
-                attacker + ATTACKER_WITHDRAW)
+        BattleStepsTest.mergeSteps(
+                List.of(defender + SUBS_SUBMERGE),
+                BattleStepsTest.firstStrikeFightStepStrings(defenderPlayer, attackerPlayer),
+                List.of(REMOVE_SNEAK_ATTACK_CASUALTIES),
+                BattleStepsTest.firstStrikeFightStepStrings(attackerPlayer, defenderPlayer),
+                BattleStepsTest.generalFightStepStrings(defenderPlayer, attackerPlayer),
+                List.of(REMOVE_CASUALTIES, attacker + ATTACKER_WITHDRAW))
             .toString(),
         steps.toString());
     // defending subs sneak attack and hit
@@ -1053,16 +1080,17 @@ class WW2V3Year41Test {
 
   @Test
   void testAttackDestroyerAndSubsAgainstSub() {
-    final String defender = "Germans";
+    final GamePlayer defenderPlayer = germans(gameData);
     final String attacker = "British";
+    final GamePlayer attackerPlayer = british(gameData);
     final Territory attacked = territory("31 Sea Zone", gameData);
     final Territory from = territory("32 Sea Zone", gameData);
     // 1 sub and 1 destroyer attack 1 sub
     // defender sneak attacks, not attacker
-    addTo(from, submarine(gameData).create(1, british(gameData)));
-    addTo(from, destroyer(gameData).create(1, british(gameData)));
-    addTo(attacked, submarine(gameData).create(1, germans(gameData)));
-    final IDelegateBridge bridge = newDelegateBridge(british(gameData));
+    addTo(from, submarine(gameData).create(1, attackerPlayer));
+    addTo(from, destroyer(gameData).create(1, attackerPlayer));
+    addTo(attacked, submarine(gameData).create(1, defenderPlayer));
+    final IDelegateBridge bridge = newDelegateBridge(attackerPlayer);
     advanceToStep(bridge, "CombatMove");
     moveDelegate(gameData).setDelegateBridgeAndPlayer(bridge);
     moveDelegate(gameData).start();
@@ -1073,17 +1101,13 @@ class WW2V3Year41Test {
             AbstractMoveDelegate.getBattleTracker(gameData).getPendingBattle(attacked);
     final List<String> steps = battle.determineStepStrings();
     assertEquals(
-        List.of(
-                attacker + SUBS_SUBMERGE,
-                attacker + FIRST_STRIKE_UNITS_FIRE,
-                defender + SELECT_FIRST_STRIKE_CASUALTIES,
-                REMOVE_SNEAK_ATTACK_CASUALTIES,
-                attacker + FIRE,
-                defender + SELECT_CASUALTIES,
-                defender + FIRST_STRIKE_UNITS_FIRE,
-                attacker + SELECT_FIRST_STRIKE_CASUALTIES,
-                REMOVE_CASUALTIES,
-                attacker + ATTACKER_WITHDRAW)
+        BattleStepsTest.mergeSteps(
+                List.of(attacker + SUBS_SUBMERGE),
+                BattleStepsTest.firstStrikeFightStepStrings(attackerPlayer, defenderPlayer),
+                List.of(REMOVE_SNEAK_ATTACK_CASUALTIES),
+                BattleStepsTest.generalFightStepStrings(attackerPlayer, defenderPlayer),
+                BattleStepsTest.firstStrikeFightStepStrings(defenderPlayer, attackerPlayer),
+                List.of(REMOVE_CASUALTIES, attacker + ATTACKER_WITHDRAW))
             .toString(),
         steps.toString());
     // attacking subs sneak attack and hit
@@ -1101,17 +1125,18 @@ class WW2V3Year41Test {
 
   @Test
   void testAttackDestroyerAndSubsAgainstSubAndDestroyer() {
-    final String defender = "Germans";
+    final GamePlayer defenderPlayer = germans(gameData);
     final String attacker = "British";
+    final GamePlayer attackerPlayer = british(gameData);
     final Territory attacked = territory("31 Sea Zone", gameData);
     final Territory from = territory("32 Sea Zone", gameData);
     // 1 sub and 1 destroyer attack 1 sub and 1 destroyer
     // no sneak attacks
-    addTo(from, submarine(gameData).create(1, british(gameData)));
-    addTo(from, destroyer(gameData).create(1, british(gameData)));
-    addTo(attacked, submarine(gameData).create(1, germans(gameData)));
-    addTo(attacked, destroyer(gameData).create(1, germans(gameData)));
-    final IDelegateBridge bridge = newDelegateBridge(british(gameData));
+    addTo(from, submarine(gameData).create(1, attackerPlayer));
+    addTo(from, destroyer(gameData).create(1, attackerPlayer));
+    addTo(attacked, submarine(gameData).create(1, defenderPlayer));
+    addTo(attacked, destroyer(gameData).create(1, defenderPlayer));
+    final IDelegateBridge bridge = newDelegateBridge(attackerPlayer);
     advanceToStep(bridge, "CombatMove");
     moveDelegate(gameData).setDelegateBridgeAndPlayer(bridge);
     moveDelegate(gameData).start();
@@ -1122,17 +1147,12 @@ class WW2V3Year41Test {
             AbstractMoveDelegate.getBattleTracker(gameData).getPendingBattle(attacked);
     final List<String> steps = battle.determineStepStrings();
     assertEquals(
-        List.of(
-                attacker + FIRST_STRIKE_UNITS_FIRE,
-                defender + SELECT_FIRST_STRIKE_CASUALTIES,
-                attacker + FIRE,
-                defender + SELECT_CASUALTIES,
-                defender + FIRST_STRIKE_UNITS_FIRE,
-                attacker + SELECT_FIRST_STRIKE_CASUALTIES,
-                defender + FIRE,
-                attacker + SELECT_CASUALTIES,
-                REMOVE_CASUALTIES,
-                attacker + ATTACKER_WITHDRAW)
+        BattleStepsTest.mergeSteps(
+                BattleStepsTest.firstStrikeFightStepStrings(attackerPlayer, defenderPlayer),
+                BattleStepsTest.generalFightStepStrings(attackerPlayer, defenderPlayer),
+                BattleStepsTest.firstStrikeFightStepStrings(defenderPlayer, attackerPlayer),
+                BattleStepsTest.generalFightStepStrings(defenderPlayer, attackerPlayer),
+                List.of(REMOVE_CASUALTIES, attacker + ATTACKER_WITHDRAW))
             .toString(),
         steps.toString());
     givenRemotePlayerWillSelectCasualtiesPer(
