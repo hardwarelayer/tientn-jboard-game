@@ -27,6 +27,7 @@ Current core release: 2.5.22294
 History of core update:
 
 2.3.21874 2020/10/04
+
 2.5.22294 2021/04/08
 
 
