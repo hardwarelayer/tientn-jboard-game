@@ -20,13 +20,14 @@ This branch 'master' will always be used to keep up with newer releases of the c
 
 Good luck with the game :)
 
-Current version: 0.1
+Current version: 0.2
 
-Current core release: 2.3.21874
+Current core release: 2.5.22294
 
 History of core update:
 
 2.3.21874 2020/10/04
+2.5.22294 2021/04/08
 
 
 ### Porting:
