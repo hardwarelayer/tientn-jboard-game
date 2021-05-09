@@ -1,0 +1,2 @@
+org/triplea/test/smoke/ClientConnect.java
+ org.triplea.test.smoke.ClientConnect

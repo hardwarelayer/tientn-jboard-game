@@ -75,6 +75,10 @@ public interface BattleStep extends IExecutable {
     OFFENSIVE_GENERAL_RETREAT,
     STALEMATE_BATTLE_END_CHECK,
     SUB_DEFENSIVE_RETREAT_AFTER_BATTLE,
+
+    FIRE_ROUND_ROLL_DICE,
+    FIRE_ROUND_SELECT_CASUALTIES,
+    FIRE_ROUND_REMOVE_CASUALTIES,
   }
 
   /** @return a list of names that will be shown in {@link games.strategy.triplea.ui.BattlePanel} */
