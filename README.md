@@ -85,11 +85,170 @@ Changes for porting: build parameters, tool and script environment ...
 
     4. PR core-release-xxxxxx to master
 
-    5. update master Readme.MD with release info
+    5. merge master to feature-tientn-j-lang (cannot be rebased)
 
-    6. merge master to feature-tientn-j-lang
+    6. rebuild and run
 
-    7. rebuild and run
+    7. commit to feature-tientn-j-lang
+
+    8. update master Readme.MD with release info
+
+
+### Example of updating with 2.5.22294
+
+make a tar of tripleA release source code without the folder (so we can extract and overwrite directly to our source)
+
+% cd place_of_download
+
+% tar xvf triplea-2.5.22294.tar.gz
+
+% cd triplea-2.5.22294
+
+% tar cvf ../triplea-root-2.5.22294.tar *
+
+% cd ..
+
+% rm -rf triplea-2.5.22294
+
+% cd tientn-jboard-game
+
+% git checkout master
+
+% git pull
+
+% git checkout -b core-release-2.5.22294
+
+% tar xvf ../place_of_download/triplea-root-2.5.22294.tar
+
+% git add .
+
+% git commit -m "upgrade to new version 2.5.22294"
+
+% git push
+
+Create a PR to master on github.com/hardwarelayer/tientn-jboard-game/core-release-2.5.22294
+
+    merge it to master
+
+    delete the branch core-release-2.5.22294
+
+VSCode clone:
+
+Command+Shift+P: "Git: Clone", Open it
+
+Choose Source Control tab on the left
+
+Click "..." Choose checkout to: feature-tientn-j-lang
+
+Click "..." Choose Checkout to ... master
+
+    Conflicted files are shown in Merge Changes list on top left
+
+Create two folder of master and feature-tientn-j-lang to compare source by TC / DC
+
+    Show differents for helping changes in VS
+
+In VS choose Accept options in conflicted blocks
+
+    Choose Stage conflicted files
+
+Lost file, must recover after merge
+
+cp ../backup-working-before-merge/tientn-jboard-game/gradle/wrapper/gradle-wrapper.properties gradle/wrapper/gradle-wrapper.properties
+
+Rebuild : ./run.sh
+
+List of file which need auto-merging and conflicts:
+
+    Auto-merging game-headed/build.gradle
+    
+    CONFLICT (content): Merge conflict in game-headed/build.gradle
+    
+    Auto-merging game-core/src/main/java/games/strategy/triplea/ui/TripleAFrame.java
+    
+    Auto-merging game-core/src/main/java/games/strategy/triplea/delegate/battle/steps/change/CheckStalemateBattleEnd.java
+    
+    Auto-merging game-core/src/main/java/games/strategy/engine/framework/startup/ui/panels/main/game/selector/GameSelectorPanel.java
+    
+    CONFLICT (content): Merge conflict in game-core/src/main/java/games/strategy/engine/framework/startup/ui/panels/main/game/selector/GameSelectorPanel.java
+
+    Auto-merging game-core/src/main/java/games/strategy/engine/framework/startup/ui/panels/main/game/selector/GameSelectorModel.java
+
+    CONFLICT (content): Merge conflict in game-core/src/main/java/games/strategy/engine/framework/startup/ui/panels/main/game/selector/GameSelectorModel.java
+
+    Auto-merging game-core/src/main/java/games/strategy/engine/framework/startup/mc/ServerModel.java
+
+    Auto-merging game-core/src/main/java/games/strategy/engine/framework/save/game/GameDataWriter.java
+
+    Auto-merging game-core/src/main/java/games/strategy/engine/framework/GameDataManager.java
+    CONFLICT (content): Merge conflict in game-core/src/main/java/games/strategy/engine/framework/GameDataManager.java
+
+    Auto-merging game-core/src/main/java/games/strategy/engine/data/GameData.java
+
+    Auto-merging build.gradle
+
+    Auto-merging README.md
+    CONFLICT (content): Merge conflict in README.md
+
+    Automatic merge failed; fix conflicts and then commit the result.
+
+% git status
+
+Unmerged paths:
+
+    both modified:   README.md
+    
+	both modified:   game-core/src/main/java/games/strategy/engine/framework/GameDataManager.java
+
+    both modified:   game-core/src/main/java/games/strategy/engine/framework/startup/ui/panels/main/game/selector/GameSelectorModel.java
+	
+    both modified:   game-core/src/main/java/games/strategy/engine/framework/startup/ui/panels/main/game/selector/GameSelectorPanel.java
+	
+    both modified:   game-headed/build.gradle
+
+Close VS
+
+% git add .
+
+% git commit -m "merged master - engine 2.3 to 2.5.22294 on this branch"
+
+% git push
+
+Done
+
+Still keep the folder of engine 2.3 before changed in:
+
+    JBoard/bk.tientn-jboard-game.tar.gz
+
+    JBoard/backup-working-before-merge
+
+### TODO: Rebasing (not success yet):
+
+% git checkout feature-tientn-j-lang
+
+% git clean -df (delete untracked files to avoid conflict-backup first!!!)
+
+% ./gradlew clean (clean build files - *.class ... etc.)
+
+% ps aux | grep gradle <-- it keep .bin and .lock files in folders
+
+% kill -9 <pid>
+
+% find ./.gradle -type f -name "*.lock" -delete
+
+% find ./.gradle -type f -name "*.bin" -delete
+
+% find ./.gradle -type f -name "gc.properties" -delete
+
+% find ./.gradle -type f -name "cache.properties" -delete
+
+% git rebase master (not success yet)
+
+### Add ignore:
+
+% vi .gitignore         
+
+% git config --global core.excludesFile ~/.gitignore
 
 ### Run standalone game locally:
 
@@ -105,6 +264,33 @@ Changes for porting: build parameters, tool and script environment ...
 
         Java HotSpot(TM) 64-Bit Server VM (build 15+36-1562, mixed mode, sharing)
 
+### Changes and TODOs by 2021-04-08:
+
+1. bug: validate word ok, but remove selected item, so if we choose an item and move list selected to another, that item will be removed if all selected words are matched -> Should remove selected words not list selected items
+
+[Fixed] 2. bug: can't build news if human are the first player in list
+
+[Done] 3. improve: build list of word by order, but each time, should include one or two random words from next steps (always same items each time is boring)
+
+[Done] 4. improve: options to load newer word items (normal load is word with correct < 10, new load < 3)
+
+[Done] 5. improve: Select word move to next list, double ENTER on last list with same selected word equals to SHIFT+ENTER
+
+[Done] 6. improve: bigger and better font size for WordMatch game
+
+[Done] 7. improve: remove default buttons(OK, cancel ... ) from our game dialog and territory dialog
+
+[Done] 8. improve: add newspaper icon to territory canvas, remove Newspaper button from Territory dialog
+
+[Done] 9. improve: add key shortcut for the WordMatch panel
+
+[Done] 10. improve: change kanji item logic, so if a word is reached min correct limit, but got wrong answer after that, the correct count will be reduced, thus can bring the word to test more frequently.
+
+11. improve: show statistics on WordMatch: total learned words / total words, avg tests / learned word, needed tests 
+
+12. bug: after WordMatch game, back to territory canvas and build dialog, new JCoin has not updated, must close Territory and reopen
+
+13. improve: after a while, we'll have a lot of jCoin each turn, need a mechanism to spend these jCoin, for example: maintenance cost of buildings, if not enough, buildings may disappear ... so we have to earn jCoin on every turn
 
 ------------------
 
@@ -114,6 +300,8 @@ This project is licensed under the terms of the
 [GNU General Public License v3.0 with additional permissions](/LICENSE).
 
 Copyright (C) 2001-2019 TripleA contributors.
+
+Part of tientn-jboard-game is (c) by Tran Ngoc Tien.
 
 This program is free software; you can redistribute it and/or modify it under the terms
 of the GNU General Public License as published by the Free Software Foundation; either
