@@ -2,6 +2,8 @@
 
 ![image](https://user-images.githubusercontent.com/20723609/117677335-91142180-b1d8-11eb-9859-8c3f8891e5e1.png)
 
+![image](https://user-images.githubusercontent.com/20723609/117690774-6a101c80-b1e5-11eb-8beb-2dd0782cbe46.png)
+
 A desktop game with language learning feature, coded in Java using Swing and Docker instances. 
 
 Features of territories buidling and board based, turn based war games.
