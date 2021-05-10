@@ -83,6 +83,7 @@ public class JBGTerritoryViewCanvasPanel extends JPanel
     int iResLevel = 0;
     int iProdLevel = 0;
     int iJCoin = 0;
+    String sBasicInfo = null;
     @Setter private boolean factoryExists = false;
     @Setter private int bunkerTotal = 0;
 
@@ -139,7 +140,8 @@ public class JBGTerritoryViewCanvasPanel extends JPanel
     public void updateInfo(
         final String territoryName,
         final String sResBuildings, final String sEcoBuildings,
-        final int iEcoLevel, final int iResLevel, final int iProdLevel, final int iJCoin) {
+        final int iEcoLevel, final int iResLevel, final int iProdLevel, final int iJCoin, 
+        final String sBasicInfo) {
 
         this.territoryName = territoryName;
 
@@ -149,6 +151,7 @@ public class JBGTerritoryViewCanvasPanel extends JPanel
         this.iResLevel = iResLevel;
         this.iProdLevel = iProdLevel;
         this.iJCoin = iJCoin;
+        this.sBasicInfo = sBasicInfo;
 
         //regenerate
         this.map = JBGTerritoryMapBuilder.getInstance().buildMapBackground(JBGConstants.MAP_HORZ_TILES, JBGConstants.MAP_VERT_TILES, false, false);
@@ -301,6 +304,17 @@ public class JBGTerritoryViewCanvasPanel extends JPanel
         Toolkit.getDefaultToolkit().sync();
     }
 
+    private void drawMultilineString(Graphics2D g, String text, int x, int y) {
+        //this kind of text is from TerritoryAttachment.toStringForBasic ... 
+        //but I don't want to change that file, for easier engine update
+        for (String line : text.split("<br>", 20)) {
+            if (line.indexOf("&nbsp;") >= 0) {
+                line = line.replace("&nbsp;", "  ");
+            }
+            g.drawString(line, x, y += g.getFontMetrics().getHeight());
+        }
+    }
+
     private void draw2DItemsOnTop(Graphics g) {
         Graphics2D eg = (Graphics2D) g;
 
@@ -308,9 +322,10 @@ public class JBGTerritoryViewCanvasPanel extends JPanel
         eg.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         eg.setColor(Color.DARK_GRAY);
  
-        eg.drawString(this.territoryName, 2, 10);
+        drawMultilineString(eg, this.sBasicInfo, 2, 0);
+
         if (this.sInstanceMessage != null && this.sInstanceMessage.length() > 0) {
-          eg.drawString(this.sInstanceMessage, 100, 10);            
+          eg.drawString(this.sInstanceMessage, 200, 10);            
         }
 
         rcWorkIcon = drawIconInTile(eg, 3, 270, 0);

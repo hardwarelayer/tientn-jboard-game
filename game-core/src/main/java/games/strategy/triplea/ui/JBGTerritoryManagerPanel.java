@@ -166,6 +166,7 @@ public class JBGTerritoryManagerPanel  extends ActionPanel {
   @Getter private final UiContext uiContext;
 
   @Getter private List<JBGKanjiItem> kanjiList = null;
+  @Getter private String testStatistic = null;
 
   private Territory territoryRef = null;
 
@@ -198,8 +199,15 @@ public class JBGTerritoryManagerPanel  extends ActionPanel {
       this.kanjiList = JBGKanjiUnits.getInstance(tData).getData();
     else
       this.kanjiList = JBGKanjiUnits.getInstance(tData).getNewData();
+    this.testStatistic = String.format("%d/%d %d", 
+      JBGKanjiUnits.getInstance(tData).getTotalMatchedKanjis(),
+      JBGKanjiUnits.getInstance(tData).getTotalKanjis(),
+      JBGKanjiUnits.getInstance(tData).getTotalKanjiTests()
+      );
     return this.kanjiList;
   }
+
+
 
   @Override
   public void performDone() {
@@ -290,21 +298,21 @@ public class JBGTerritoryManagerPanel  extends ActionPanel {
   }
 
   public int getJCoin() {
-    int amt = 0;
     GameData gd = this.getData();
     if (gd != null) {
       try {
         gd.acquireReadLock();
-        amt = gd.getJCoinAmount();
+        this.iJCoin = gd.getJCoinAmount();
       }
       finally {
         gd.releaseReadLock();
       }
     }
-    return amt;
+    return this.iJCoin;
   }
 
   public void setJCoin(final int amt) {
+    this.iJCoin = amt;
     GameData gd = this.getData();
     if (gd != null) {
       try {
@@ -335,7 +343,8 @@ public class JBGTerritoryManagerPanel  extends ActionPanel {
     if (territoryCanvasPanel != null) {
       territoryCanvasPanel.updateInfo(this.territoryRef.getName(),  
         this.sResearchBuildingList, this.sEconomyBuildingList,
-        this.iEcoLevel, this.iResLevel, this.iProdLevel, getJCoin());
+        this.iEcoLevel, this.iResLevel, this.iProdLevel, getJCoin(),
+        makeBasicTerritoryString(this.territoryRef, TerritoryAttachment.get(this.territoryRef)));
     }
 
     return 0;
@@ -380,7 +389,7 @@ public class JBGTerritoryManagerPanel  extends ActionPanel {
     this.iProdLevel = iProd;
     this.sEconomyBuildingList = sEcoBuild;
     this.sResearchBuildingList = sResBuild;
-    this.iJCoin = getJCoin();
+    getJCoin();
 
     saveInfoToAttachment();
   }
@@ -406,36 +415,6 @@ public class JBGTerritoryManagerPanel  extends ActionPanel {
     }
 
   }
- //walking inside the treemodel, will be used later
- //History hist = this.getData().getHistory();
- //walk(hist, root, 0);
- /*
- protected String walk(DefaultTreeModel model, Object o, int level, String res){
-    int  cc;
-    cc = model.getChildCount(o);
-    for( int i=0; i < cc; i++) {
-      Object child = model.getChild(o, i );
-
-      re += child.toString();
-
-      if (model.isLeaf(child))
-        System.out.println(String.valueOf(level) + "#...." + child.toString());
-      else {
-
-            System.out.println(String.valueOf(level) + "#" + child.toString()+"--");
-            res += walk(model,child, level+1, res); 
-        }
-
-       if (child.toString().equals("Combat Move")) {
-        System.out.println(res);
-       }
-
-     }
-
-
-     return res;
-  }
-  */
 
   public void buildNewspaper(final Component parent) {
     GameData gameData = this.getData();
@@ -544,11 +523,11 @@ public class JBGTerritoryManagerPanel  extends ActionPanel {
     purObj.setJCoin(this.iJCoin);
     JScrollPane p = purObj.makePanel(this.uiContext);
 
-    String[] options = {"Cancel"};
+    String[] options = {"閉じる"};
     JOptionPane.showOptionDialog(
             parent,
             p,
-            "Territory Build",
+            "地域建設(ちいき けんせつ)",
             JOptionPane.CANCEL_OPTION,
             JOptionPane.PLAIN_MESSAGE,
             null,
@@ -564,8 +543,7 @@ public class JBGTerritoryManagerPanel  extends ActionPanel {
       setBuildingSlot(0, lstEco, true);
       setBuildingSlot(1, lstRes, true);
 
-      this.iJCoin -= iSpent;
-      setJCoin(this.iJCoin);
+      setJCoin(this.iJCoin - iSpent);
 
       this.iEcoLevel += lstEco.size();
       this.iResLevel += lstRes.size();
@@ -578,12 +556,13 @@ public class JBGTerritoryManagerPanel  extends ActionPanel {
         territoryCanvasPanel.updateInfo(
           this.territoryRef.getName(),
           this.sResearchBuildingList, this.sEconomyBuildingList,
-          this.iEcoLevel, this.iResLevel, this.iProdLevel, getJCoin()
+          this.iEcoLevel, this.iResLevel, this.iProdLevel, getJCoin(),
+          makeBasicTerritoryString(this.territoryRef, TerritoryAttachment.get(this.territoryRef))
           );
       }
     }
     else {
-      this.showAlert(parent, "Can't buy, not enough money!");
+      this.showAlert(parent, "jCoinが足りないので買えない！！！");
       //System.out.println("Can't buy, not enough money!");
     }
 
@@ -634,6 +613,12 @@ public class JBGTerritoryManagerPanel  extends ActionPanel {
     System.out.println("END");
   }
 
+  private String makeBasicTerritoryString(final Territory territory, final TerritoryAttachment ta) {
+    if (ta == null)
+      return String.format("%s<br>領海(りょうかい)", territory.getName());
+    return String.format("%s", ta.toStringForInfo(true, true));
+  }
+
   //JBG
   private JPanel makeInterractiveTerritoryPanel(
       final Territory territory, 
@@ -681,7 +666,8 @@ public class JBGTerritoryManagerPanel  extends ActionPanel {
     this.territoryCanvasPanel = new JBGTerritoryViewCanvasPanel(this);
     territoryCanvasPanel.updateInfo(territory.getName(),  
         sResearchBuildingList, sEconomyBuildingList,
-        iEcoLevel, iResLevel, iProdLevel, getJCoin());
+        iEcoLevel, iResLevel, iProdLevel, getJCoin(), 
+        makeBasicTerritoryString(territory, ta));
 
     territoryViewPanel.add(territoryCanvasPanel);
     //territoryViewPanel.add(new JLabel("This is city skyline"));

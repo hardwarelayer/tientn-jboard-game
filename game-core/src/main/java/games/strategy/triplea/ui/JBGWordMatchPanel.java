@@ -189,6 +189,7 @@ public class JBGWordMatchPanel {
   JList<String> hvListCtl;
   JList<String> vnListCtl;
 
+  JLabel lblStats = null;
   JLabel lblSneakpeek;
   JLabel lblSelKanji;
   JLabel lblSelHiragana;
@@ -198,6 +199,7 @@ public class JBGWordMatchPanel {
 
   JButton btnLoadNormalKanji;
   JButton btnLoadNewKanji;
+  JButton btnStartTest;
 
   private static class ListKeyAction extends AbstractAction {
     JBGWordMatchPanel masterModel = null;
@@ -242,10 +244,14 @@ public class JBGWordMatchPanel {
 
   public void loadNormalKanji() {
     this.kanjiList = parent.getNewKanjiList(false);
+    if (this.lblStats != null)
+      this.lblStats.setText(String.valueOf(parent.getTestStatistic()));
   }
 
   public void loadNewKanji() {
     this.kanjiList = parent.getNewKanjiList(true);    
+    if (this.lblStats != null)
+      this.lblStats.setText(String.valueOf(parent.getTestStatistic()));
   }
 
   protected JButton makebutton(String name,
@@ -501,8 +507,11 @@ public class JBGWordMatchPanel {
 
           int totalJCoin = parent.getJCoin();
           totalJCoin++;
-          parent.setJCoin(totalJCoin);
+          parent.setJCoin(totalJCoin); //set back to parent
           lblJCoinAmount.setText(String.valueOf(totalJCoin));
+
+          //select first list to start a new word select flow
+          chooseKanjiList();
         }
         //update the statistic of word
         if (!updateWordStat(matchRes[0], matchRes[1])) {
@@ -630,7 +639,7 @@ public class JBGWordMatchPanel {
               }
             }
             else if (ke.getKeyCode() == KeyEvent.VK_SLASH && bIsShift) {
-              //question
+              //press question mark
               if (lstName.equals(NAME_LIST_KANJI)) {
                 Object selObj = list.getSelectedValue();
                 if (selObj != null) {
@@ -675,9 +684,13 @@ public class JBGWordMatchPanel {
   }
 
   private void doStartGame() {
+    if (bWordMatchStart)
+      return;
+
     shuffleAllListModels();
     btnLoadNormalKanji.setEnabled(false);
     btnLoadNewKanji.setEnabled(false);
+    btnStartTest.setEnabled(false);
     clearWordListSelection();
     bWordMatchStart = true;
     chooseKanjiList();
@@ -723,6 +736,12 @@ public class JBGWordMatchPanel {
     makeLabel("Kanji matching task", panel, gridbag, c, false);
 
     c.weightx = 1.0; //spacing
+    c.gridx = 1; //col
+    c.gridy = 0; //row
+    c.gridwidth = 1; //column span
+    this.lblStats = makeLabel("Stats:", panel, gridbag, c, false);
+
+    c.weightx = 1.0; //spacing
     c.gridx = 2; //col
     c.gridy = 0; //row
     c.gridwidth = 1; //column span
@@ -740,17 +759,10 @@ public class JBGWordMatchPanel {
     c.gridx = 0;
     c.gridy = 1;
     c.gridwidth = 4;
-    this.lblSneakpeek = makeLabel(sWordMatchEmptyValue, panel, gridbag, c, true);
-    this.lblSneakpeek.setFont(new Font("Arial", Font.PLAIN, 17));
-
-    c.weightx = 1.0;
-    c.gridx = 0;
-    c.gridy = 2;
-    c.gridwidth = 4;
     makeLabel("Selected parts:", panel, gridbag, c, false);
 
     c.gridx = 0;
-    c.gridy = 3;
+    c.gridy = 2;
     c.gridwidth = 1;
     this.lblSelKanji = makeLabel(sWordMatchEmptyValue, panel, gridbag, c, true);
     this.lblSelKanji.setFont(new Font("Arial", Font.PLAIN, 20));
@@ -767,25 +779,22 @@ public class JBGWordMatchPanel {
 
     c.weightx = 1.0;
     c.gridx = 0;
-    c.gridy = 4;
+    c.gridy = 3;
     c.gridwidth = 1;
     this.kanjiListCtl = makeScrollList(NAME_LIST_KANJI, panel, gridbag, c, 1);
 
     c.weightx = 1.0;
     c.gridx = 1;
-    c.gridy = 4;
     c.gridwidth = 1;
     this.hiraListCtl = makeScrollList(NAME_LIST_HIRAGANA, panel, gridbag, c, 6);
 
     c.weightx = 1.0;
     c.gridx = 2;
-    c.gridy = 4;
     c.gridwidth = 1;
     this.hvListCtl = makeScrollList(NAME_LIST_HANVIET, panel, gridbag, c, 15);
 
     c.weightx = 1.0;
     c.gridx = 3;
-    c.gridy = 4;
     c.gridwidth = 1;
     this.vnListCtl = makeScrollList(NAME_LIST_MEANING, panel, gridbag, c, 15);
 
@@ -817,7 +826,7 @@ public class JBGWordMatchPanel {
       }
     };
 
-    c.gridy = 5;
+    c.gridy = 4;
     c.gridx = 0;
     c.gridwidth = 1;
     btnLoadNormalKanji = makeButtonWithAction("(L)正常漢字", panel, gridbag, c, loadNormalKanjiListenerFnc);
@@ -826,10 +835,17 @@ public class JBGWordMatchPanel {
     btnLoadNewKanji = makeButtonWithAction("(N)新漢字", panel, gridbag, c, loadNewKanjiListenerFnc);
     c.gridx = 2;
     c.gridwidth = 1;
-    makeButtonWithAction("(S)開始", panel, gridbag, c, startListenerFnc);
+    btnStartTest = makeButtonWithAction("(S)開始", panel, gridbag, c, startListenerFnc);
     c.gridx = 3;
     c.gridwidth = 1;
     makeButtonWithAction("リセット", panel, gridbag, c, resetListenerFnc);
+
+    c.weightx = 1.0;
+    c.gridx = 0;
+    c.gridy = 5;
+    c.gridwidth = 4;
+    this.lblSneakpeek = makeLabel(sWordMatchEmptyValue, panel, gridbag, c, true);
+    this.lblSneakpeek.setFont(new Font("Arial", Font.PLAIN, 17));
 
     final JScrollPane unitsPane = new JScrollPane();
     unitsPane.setBorder(BorderFactory.createEmptyBorder());

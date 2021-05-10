@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.concurrent.ThreadLocalRandom;
+import lombok.Getter;
+import lombok.Setter;
 
 import lombok.extern.java.Log;
 import java.util.logging.Level;
@@ -36,6 +38,9 @@ public final class JBGKanjiUnits {
   private static Instant timestamp = Instant.EPOCH;
   private List<JBGKanjiItem> originRecords = null;
   private List<JBGKanjiItem> subsetRecords = null;
+  @Getter private int totalKanjis = 0;
+  @Getter private int totalMatchedKanjis = 0;
+  @Getter private int totalKanjiTests = 0;
 
   private JBGKanjiUnits(GameData data) {
 
@@ -81,18 +86,39 @@ public final class JBGKanjiUnits {
     //sort desc by correct count, so we'll traverse top down when load
     sortKanjisByCorrectCount(this.originRecords, true);
     int iCount = 0;
+    //reset 2nd purpose(stats)
+    this.totalKanjis = 0;
+    this.totalMatchedKanjis = 0;
+    this.totalKanjiTests = 0;
+    totalKanjis = this.originRecords.size();
     for (JBGKanjiItem item: this.originRecords) {
-      if (item.getCorrectCount() < iMinTestCorrect) {
-        lstNewItems.add(item);
-        iCount++;
+      //2nd purpose
+      if (item.getCorrectCount() >= JBGConstants.KANJI_MIN_TEST_CORRECT) {
+        totalMatchedKanjis += 1;
+      }
+      totalKanjiTests += item.getTestCount();
+
+      //first purpose of this loop
+      if (iCount <= JBGConstants.KANJI_TOTAL_SUBSET_SIZE) {
+
+        if (item.getCorrectCount() < iMinTestCorrect) {
+          lstNewItems.add(item);
+          iCount++;
+        }
+        else {
+          //get all known items into one list
+          lstKnownItems.add(item);
+        }
+
       }
       else {
-        //get all known items into one list
-        lstKnownItems.add(item);
+        //if first purpose of the loop is done, now checking for break point after 2nd purpose (count stats)
+        if (item.getTestCount() < 1) {
+          //chua test bao gio
+          break;
+        }
       }
-      if (iCount > JBGConstants.KANJI_TOTAL_SUBSET_SIZE) {
-        break;
-      }
+
     }
 
     //at the beginning, this is small to zero number
