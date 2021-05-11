@@ -4,9 +4,7 @@
 
 ![image](https://user-images.githubusercontent.com/20723609/117690774-6a101c80-b1e5-11eb-8beb-2dd0782cbe46.png)
 
-A desktop game with language learning feature, coded in Java using Swing and Docker instances. 
-
-Features of territories buidling and board based, turn based war games.
+A board based, turn based war game, made for desktop, more targeted to local play, with newspaper with articles made by computer on each turn, territory building, language learning feature, coded in Java using Swing and Docker instances. 
 
 Since I have played a lot of strategy series, from Civilization and EU4, IronHearts, Victoria ... But they are over complicated
 
