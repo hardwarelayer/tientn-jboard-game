@@ -105,7 +105,7 @@ public class JBGTerritoryMapBuilder {
             resList.add(JBGConstants.Tile.DESERT_BG);
           }
           else {
-            resList.add(JBGConstants.Tile.SAVANA);
+            resList.add(JBGConstants.Tile.EMPTY);
           }
         }
       }

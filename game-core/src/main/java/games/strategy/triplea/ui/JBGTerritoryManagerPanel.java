@@ -207,7 +207,16 @@ public class JBGTerritoryManagerPanel  extends ActionPanel {
     return this.kanjiList;
   }
 
-
+  public List<JBGKanjiItem> getSpecificKanjiList(ArrayList<String> lstKanjiWords) {
+    GameData tData = getData();
+    this.kanjiList = JBGKanjiUnits.getInstance(tData).getSpecificData(lstKanjiWords);
+    this.testStatistic = String.format("%d/%d %d", 
+      JBGKanjiUnits.getInstance(tData).getTotalMatchedKanjis(),
+      JBGKanjiUnits.getInstance(tData).getTotalKanjis(),
+      JBGKanjiUnits.getInstance(tData).getTotalKanjiTests()
+      );
+    return this.kanjiList;
+  }
 
   @Override
   public void performDone() {

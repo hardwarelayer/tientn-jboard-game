@@ -170,6 +170,7 @@ public class JBGWordMatchPanel {
   private static final String START_KEY = "START_KEY";
   private static final String LOAD_NORMAL_KEY = "LOAD_NORMAL_KEY";
   private static final String LOAD_NEW_KEY = "LOAD_NEW_KEY";
+  private static final String LOAD_NOTE_KEY = "LOAD_NOTE_KEY";
 
   private static final String NAME_LIST_KANJI = "kanji";
   private static final String NAME_LIST_HIRAGANA = "hira";
@@ -183,6 +184,7 @@ public class JBGWordMatchPanel {
   private List<JBGKanjiItem> kanjiList = null;
   int     iCurrentSelectedList = 1;
 
+  ArrayList<String> lstProblematicWords = new ArrayList<>();
 
   JList<String> kanjiListCtl;
   JList<String> hiraListCtl;
@@ -199,6 +201,7 @@ public class JBGWordMatchPanel {
 
   JButton btnLoadNormalKanji;
   JButton btnLoadNewKanji;
+  JButton btnLoadNotedKanji;
   JButton btnStartTest;
 
   private static class ListKeyAction extends AbstractAction {
@@ -227,19 +230,33 @@ public class JBGWordMatchPanel {
             this.masterModel.chooseHanVietList();
           } else if (name.equals(NO_4)) {
             this.masterModel.chooseMeaningList();
-          } else if (name.equals(START_KEY)) {
-            this.masterModel.doStartGame();
-          } else if (name.equals(LOAD_NORMAL_KEY)) {
-            this.masterModel.doLoadNormalKanji();
-          } else if (name.equals(LOAD_NEW_KEY)) {
-            this.masterModel.doLoadNewKanji();
+          } 
+
+          if (!this.masterModel.isGameStarted()) {
+            //these keys only active on waiting step
+            //in testing step, key is for selecting words inside lists
+            if (name.equals(START_KEY)) {
+              this.masterModel.doStartGame();
+            } else if (name.equals(LOAD_NORMAL_KEY)) {
+              this.masterModel.doLoadNormalKanji();
+            } else if (name.equals(LOAD_NEW_KEY)) {
+              this.masterModel.doLoadNewKanji();
+            } else if (name.equals(LOAD_NOTE_KEY)) {
+              this.masterModel.doLoadNotedKanji();
+            }
+
           }
+
      }
   }
 
   public JBGWordMatchPanel(JBGTerritoryManagerPanel p) {
     this.parent = p;
-    loadNormalKanji();
+    //loadNormalKanji();
+  }
+
+  public boolean isGameStarted() {
+    return this.bWordMatchStart;
   }
 
   public void loadNormalKanji() {
@@ -252,6 +269,16 @@ public class JBGWordMatchPanel {
     this.kanjiList = parent.getNewKanjiList(true);    
     if (this.lblStats != null)
       this.lblStats.setText(String.valueOf(parent.getTestStatistic()));
+  }
+
+  public void loadNotedKanji() {
+    if (this.lstProblematicWords.size() > 0) {
+      this.kanjiList = parent.getSpecificKanjiList(this.lstProblematicWords);
+    }
+    else {
+      btnLoadNotedKanji.setEnabled(false);
+    }
+    //not load statistic because we don't recalculate it in parent
   }
 
   protected JButton makebutton(String name,
@@ -441,14 +468,34 @@ public class JBGWordMatchPanel {
     }
   }
 
-  private void removeItemFromList(JList lst, final int idx) {
+  private int removeItemFromList(JList lst, final int idx) {
     DefaultListModel model = (DefaultListModel) lst.getModel();
     model.remove(idx);
+    return model.size();
+  }
+
+  private void noteWord(final String kanjiWord) {
+    if (!this.lstProblematicWords.contains(kanjiWord))
+      this.lstProblematicWords.add(kanjiWord);
+  }
+
+  private void unnoteWord(final String kanjiWord) {
+    if (this.lstProblematicWords.contains(kanjiWord))
+      this.lstProblematicWords.remove(kanjiWord);
   }
 
   public void showSneakpeek(final String kanjiWord) {
+    if (!this.isGameStarted()) return;
     final String sVal = getContentOfKanjiWord(kanjiWord); 
     lblSneakpeek.setText(sVal);
+
+    int totalJCoin = parent.getJCoin();
+    if (totalJCoin > 0) totalJCoin--;
+    parent.setJCoin(totalJCoin); //set back to parent
+    lblJCoinAmount.setText(String.valueOf(totalJCoin));
+
+    noteWord(kanjiWord);
+
   }
 
   public boolean validateKanjiSelection() {
@@ -472,6 +519,8 @@ public class JBGWordMatchPanel {
       allFieldSet = false;
     }
 
+    int totalJCoin = parent.getJCoin();
+
     if (allFieldSet) {
 
       final String kanji = lblSelKanji.getText();
@@ -489,6 +538,9 @@ public class JBGWordMatchPanel {
         final String[] matchRes = isSelectedWordMatched(kanji, hira, hv, viet);
         if (matchRes[1].equals(MATCH_WORD_OK) && matchRes[0].length() > 0) {
 
+          //reward
+          totalJCoin++;
+
           StringBuilder sb = new StringBuilder();
           sb.append(kanji);
           sb.append("-");
@@ -500,24 +552,32 @@ public class JBGWordMatchPanel {
           lblSneakpeek.setText(sb.toString());
 
           //remove the correct matched word set from lists
-          removeItemFromList(kanjiListCtl, iKanjiSel);
+          int iRemainingItems = removeItemFromList(kanjiListCtl, iKanjiSel);
           removeItemFromList(hiraListCtl, iHiraSel);
           removeItemFromList(hvListCtl, iHvSel);
           removeItemFromList(vnListCtl, iVnSel);
 
-          int totalJCoin = parent.getJCoin();
-          totalJCoin++;
-          parent.setJCoin(totalJCoin); //set back to parent
-          lblJCoinAmount.setText(String.valueOf(totalJCoin));
-
-          //select first list to start a new word select flow
-          chooseKanjiList();
+          if (iRemainingItems > 0) {
+            //select first list to start a new word select flow
+            chooseKanjiList();
+          }
+          else {
+            //no more word
+            doEndGame();
+          }
+        }
+        else {
+          //not correct!
+          if (totalJCoin > 0) totalJCoin--;
+          noteWord(kanji);
         }
         //update the statistic of word
         if (!updateWordStat(matchRes[0], matchRes[1])) {
           //can't update
           System.out.println("cannot update work of" + matchRes[1]);
         }
+        parent.setJCoin(totalJCoin); //set back to parent
+        lblJCoinAmount.setText(String.valueOf(totalJCoin));
         clearWordListSelection();
 
       }
@@ -529,7 +589,7 @@ public class JBGWordMatchPanel {
 
   public boolean updateSelectedKanjis(final String sColName, final String value) {
 
-    if (!this.bWordMatchStart) return false;
+    if (!isGameStarted()) return false;
 
     lblSneakpeek.setText(sWordMatchEmptyValue);
 
@@ -580,7 +640,9 @@ public class JBGWordMatchPanel {
     DefaultListModel<String> listModel = (DefaultListModel<String>) lstObj.getModel();
     if (listModel.getSize() > 0)
       listModel.removeAllElements();
-  
+    if (this.kanjiList == null || this.kanjiList.size() < 1)
+      return;
+
     for (JBGKanjiItem kanjiItem: this.kanjiList) {
       switch (sColName) {
       case NAME_LIST_KANJI:
@@ -684,20 +746,33 @@ public class JBGWordMatchPanel {
   }
 
   private void doStartGame() {
-    if (bWordMatchStart)
+    if (isGameStarted())
       return;
 
     shuffleAllListModels();
     btnLoadNormalKanji.setEnabled(false);
     btnLoadNewKanji.setEnabled(false);
+    btnLoadNotedKanji.setEnabled(false);
     btnStartTest.setEnabled(false);
     clearWordListSelection();
     bWordMatchStart = true;
     chooseKanjiList();
   }
 
+  private void doEndGame() {
+    if (!isGameStarted())
+      return;
+
+    btnLoadNormalKanji.setEnabled(true);
+    btnLoadNewKanji.setEnabled(true);
+    btnLoadNotedKanji.setEnabled(true);
+    btnStartTest.setEnabled(true);
+    clearWordListSelection();
+    bWordMatchStart = false;
+  }
+
   private void doLoadNormalKanji() {
-    if (!bWordMatchStart) {
+    if (!isGameStarted() && this.lstProblematicWords.size() > 0) {
       loadNormalKanji();
       reloadAllLists();
       clearWordListSelection();
@@ -705,8 +780,16 @@ public class JBGWordMatchPanel {
   }
 
   private void doLoadNewKanji() {
-    if (!bWordMatchStart) {
+    if (!isGameStarted()) {
       loadNewKanji();
+      reloadAllLists();
+      clearWordListSelection();
+    }
+  }
+
+  private void doLoadNotedKanji() {
+    if (!isGameStarted()) {
+      loadNotedKanji();
       reloadAllLists();
       clearWordListSelection();
     }
@@ -819,10 +902,10 @@ public class JBGWordMatchPanel {
       }
     };
 
-    ActionListener resetListenerFnc = new ActionListener() {
+    ActionListener loadNotedListenerFnc = new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        clearWordListSelection();
+        doLoadNotedKanji();
       }
     };
 
@@ -835,10 +918,10 @@ public class JBGWordMatchPanel {
     btnLoadNewKanji = makeButtonWithAction("(N)新漢字", panel, gridbag, c, loadNewKanjiListenerFnc);
     c.gridx = 2;
     c.gridwidth = 1;
-    btnStartTest = makeButtonWithAction("(S)開始", panel, gridbag, c, startListenerFnc);
+    btnLoadNotedKanji = makeButtonWithAction("(O)問題の言葉", panel, gridbag, c, loadNotedListenerFnc);
     c.gridx = 3;
     c.gridwidth = 1;
-    makeButtonWithAction("リセット", panel, gridbag, c, resetListenerFnc);
+    btnStartTest = makeButtonWithAction("(S)開始", panel, gridbag, c, startListenerFnc);
 
     c.weightx = 1.0;
     c.gridx = 0;
@@ -862,6 +945,7 @@ public class JBGWordMatchPanel {
     inMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_S, 0), START_KEY);
     inMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_L, 0), LOAD_NORMAL_KEY);
     inMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_N, 0), LOAD_NEW_KEY);
+    inMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_O, 0), LOAD_NOTE_KEY);
 
     inMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), UP);
     inMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), DOWN);
@@ -875,6 +959,7 @@ public class JBGWordMatchPanel {
     actMap.put(START_KEY, new ListKeyAction(START_KEY, this));
     actMap.put(LOAD_NORMAL_KEY, new ListKeyAction(LOAD_NORMAL_KEY, this));
     actMap.put(LOAD_NEW_KEY, new ListKeyAction(LOAD_NEW_KEY, this));
+    actMap.put(LOAD_NOTE_KEY, new ListKeyAction(LOAD_NOTE_KEY, this));
 
     return unitsPane;
   }

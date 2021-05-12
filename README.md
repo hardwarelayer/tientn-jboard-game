@@ -260,27 +260,33 @@ Still keep the folder of engine 2.3 before changed in:
 
     % git config --global core.excludesFile ~/.gitignore
 
+    ***Fix wrongly put *.class:***
+
+    % find . -name "*.class" -exec git rm -f {} \; (if error find: fts_read: No such file or directory, run repeatedly)
+    % find . -name "*.lock" -exec git rm -f {} \;
+    % find . -name "*.bin" -exec git rm -f {} \;
+
 ### Run standalone game locally:
 
     1. Not need docker or db
 
     2. use ./run.sh
 
-    ####Note: current java version
+####Note: current java version
 
-        java version "15" 2020-09-15
+    java version "15" 2020-09-15
 
-        Java(TM) SE Runtime Environment (build 15+36-1562)
+    Java(TM) SE Runtime Environment (build 15+36-1562)
 
-        Java HotSpot(TM) 64-Bit Server VM (build 15+36-1562, mixed mode, sharing)
+    Java HotSpot(TM) 64-Bit Server VM (build 15+36-1562, mixed mode, sharing)
 
-*** Changes and TODOs: ***
+***Changes and TODOs:***
 
     2020-10-04: load tooltip.properties with UTF-8
 
     Other changes see commits (huge)
 
-*** From 2021-04-08 ***
+***From 2021-04-08***
 
     1. bug: validate word ok, but remove selected item, so if we choose an item and move list selected to another, that item will be removed if all selected words are matched -> Should remove selected words not list selected items
 
@@ -306,9 +312,17 @@ Still keep the folder of engine 2.3 before changed in:
 
     [Fixed] 12. bug: after WordMatch game, back to territory canvas and build dialog, new JCoin has not updated, must close Territory and reopen
 
-    13. improve: after a while, we'll have a lot of jCoin each turn, need a mechanism to spend these jCoin, for example: maintenance cost of buildings, if not enough, buildings may disappear ... so we have to earn jCoin on every turn
+    13. improve: after a while, we'll have a lot of jCoin each turn, need a mechanism to spend the jCoin, for example: maintenance cost of buildings, if not enough, buildings may disappear ... so we have to earn jCoin on every turn
 
     [Done] 14. improve: focus back to first word list after complete one test
+
+    [Done] 15. improve: can make a new test round in WordMatch after all words were clean
+
+    [Done] 16. improve: WordMatch remember missed word and questioned word, and refill only these words if needed (click on mondai's words btn)
+
+    [Done] 17. improve: deduct jCoin if use QUESTION_MARK on WordMatch, deduct jCoin if submit invalid combination
+
+    18. new feature: use jCoin to trade on virtual crypto market (use real market data)
 
 ------------------
 
@@ -319,7 +333,7 @@ This project is licensed under the terms of the
 
 Copyright (C) 2001-2019 TripleA contributors.
 
-Part of tientn-jboard-game is (c) by Tran Ngoc Tien.
+All newly added features in tientn-jboard-game (c) by Tran Ngoc Tien.
 
 This program is free software; you can redistribute it and/or modify it under the terms
 of the GNU General Public License as published by the Free Software Foundation; either

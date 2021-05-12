@@ -141,6 +141,21 @@ public final class JBGKanjiUnits {
 
   }
 
+  private void buildSpecificRecords(final ArrayList<String> lstKanjiWords) {
+    int iTotalSpecificItems = lstKanjiWords.size();
+
+    this.subsetRecords = new ArrayList<>();
+
+    for (JBGKanjiItem item: this.originRecords) {
+      if (lstKanjiWords.contains(item.getKanji())) {
+        this.subsetRecords.add(item);
+        if (this.subsetRecords.size() >= iTotalSpecificItems)
+          break;
+      }
+    }
+
+  }
+
   public static JBGKanjiUnits getInstance(GameData data) {
     // cache properties for 5 seconds
     if (kjp == null || timestamp.plusSeconds(5).isBefore(Instant.now())) {
@@ -162,6 +177,11 @@ public final class JBGKanjiUnits {
     return this.subsetRecords;
   }
 
+  public List<JBGKanjiItem> getSpecificData(ArrayList<String> lstKanjiWords) {
+    //only load the kanjis in the string list
+    buildSpecificRecords(lstKanjiWords);
+    return this.subsetRecords;
+  }
 /*
   private static final String KANJI_FILE = "kanji.csv";
       //this.originRecords = loadKanjiFromResource(KANJI_FILE);

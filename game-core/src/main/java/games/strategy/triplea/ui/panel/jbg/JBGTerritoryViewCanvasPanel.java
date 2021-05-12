@@ -15,6 +15,7 @@ import java.awt.Toolkit;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.Font;
+import java.awt.GradientPaint;
 import java.awt.event.*;
 import javax.swing.JPanel;
 import games.strategy.triplea.ResourceLoader;
@@ -197,7 +198,7 @@ public class JBGTerritoryViewCanvasPanel extends JPanel
         for (int i = 0; i < iTotalCloud; i++) {
             //minimum delay is 1, mean it always change with the standard timer here
             JBGCanvasItem item = new JBGCanvasItem(
-                getRandom(0, iCanvasWidth - JBGConstants.TILE_WIDTH), iY + (i*2), DEFAULT_TIMER_CLOCK*i, 1, 0, JBGConstants.Tile.CLOUD, 
+                getRandom(0, iCanvasWidth - JBGConstants.TILE_WIDTH), iY + (i*10), DEFAULT_TIMER_CLOCK*i, 1, 0, JBGConstants.Tile.CLOUD, 
                 iCanvasWidth, iCanvasHeight, JBGConstants.TILE_WIDTH, JBGConstants.TILE_HEIGHT,
                 true);
             movingClouds.add(item);
@@ -264,6 +265,7 @@ public class JBGTerritoryViewCanvasPanel extends JPanel
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
+
         g.setColor(Color.black);
         g.fillRect(0, 0, iCanvasWidth, iCanvasHeight);
 
@@ -281,13 +283,13 @@ public class JBGTerritoryViewCanvasPanel extends JPanel
         if (this.bunkerTotal > 0) {
             for (int i = 0; i < this.bunkerTotal; i++) {
               if (i >= JBGConstants.MAP_HORZ_TILES) break;
-              drawBunker(g, i+1, 6);
+              drawBunker(g, i+1, 5);
             }
         }
         drawResearchBuildings(g);
         drawEconomyBuildings(g);
 
-        drawMapUnits(g);
+        drawMapUnits(g, 5);
 
         if (!flgFirstPaintDone) {
             flgFirstPaintDone = true;
@@ -313,6 +315,14 @@ public class JBGTerritoryViewCanvasPanel extends JPanel
             }
             g.drawString(line, x, y += g.getFontMetrics().getHeight());
         }
+    }
+
+    private void drawUnitCount(Graphics2D g, int count, int x, int y) {
+        g.setFont(new Font("Arial", Font.PLAIN, 8));
+        g.setColor(Color.YELLOW);
+        int iTextX = x - (JBGConstants.TILE_WIDTH + g.getFontMetrics().getHeight());
+        int iTextY = (y + JBGConstants.TILE_HEIGHT) - (g.getFontMetrics().getHeight() / 2);
+        g.drawString(String.format("(%d)", count), x, iTextY);
     }
 
     private void draw2DItemsOnTop(Graphics g) {
@@ -398,6 +408,8 @@ public class JBGTerritoryViewCanvasPanel extends JPanel
         // map Tile from the tileset
         int mx = t.ordinal()%JBGConstants.TILESET_COLS;
         int my = t.ordinal()/JBGConstants.TILESET_ROWS;
+        if (mx > iCanvasWidth) return;
+        if (my > iCanvasHeight) return;
         g.drawImage(tileset, 
             x, y, x+JBGConstants.TILE_WIDTH, y+JBGConstants.TILE_HEIGHT, //where to draw
             mx*JBGConstants.TILE_WIDTH, my*JBGConstants.TILE_HEIGHT,  
@@ -407,15 +419,28 @@ public class JBGTerritoryViewCanvasPanel extends JPanel
     }
 
     protected void drawMapBackground(Graphics g) {
+
+        Color startColor = new Color(192, 192, 192);
+        Color endColor = new Color(130,187,101);
+        int iStartGradY = (JBGConstants.MAP_VERT_TILES - 13) * JBGConstants.TILE_HEIGHT;
+        int iEndGradY = (JBGConstants.MAP_VERT_TILES - 8) * JBGConstants.TILE_HEIGHT;
+        GradientPaint gradient = new GradientPaint(0, iStartGradY, startColor, 0, iEndGradY, endColor);
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setPaint(gradient);
+        g2d.fillRect(0, iStartGradY, iCanvasWidth, iEndGradY-iStartGradY);
+
         for(int i=0;i<JBGConstants.MAP_HORZ_TILES;i++) {
 
             for(int j=0;j<JBGConstants.MAP_VERT_TILES;j++) {
                 int iRowCols = j*JBGConstants.MAP_HORZ_TILES;
                 iRowCols += i;
-                drawTile(
-                    g, map.get(iRowCols), 
-                    i*JBGConstants.TILE_WIDTH, j*JBGConstants.TILE_HEIGHT
-                    );
+                JBGConstants.Tile t = map.get(iRowCols);
+                if (t != JBGConstants.Tile.EMPTY) {
+                    drawTile(
+                        g, map.get(iRowCols), 
+                        i*JBGConstants.TILE_WIDTH, j*JBGConstants.TILE_HEIGHT
+                        );
+                }
             }
 
         }
@@ -471,17 +496,17 @@ public class JBGTerritoryViewCanvasPanel extends JPanel
     }
 
     protected void drawFactory1(Graphics g, int x, int y) {
-        drawTile(g, JBGConstants.Tile.FACTORY11_TOP, (x*JBGConstants.TILE_WIDTH), JBGConstants.TILE_HEIGHT*y-4);
-        drawTile(g, JBGConstants.Tile.FACTORY12_TOP, ((x+1)*JBGConstants.TILE_WIDTH), JBGConstants.TILE_HEIGHT*y-4);
-        drawTile(g, JBGConstants.Tile.FACTORY11_BASE, (x*JBGConstants.TILE_WIDTH), JBGConstants.TILE_HEIGHT*(y+1)-4);
-        drawTile(g, JBGConstants.Tile.FACTORY12_BASE, ((x+1)*JBGConstants.TILE_WIDTH), JBGConstants.TILE_HEIGHT*(y+1)-4);
+        drawTile(g, JBGConstants.Tile.FACTORY11_TOP, iCanvasWidth-((x+2)*JBGConstants.TILE_WIDTH), JBGConstants.TILE_HEIGHT*y-4);
+        drawTile(g, JBGConstants.Tile.FACTORY12_TOP, iCanvasWidth-((x+1)*JBGConstants.TILE_WIDTH), JBGConstants.TILE_HEIGHT*y-4);
+        drawTile(g, JBGConstants.Tile.FACTORY11_BASE, iCanvasWidth-((x+2)*JBGConstants.TILE_WIDTH), JBGConstants.TILE_HEIGHT*(y+1)-4);
+        drawTile(g, JBGConstants.Tile.FACTORY12_BASE, iCanvasWidth-((x+1)*JBGConstants.TILE_WIDTH), JBGConstants.TILE_HEIGHT*(y+1)-4);
     }
 
     protected void drawFactory2(Graphics g, int x, int y) {
-        drawTile(g, JBGConstants.Tile.FACTORY21_TOP, (x*JBGConstants.TILE_WIDTH), JBGConstants.TILE_HEIGHT*y-4);
-        drawTile(g, JBGConstants.Tile.FACTORY22_TOP, ((x+1)*JBGConstants.TILE_WIDTH), JBGConstants.TILE_HEIGHT*y-4);
-        drawTile(g, JBGConstants.Tile.FACTORY21_BASE, (x*JBGConstants.TILE_WIDTH), JBGConstants.TILE_HEIGHT*(y+1)-4);
-        drawTile(g, JBGConstants.Tile.FACTORY22_BASE, ((x+1)*JBGConstants.TILE_WIDTH), JBGConstants.TILE_HEIGHT*(y+1)-4);
+        drawTile(g, JBGConstants.Tile.FACTORY21_TOP, iCanvasWidth-((x+2)*JBGConstants.TILE_WIDTH), JBGConstants.TILE_HEIGHT*y-4);
+        drawTile(g, JBGConstants.Tile.FACTORY22_TOP, iCanvasWidth-((x+1)*JBGConstants.TILE_WIDTH), JBGConstants.TILE_HEIGHT*y-4);
+        drawTile(g, JBGConstants.Tile.FACTORY21_BASE, iCanvasWidth-((x+2)*JBGConstants.TILE_WIDTH), JBGConstants.TILE_HEIGHT*(y+1)-4);
+        drawTile(g, JBGConstants.Tile.FACTORY22_BASE, iCanvasWidth-((x+1)*JBGConstants.TILE_WIDTH), JBGConstants.TILE_HEIGHT*(y+1)-4);
     }
 
     protected void drawSomeTreeOnHorizon(Graphics g) {
@@ -490,75 +515,148 @@ public class JBGTerritoryViewCanvasPanel extends JPanel
         }
     }
 
-    protected void drawMapUnits(Graphics g) {
+    protected void drawMapUnits(Graphics g, int y) {
 
-        int iUnitX = 0;
+        int iUnitX = 4;
+        int iUnitY = JBGConstants.TILE_HEIGHT*y + 8;
+        int iUnitRow = 0;
+        int iUnitRowIncrement = JBGConstants.TILE_HEIGHT;
+        int iUnitColIncrement = JBGConstants.TILE_WIDTH - 10;
+        Graphics2D g2d = (Graphics2D) g;
+
         for (final UnitCategory item : units) {
 
           String itemType = item.getType().getName();
           int itemSize = item.getUnits().size();
           //System.out.println(itemType + " " + String.valueOf(itemSize));
 
-          int iUnitCount = 1;
-          if (itemSize > 10) {
-            iUnitCount = 2;
+          int iUnitCount = itemSize;
+          if (itemSize > 18) {
+            iUnitCount = 18;
           }
-          if (itemSize > 40) {
-            iUnitCount = 3;
+          if (itemType.equals(JBGConstants.MAP_UNIT_INFANTRY) ) {
+            int iDrawUnitX = iUnitX;
+            int iDrawUnitY = iUnitY + (iUnitRowIncrement*iUnitRow);
+            iUnitRow++;
+
+            for (int i = 0; i < iUnitCount; i++) {
+                drawTile(g, JBGConstants.Tile.INFANTRY, iDrawUnitX, iDrawUnitY);
+                iDrawUnitX += iUnitColIncrement;
+            }
+            drawUnitCount(g2d, itemSize, iDrawUnitX, iDrawUnitY);
           }
-          if (itemType.equals(JBGConstants.MAP_UNIT_INFANTRY) ||
-                itemType.equals(JBGConstants.MAP_UNIT_ELITE) || 
-                itemType.equals(JBGConstants.MAP_UNIT_MARINE)
-                ) {
-                for (int i = 0; i < iUnitCount; i++) {
-                    drawTile(g, JBGConstants.Tile.INFANTRY, iUnitX, 
-                        JBGConstants.TILE_HEIGHT*(JBGConstants.MAP_VERT_TILES - 2)-2);
-                    iUnitX += JBGConstants.TILE_WIDTH;
-                }
+          else if (itemType.equals(JBGConstants.MAP_UNIT_ELITE) ) {
+            int iDrawUnitX = iUnitX;
+            int iDrawUnitY = iUnitY + (iUnitRowIncrement*iUnitRow);
+            iUnitRow++;
+
+            for (int i = 0; i < iUnitCount; i++) {
+                drawTile(g, JBGConstants.Tile.ELITE_INFANTRY, iDrawUnitX, iDrawUnitY);
+                iDrawUnitX += iUnitColIncrement;
+            }
+            drawUnitCount(g2d, itemSize, iDrawUnitX, iDrawUnitY);
+          }
+          else if (itemType.equals(JBGConstants.MAP_UNIT_MARINE) ) {
+            int iDrawUnitX = iUnitX;
+            int iDrawUnitY = iUnitY + (iUnitRowIncrement*iUnitRow);
+            iUnitRow++;
+
+            for (int i = 0; i < iUnitCount; i++) {
+                drawTile(g, JBGConstants.Tile.MARINE, iDrawUnitX, iDrawUnitY);
+                iDrawUnitX += iUnitColIncrement;
+            }
+            drawUnitCount(g2d, itemSize, iDrawUnitX, iDrawUnitY);
           }
           else if (itemType.equals(JBGConstants.MAP_UNIT_MECH_INFANTRY)) {
+            int iDrawUnitX = iUnitX;
+            int iDrawUnitY = iUnitY + (iUnitRowIncrement*iUnitRow);
+            iUnitRow++;
+
             for (int i = 0; i < iUnitCount; i++) {
-                drawTile(g, JBGConstants.Tile.MECH_INFANTRY, iUnitX, 
-                    JBGConstants.TILE_HEIGHT*(JBGConstants.MAP_VERT_TILES - 2)-2);
-                iUnitX += JBGConstants.TILE_WIDTH;
+                drawTile(g, JBGConstants.Tile.MECH_INFANTRY, iDrawUnitX, iDrawUnitY);
+                iDrawUnitX += iUnitColIncrement;
             }
+            drawUnitCount(g2d, itemSize, iDrawUnitX, iDrawUnitY);
           }
           else if (itemType.equals(JBGConstants.MAP_UNIT_TANK)) {
+            int iDrawUnitX = iUnitX;
+            int iDrawUnitY = iUnitY + (iUnitRowIncrement*iUnitRow);
+            iUnitRow++;
+
             for (int i = 0; i < iUnitCount; i++) {
-                drawTile(g, JBGConstants.Tile.TANK, iUnitX, 
-                    JBGConstants.TILE_HEIGHT*(JBGConstants.MAP_VERT_TILES - 2)-2);
-                iUnitX += JBGConstants.TILE_WIDTH;
+                drawTile(g, JBGConstants.Tile.TANK, iDrawUnitX, iDrawUnitY);
+                iDrawUnitX += iUnitColIncrement;
             }
+            drawUnitCount(g2d, itemSize, iDrawUnitX, iDrawUnitY);
           }
-          else if (itemType.equals(JBGConstants.MAP_UNIT_APC)) {
+          else if (itemType.equals(JBGConstants.MAP_UNIT_APC) || itemType.equals(JBGConstants.MAP_UNIT_TANKETTE)) {
+            int iDrawUnitX = iUnitX;
+            int iDrawUnitY = iUnitY + (iUnitRowIncrement*iUnitRow);
+            iUnitRow++;
+
             for (int i = 0; i < iUnitCount; i++) {
-                drawTile(g, JBGConstants.Tile.APC, iUnitX, 
-                    JBGConstants.TILE_HEIGHT*(JBGConstants.MAP_VERT_TILES - 2)-2);
-                iUnitX += JBGConstants.TILE_WIDTH;
+                drawTile(g, JBGConstants.Tile.APC, iDrawUnitX, iDrawUnitY);
+                iDrawUnitX += iUnitColIncrement;
             }
-            
+            drawUnitCount(g2d, itemSize, iDrawUnitX, iDrawUnitY);            
           }
           else if (itemType.equals(JBGConstants.MAP_UNIT_FLAK)) {
+            int iDrawUnitX = iUnitX;
+            int iDrawUnitY = iUnitY + (iUnitRowIncrement*iUnitRow);
+            iUnitRow++;
+
             for (int i = 0; i < iUnitCount; i++) {
-                drawTile(g, JBGConstants.Tile.FLAK, iUnitX, 
-                    JBGConstants.TILE_HEIGHT*(JBGConstants.MAP_VERT_TILES - 2)-2);
-                iUnitX += JBGConstants.TILE_WIDTH;
+                drawTile(g, JBGConstants.Tile.FLAK, iDrawUnitX, iDrawUnitY);
+                iDrawUnitX += iUnitColIncrement;
             }
+            drawUnitCount(g2d, itemSize, iDrawUnitX, iDrawUnitY);
           }
           else if (itemType.equals(JBGConstants.MAP_UNIT_ARTILLERY)) {
-            for (int i = 0; i < iUnitCount; i++) {
-                drawTile(g, JBGConstants.Tile.ARTY, iUnitX, 
-                    JBGConstants.TILE_HEIGHT*(JBGConstants.MAP_VERT_TILES - 2)-2);
-                iUnitX += JBGConstants.TILE_WIDTH;
-            }
-          }
-          else if (itemType.equals(JBGConstants.MAP_UNIT_FIGHTER) ||
-            itemType.equals(JBGConstants.MAP_UNIT_FIGHTER2) ||
-            itemType.equals(JBGConstants.MAP_UNIT_FIGHTER3) ||
-            itemType.equals(JBGConstants.MAP_UNIT_BOMBER) ||
-            itemType.equals(JBGConstants.MAP_UNIT_BOMBER2)
-            ) {
+            int iDrawUnitX = iUnitX;
+            int iDrawUnitY = iUnitY + (iUnitRowIncrement*iUnitRow);
+            iUnitRow++;
 
+            for (int i = 0; i < iUnitCount; i++) {
+                drawTile(g, JBGConstants.Tile.ARTY, iDrawUnitX, iDrawUnitY);
+                iDrawUnitX += iUnitColIncrement;
+            }
+            drawUnitCount(g2d, itemSize, iDrawUnitX, iDrawUnitY);
+          }
+          else if (itemType.equals(JBGConstants.MAP_UNIT_EARLY_FIGHTER)) {
+                int iDrawUnitX = iCanvasWidth - (JBGConstants.TILE_WIDTH * 6);
+                int iDrawUnitY = JBGConstants.TILE_HEIGHT*(JBGConstants.MAP_VERT_TILES - 2)-2;;
+                drawTile(g, JBGConstants.Tile.FIGHTER, iDrawUnitX, iDrawUnitY);
+                drawUnitCount(g2d, itemSize, iDrawUnitX+JBGConstants.TILE_WIDTH/2, iDrawUnitY);
+          }
+          else if (itemType.equals(JBGConstants.MAP_UNIT_FIGHTER)) {
+                int iDrawUnitX = iCanvasWidth - (JBGConstants.TILE_WIDTH * 5);
+                int iDrawUnitY = JBGConstants.TILE_HEIGHT*(JBGConstants.MAP_VERT_TILES - 2)-2;;
+                drawTile(g, JBGConstants.Tile.FIGHTER, iDrawUnitX, iDrawUnitY);
+                drawUnitCount(g2d, itemSize, iDrawUnitX+JBGConstants.TILE_WIDTH/2, iDrawUnitY);
+          }
+          else if (itemType.equals(JBGConstants.MAP_UNIT_FIGHTER2)) {
+                int iDrawUnitX = iCanvasWidth - (JBGConstants.TILE_WIDTH * 4);
+                int iDrawUnitY = JBGConstants.TILE_HEIGHT*(JBGConstants.MAP_VERT_TILES - 2)-2;;
+                drawTile(g, JBGConstants.Tile.FIGHTER, iDrawUnitX, iDrawUnitY);
+                drawUnitCount(g2d, itemSize, iDrawUnitX+JBGConstants.TILE_WIDTH/2, iDrawUnitY);
+          }
+          else if (itemType.equals(JBGConstants.MAP_UNIT_FIGHTER3)) {
+                int iDrawUnitX = iCanvasWidth - (JBGConstants.TILE_WIDTH * 3);
+                int iDrawUnitY = JBGConstants.TILE_HEIGHT*(JBGConstants.MAP_VERT_TILES - 2)-2;;
+                drawTile(g, JBGConstants.Tile.FIGHTER, iDrawUnitX, iDrawUnitY);
+                drawUnitCount(g2d, itemSize, iDrawUnitX+JBGConstants.TILE_WIDTH/2, iDrawUnitY);
+          }
+          else if (itemType.equals(JBGConstants.MAP_UNIT_BOMBER)) {
+                int iDrawUnitX = iCanvasWidth - (JBGConstants.TILE_WIDTH * 2);
+                int iDrawUnitY = JBGConstants.TILE_HEIGHT*(JBGConstants.MAP_VERT_TILES - 2)-2;;
+                drawTile(g, JBGConstants.Tile.BOMBER, iDrawUnitX, iDrawUnitY);
+                drawUnitCount(g2d, itemSize, iDrawUnitX+JBGConstants.TILE_WIDTH/2, iDrawUnitY);
+          }
+          else if (itemType.equals(JBGConstants.MAP_UNIT_BOMBER2)) {
+                int iDrawUnitX = iCanvasWidth - (JBGConstants.TILE_WIDTH * 1);
+                int iDrawUnitY = JBGConstants.TILE_HEIGHT*(JBGConstants.MAP_VERT_TILES - 2)-2;;
+                drawTile(g, JBGConstants.Tile.BOMBER, iDrawUnitX, iDrawUnitY);
+                drawUnitCount(g2d, itemSize, iDrawUnitX+JBGConstants.TILE_WIDTH/2, iDrawUnitY);
           }
           else if (itemType.equals(JBGConstants.MAP_UNIT_SHIP_SUBMARINE) ||
                     itemType.equals(JBGConstants.MAP_UNIT_SHIP_SUBMARINE2)

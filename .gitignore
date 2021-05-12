@@ -7,6 +7,9 @@
 .settings
 .checkstyle
 
+*.bin
+*.class
+*.lock
 *.iml
 *.backup
 *.swp
