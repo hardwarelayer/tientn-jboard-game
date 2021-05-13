@@ -39,7 +39,7 @@ public class JBGTerritoryMapBuilder {
   private List<JBGConstants.Tile> buildSkyHorizon(int type, int w) {
     List<JBGConstants.Tile> horzList = new ArrayList();
     for (int i = 0; i < w; i++) {
-      horzList.add(JBGConstants.Tile.SKY_BG);
+      horzList.add(JBGConstants.Tile.EMPTY);//SKY_BG);
     }
     return horzList;
   }
@@ -102,7 +102,7 @@ public class JBGTerritoryMapBuilder {
       for (int i = 0; i < w; i++) {
         for (int j = 0; j < iTopEmptyRows; j++) {
           if (flgHasDesert) {
-            resList.add(JBGConstants.Tile.DESERT_BG);
+            resList.add(JBGConstants.Tile.EMPTY); //DESERT_BG);
           }
           else {
             resList.add(JBGConstants.Tile.EMPTY);

@@ -772,7 +772,7 @@ public class JBGWordMatchPanel {
   }
 
   private void doLoadNormalKanji() {
-    if (!isGameStarted() && this.lstProblematicWords.size() > 0) {
+    if (!isGameStarted()) {
       loadNormalKanji();
       reloadAllLists();
       clearWordListSelection();
@@ -788,7 +788,7 @@ public class JBGWordMatchPanel {
   }
 
   private void doLoadNotedKanji() {
-    if (!isGameStarted()) {
+    if (!isGameStarted() && this.lstProblematicWords.size() > 0) {
       loadNotedKanji();
       reloadAllLists();
       clearWordListSelection();

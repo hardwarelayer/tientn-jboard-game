@@ -369,16 +369,8 @@ games/strategy/triplea/ai/pro/util/ProTerritoryValueUtils.java
  games.strategy.triplea.ai.pro.util.ProTerritoryValueUtils$2
 games/strategy/triplea/ai/pro/data/ProTerritory.java
  games.strategy.triplea.ai.pro.data.ProTerritory
-games/strategy/triplea/ui/panels/map/MapPanel.java
- games.strategy.triplea.ui.panels.map.MapPanel
- games.strategy.triplea.ui.panels.map.MapPanel$1
- games.strategy.triplea.ui.panels.map.MapPanel$2
- games.strategy.triplea.ui.panels.map.MapPanel$3
- games.strategy.triplea.ui.panels.map.MapPanel$4
- games.strategy.triplea.ui.panels.map.MapPanel$5
- games.strategy.triplea.ui.panels.map.MapPanel$AnimationDuration
- games.strategy.triplea.ui.panels.map.MapPanel$HighlightDelay
- games.strategy.triplea.ui.panels.map.MapPanel$TerritoryHighlighter
+games/strategy/engine/framework/AutoSaveFileUtils.java
+ games.strategy.engine.framework.AutoSaveFileUtils
 games/strategy/triplea/ui/logic/MapScrollUtil.java
  games.strategy.triplea.ui.logic.MapScrollUtil
 games/strategy/ui/ScrollableTextField.java
@@ -919,9 +911,9 @@ games/strategy/triplea/ui/BattleDisplay.java
  games.strategy.triplea.ui.BattleDisplay$RetreatComponent
  games.strategy.triplea.ui.BattleDisplay$RetreatResult
  games.strategy.triplea.ui.BattleDisplay$TableData
-games/strategy/triplea/ui/panel/jbg/JBGTerritoryViewCanvasPanel.java
- games.strategy.triplea.ui.panel.jbg.JBGTerritoryViewCanvasPanel
- games.strategy.triplea.ui.panel.jbg.JBGTerritoryViewCanvasPanel$1
+games/strategy/engine/random/IRandomStats.java
+ games.strategy.engine.random.IRandomStats
+ games.strategy.engine.random.IRandomStats$DiceType
 games/strategy/triplea/delegate/IncreasedFactoryProductionAdvance.java
  games.strategy.triplea.delegate.IncreasedFactoryProductionAdvance
 games/strategy/triplea/attachments/AbstractUserActionAttachment.java
@@ -1266,15 +1258,10 @@ games/strategy/triplea/delegate/battle/steps/fire/general/DefensiveGeneral.java
 games/strategy/engine/framework/ui/GameChooser.java
  games.strategy.engine.framework.ui.GameChooser
  games.strategy.engine.framework.ui.GameChooser$1
-games/strategy/triplea/ui/JBGWordMatchPanel.java
- games.strategy.triplea.ui.JBGWordMatchPanel
- games.strategy.triplea.ui.JBGWordMatchPanel$1
- games.strategy.triplea.ui.JBGWordMatchPanel$2
- games.strategy.triplea.ui.JBGWordMatchPanel$3
- games.strategy.triplea.ui.JBGWordMatchPanel$4
- games.strategy.triplea.ui.JBGWordMatchPanel$5
- games.strategy.triplea.ui.JBGWordMatchPanel$6
- games.strategy.triplea.ui.JBGWordMatchPanel$ListKeyAction
+games/strategy/engine/framework/ui/background/TaskRunner.java
+ games.strategy.engine.framework.ui.background.TaskRunner
+ games.strategy.engine.framework.ui.background.TaskRunner$1
+ games.strategy.engine.framework.ui.background.TaskRunner$TaskRunnerBuilder
 games/strategy/engine/framework/startup/ui/ServerSetupPanel.java
  games.strategy.engine.framework.startup.ui.ServerSetupPanel
  games.strategy.engine.framework.startup.ui.ServerSetupPanel$PlayerRow
@@ -1924,14 +1911,8 @@ games/strategy/triplea/delegate/AaInMoveUtil.java
  games.strategy.triplea.delegate.AaInMoveUtil$1
  games.strategy.triplea.delegate.AaInMoveUtil$2
  games.strategy.triplea.delegate.AaInMoveUtil$3
-games/strategy/triplea/ui/JBGTerritoryBuildingPurchasePanel.java
- games.strategy.triplea.ui.JBGTerritoryBuildingPurchasePanel
- games.strategy.triplea.ui.JBGTerritoryBuildingPurchasePanel$1
- games.strategy.triplea.ui.JBGTerritoryBuildingPurchasePanel$2
- games.strategy.triplea.ui.JBGTerritoryBuildingPurchasePanel$3
- games.strategy.triplea.ui.JBGTerritoryBuildingPurchasePanel$4
- games.strategy.triplea.ui.JBGTerritoryBuildingPurchasePanel$5
- games.strategy.triplea.ui.JBGTerritoryBuildingPurchasePanel$6
+games/strategy/triplea/ui/history/JBGTurnHistoryParser.java
+ games.strategy.triplea.ui.history.JBGTurnHistoryParser
 games/strategy/engine/framework/map/download/DownloadLengthReader.java
  games.strategy.engine.framework.map.download.DownloadLengthReader
  games.strategy.engine.framework.map.download.DownloadLengthReader$DownloadLengthSupplier
@@ -2176,8 +2157,8 @@ tools/map/making/ui/properties/MapPropertiesPanel.java
  tools.map.making.ui.properties.MapPropertiesPanel$3
 games/strategy/engine/random/CryptoRandomSource.java
  games.strategy.engine.random.CryptoRandomSource
-games/strategy/triplea/ui/JBGTerritoryManagerPanel.java
- games.strategy.triplea.ui.JBGTerritoryManagerPanel
+games/strategy/triplea/ui/DiceChooser.java
+ games.strategy.triplea.ui.DiceChooser
 games/strategy/net/DefaultObjectStreamFactory.java
  games.strategy.net.DefaultObjectStreamFactory
 games/strategy/engine/lobby/client/ui/action/ShowPlayersAction.java
@@ -2585,16 +2566,35 @@ games/strategy/engine/lobby/client/ui/action/player/info/PlayerGamesTab.java
  games.strategy.engine.lobby.client.ui.action.player.info.PlayerGamesTab
 games/strategy/engine/framework/network/ui/BanPlayerAction.java
  games.strategy.engine.framework.network.ui.BanPlayerAction
-games/strategy/engine/framework/ui/background/TaskRunner.java
- games.strategy.engine.framework.ui.background.TaskRunner
- games.strategy.engine.framework.ui.background.TaskRunner$1
- games.strategy.engine.framework.ui.background.TaskRunner$TaskRunnerBuilder
-games/strategy/triplea/ui/DiceChooser.java
- games.strategy.triplea.ui.DiceChooser
-games/strategy/engine/framework/AutoSaveFileUtils.java
- games.strategy.engine.framework.AutoSaveFileUtils
-games/strategy/engine/random/IRandomStats.java
- games.strategy.engine.random.IRandomStats
- games.strategy.engine.random.IRandomStats$DiceType
-games/strategy/triplea/ui/history/JBGTurnHistoryParser.java
- games.strategy.triplea.ui.history.JBGTurnHistoryParser
+games/strategy/triplea/ui/JBGTerritoryBuildingPurchasePanel.java
+ games.strategy.triplea.ui.JBGTerritoryBuildingPurchasePanel
+ games.strategy.triplea.ui.JBGTerritoryBuildingPurchasePanel$1
+ games.strategy.triplea.ui.JBGTerritoryBuildingPurchasePanel$2
+ games.strategy.triplea.ui.JBGTerritoryBuildingPurchasePanel$3
+ games.strategy.triplea.ui.JBGTerritoryBuildingPurchasePanel$4
+ games.strategy.triplea.ui.JBGTerritoryBuildingPurchasePanel$5
+ games.strategy.triplea.ui.JBGTerritoryBuildingPurchasePanel$6
+games/strategy/triplea/ui/JBGWordMatchPanel.java
+ games.strategy.triplea.ui.JBGWordMatchPanel
+ games.strategy.triplea.ui.JBGWordMatchPanel$1
+ games.strategy.triplea.ui.JBGWordMatchPanel$2
+ games.strategy.triplea.ui.JBGWordMatchPanel$3
+ games.strategy.triplea.ui.JBGWordMatchPanel$4
+ games.strategy.triplea.ui.JBGWordMatchPanel$5
+ games.strategy.triplea.ui.JBGWordMatchPanel$6
+ games.strategy.triplea.ui.JBGWordMatchPanel$ListKeyAction
+games/strategy/triplea/ui/panels/map/MapPanel.java
+ games.strategy.triplea.ui.panels.map.MapPanel
+ games.strategy.triplea.ui.panels.map.MapPanel$1
+ games.strategy.triplea.ui.panels.map.MapPanel$2
+ games.strategy.triplea.ui.panels.map.MapPanel$3
+ games.strategy.triplea.ui.panels.map.MapPanel$4
+ games.strategy.triplea.ui.panels.map.MapPanel$5
+ games.strategy.triplea.ui.panels.map.MapPanel$AnimationDuration
+ games.strategy.triplea.ui.panels.map.MapPanel$HighlightDelay
+ games.strategy.triplea.ui.panels.map.MapPanel$TerritoryHighlighter
+games/strategy/triplea/ui/panel/jbg/JBGTerritoryViewCanvasPanel.java
+ games.strategy.triplea.ui.panel.jbg.JBGTerritoryViewCanvasPanel
+ games.strategy.triplea.ui.panel.jbg.JBGTerritoryViewCanvasPanel$1
+games/strategy/triplea/ui/JBGTerritoryManagerPanel.java
+ games.strategy.triplea.ui.JBGTerritoryManagerPanel

@@ -167,6 +167,7 @@ public class JBGTerritoryManagerPanel  extends ActionPanel {
 
   @Getter private List<JBGKanjiItem> kanjiList = null;
   @Getter private String testStatistic = null;
+  @Getter private boolean lastBattleEffect = false;
 
   private Territory territoryRef = null;
 
@@ -353,7 +354,8 @@ public class JBGTerritoryManagerPanel  extends ActionPanel {
       territoryCanvasPanel.updateInfo(this.territoryRef.getName(),  
         this.sResearchBuildingList, this.sEconomyBuildingList,
         this.iEcoLevel, this.iResLevel, this.iProdLevel, getJCoin(),
-        makeBasicTerritoryString(this.territoryRef, TerritoryAttachment.get(this.territoryRef)));
+        this.lastBattleEffect,
+        makeBasicTerritoryString(this.territoryRef));
     }
 
     return 0;
@@ -379,6 +381,10 @@ public class JBGTerritoryManagerPanel  extends ActionPanel {
       this.iProdLevel = ta.getProduction();
       this.sEconomyBuildingList = ta.getEconomyBuildingList();
       this.sResearchBuildingList = ta.getResearchBuildingList();
+
+      GameData tData = getData();
+      int iCurrentInternalTurn = tData.getJbgInternalTurnStep();
+      this.lastBattleEffect = ta.isLastBattleInEffect(iCurrentInternalTurn);
     }
     else {
       this.iEcoLevel = TerritoryAttachment.getEconomyLevel(t);
@@ -566,7 +572,8 @@ public class JBGTerritoryManagerPanel  extends ActionPanel {
           this.territoryRef.getName(),
           this.sResearchBuildingList, this.sEconomyBuildingList,
           this.iEcoLevel, this.iResLevel, this.iProdLevel, getJCoin(),
-          makeBasicTerritoryString(this.territoryRef, TerritoryAttachment.get(this.territoryRef))
+          this.lastBattleEffect,
+          makeBasicTerritoryString(this.territoryRef)
           );
       }
     }
@@ -622,7 +629,8 @@ public class JBGTerritoryManagerPanel  extends ActionPanel {
     System.out.println("END");
   }
 
-  private String makeBasicTerritoryString(final Territory territory, final TerritoryAttachment ta) {
+  private String makeBasicTerritoryString(final Territory territory) {
+    final TerritoryAttachment ta = TerritoryAttachment.get(this.territoryRef);
     if (ta == null)
       return String.format("%s<br>領海(りょうかい)", territory.getName());
     return String.format("%s", ta.toStringForInfo(true, true));
@@ -676,7 +684,8 @@ public class JBGTerritoryManagerPanel  extends ActionPanel {
     territoryCanvasPanel.updateInfo(territory.getName(),  
         sResearchBuildingList, sEconomyBuildingList,
         iEcoLevel, iResLevel, iProdLevel, getJCoin(), 
-        makeBasicTerritoryString(territory, ta));
+        this.lastBattleEffect,
+        makeBasicTerritoryString(territory));
 
     territoryViewPanel.add(territoryCanvasPanel);
     //territoryViewPanel.add(new JLabel("This is city skyline"));

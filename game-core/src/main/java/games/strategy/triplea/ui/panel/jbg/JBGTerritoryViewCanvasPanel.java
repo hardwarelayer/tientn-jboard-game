@@ -84,6 +84,7 @@ public class JBGTerritoryViewCanvasPanel extends JPanel
     int iResLevel = 0;
     int iProdLevel = 0;
     int iJCoin = 0;
+    boolean isLastBattle = false;
     String sBasicInfo = null;
     @Setter private boolean factoryExists = false;
     @Setter private int bunkerTotal = 0;
@@ -142,6 +143,7 @@ public class JBGTerritoryViewCanvasPanel extends JPanel
         final String territoryName,
         final String sResBuildings, final String sEcoBuildings,
         final int iEcoLevel, final int iResLevel, final int iProdLevel, final int iJCoin, 
+        final boolean isLastBattle,
         final String sBasicInfo) {
 
         this.territoryName = territoryName;
@@ -153,6 +155,7 @@ public class JBGTerritoryViewCanvasPanel extends JPanel
         this.iProdLevel = iProdLevel;
         this.iJCoin = iJCoin;
         this.sBasicInfo = sBasicInfo;
+        this.isLastBattle = isLastBattle;
 
         //regenerate
         this.map = JBGTerritoryMapBuilder.getInstance().buildMapBackground(JBGConstants.MAP_HORZ_TILES, JBGConstants.MAP_VERT_TILES, false, false);
@@ -330,7 +333,10 @@ public class JBGTerritoryViewCanvasPanel extends JPanel
 
         eg.setFont(new Font("Arial", Font.PLAIN, 12));
         eg.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-        eg.setColor(Color.DARK_GRAY);
+        if (!this.isLastBattle)
+            eg.setColor(Color.DARK_GRAY);
+        else
+            eg.setColor(Color.WHITE);
  
         drawMultilineString(eg, this.sBasicInfo, 2, 0);
 
@@ -420,12 +426,29 @@ public class JBGTerritoryViewCanvasPanel extends JPanel
 
     protected void drawMapBackground(Graphics g) {
 
-        Color startColor = new Color(192, 192, 192);
-        Color endColor = new Color(130,187,101);
+        Graphics2D g2d = (Graphics2D) g;
+
+        Color startSkyColor = new Color(202, 220, 245);
+        Color endSkyColor = Color.WHITE;
+        if (this.isLastBattle) {
+            //burn color
+            startSkyColor = Color.BLACK;
+            endSkyColor = new Color(255,204,0);
+        }
+        int iStartSkyY = 0;
+        int iEndSkyY = 5 * JBGConstants.TILE_HEIGHT;
+        GradientPaint skyGradient = new GradientPaint(0, iStartSkyY, startSkyColor, 0, iEndSkyY, endSkyColor);
+        g2d.setPaint(skyGradient);
+        g2d.fillRect(0, iStartSkyY, iCanvasWidth, iEndSkyY-iStartSkyY);
+
+        Color startSurburbColor = new Color(192, 192, 192);
+        Color endSurburbColor = new Color(130,187,101);
+        if (this.isLastBattle) {
+            startSurburbColor = new Color(102, 51, 0);
+        }
         int iStartGradY = (JBGConstants.MAP_VERT_TILES - 13) * JBGConstants.TILE_HEIGHT;
         int iEndGradY = (JBGConstants.MAP_VERT_TILES - 8) * JBGConstants.TILE_HEIGHT;
-        GradientPaint gradient = new GradientPaint(0, iStartGradY, startColor, 0, iEndGradY, endColor);
-        Graphics2D g2d = (Graphics2D) g;
+        GradientPaint gradient = new GradientPaint(0, iStartGradY, startSurburbColor, 0, iEndGradY, endSurburbColor);
         g2d.setPaint(gradient);
         g2d.fillRect(0, iStartGradY, iCanvasWidth, iEndGradY-iStartGradY);
 

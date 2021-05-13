@@ -324,6 +324,8 @@ Still keep the folder of engine 2.3 before changed in:
 
     18. new feature: use jCoin to trade on virtual crypto market (use real market data)
 
+    [Done] 19. add drawing effects for territory burning in recent battle
+
 ------------------
 
 ## License
