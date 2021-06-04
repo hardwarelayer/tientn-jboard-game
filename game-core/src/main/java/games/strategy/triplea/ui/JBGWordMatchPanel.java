@@ -335,7 +335,7 @@ public class JBGWordMatchPanel {
   }
 
   private String[] isSelectedWordMatched(final String kanji, final String hira, final String hv, final String meaning) {
-    String[] res = new String[]{"", MATCH_WORD_NG};
+    String[] res = new String[]{kanji, MATCH_WORD_NG};
     for (JBGKanjiItem item: this.kanjiList) {
       if (kanji.equals(item.getKanji()) &&
           hira.equals(item.getHiragana()) &&
@@ -344,6 +344,7 @@ public class JBGWordMatchPanel {
           ) {
             res[0] = item.getKanji();
             res[1] = MATCH_WORD_OK;
+            break;
           }
     }
     return res;
@@ -574,7 +575,7 @@ public class JBGWordMatchPanel {
         //update the statistic of word
         if (!updateWordStat(matchRes[0], matchRes[1])) {
           //can't update
-          System.out.println("cannot update work of" + matchRes[1]);
+          System.out.println("cannot update work of" + matchRes[0]);
         }
         parent.setJCoin(totalJCoin); //set back to parent
         lblJCoinAmount.setText(String.valueOf(totalJCoin));
