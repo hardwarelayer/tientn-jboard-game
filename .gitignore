@@ -17,6 +17,7 @@
 *.gif
 *.mp3
 *.attach_pid*
+*.log
 
 bin/
 build/
