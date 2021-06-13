@@ -543,6 +543,9 @@ games/strategy/net/nio/ServerQuarantineConversation.java
  games.strategy.net.nio.ServerQuarantineConversation$Step
 games/strategy/triplea/delegate/battle/steps/retreat/sub/SubmergeSubsVsOnlyAirStep.java
  games.strategy.triplea.delegate.battle.steps.retreat.sub.SubmergeSubsVsOnlyAirStep
+games/strategy/engine/random/IRandomStats.java
+ games.strategy.engine.random.IRandomStats
+ games.strategy.engine.random.IRandomStats$DiceType
 games/strategy/engine/random/MartiDiceRoller.java
  games.strategy.engine.random.MartiDiceRoller
  games.strategy.engine.random.MartiDiceRoller$AdvancedRedirectStrategy
@@ -786,6 +789,8 @@ games/strategy/engine/chat/ChatMessageListener.java
  games.strategy.engine.chat.ChatMessageListener
 org/triplea/game/startup/ServerSetupModel.java
  org.triplea.game.startup.ServerSetupModel
+games/strategy/engine/framework/startup/ui/panels/main/game/selector/JBGTFMTSelectorModel.java
+ games.strategy.engine.framework.startup.ui.panels.main.game.selector.JBGTFMTSelectorModel
 games/strategy/triplea/ai/pro/logging/ProLogger.java
  games.strategy.triplea.ai.pro.logging.ProLogger
 games/strategy/triplea/delegate/battle/MustFightBattle.java
@@ -1166,8 +1171,10 @@ games/strategy/engine/stats/ProductionStat.java
  games.strategy.engine.stats.ProductionStat
 games/strategy/engine/framework/startup/ui/posted/game/pbf/ForumPosterEditor.java
  games.strategy.engine.framework.startup.ui.posted.game.pbf.ForumPosterEditor
-games/strategy/engine/framework/startup/ui/panels/main/game/selector/GameSelectorPanel.java
- games.strategy.engine.framework.startup.ui.panels.main.game.selector.GameSelectorPanel
+games/strategy/engine/framework/TNARJCoinFileUtils.java
+ games.strategy.engine.framework.TNARJCoinFileUtils
+games/strategy/triplea/ui/history/JBGTurnHistoryParser.java
+ games.strategy.triplea.ui.history.JBGTurnHistoryParser
 games/strategy/engine/lobby/client/ui/action/FetchChatHistory.java
  games.strategy.engine.lobby.client.ui.action.FetchChatHistory
  games.strategy.engine.lobby.client.ui.action.FetchChatHistory$FetchChatHistoryBuilder
@@ -2322,6 +2329,9 @@ games/strategy/engine/data/RelationshipTracker.java
  games.strategy.engine.data.RelationshipTracker$Relationship
 games/strategy/triplea/delegate/BidPlaceDelegate.java
  games.strategy.triplea.delegate.BidPlaceDelegate
+games/strategy/engine/framework/startup/ui/panels/main/game/selector/TNARJCoinFileSelector.java
+ games.strategy.engine.framework.startup.ui.panels.main.game.selector.TNARJCoinFileSelector
+ games.strategy.engine.framework.startup.ui.panels.main.game.selector.TNARJCoinFileSelector$TNARJCoinFileSelectorBuilder
 games/strategy/triplea/printgenerator/PuInfo.java
  games.strategy.triplea.printgenerator.PuInfo
 games/strategy/triplea/delegate/LongRangeAircraftAdvance.java
@@ -2593,8 +2603,7 @@ games/strategy/triplea/ui/DiceChooser.java
  games.strategy.triplea.ui.DiceChooser
 games/strategy/engine/framework/AutoSaveFileUtils.java
  games.strategy.engine.framework.AutoSaveFileUtils
-games/strategy/engine/random/IRandomStats.java
- games.strategy.engine.random.IRandomStats
- games.strategy.engine.random.IRandomStats$DiceType
-games/strategy/triplea/ui/history/JBGTurnHistoryParser.java
- games.strategy.triplea.ui.history.JBGTurnHistoryParser
+games/strategy/engine/framework/startup/ui/panels/main/game/selector/GameSelectorPanel.java
+ games.strategy.engine.framework.startup.ui.panels.main.game.selector.GameSelectorPanel
+games/strategy/engine/framework/startup/ui/panels/main/game/selector/TNARJCoinSelectorModel.java
+ games.strategy.engine.framework.startup.ui.panels.main.game.selector.TNARJCoinSelectorModel

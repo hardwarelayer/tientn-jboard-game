@@ -56,6 +56,7 @@ public final class GameSelectorPanel extends JPanel implements Observer {
 
   private final GameSelectorModel model;
   private final JBGKanjiSelectorModel kanjiModel;
+  private final TNARJCoinSelectorModel jcoinModel;
   private final IGamePropertiesCache gamePropertiesCache = new FileBackedGamePropertiesCache();
   private final Map<String, Object> originalPropertiesMap = new HashMap<>();
   private final JLabel nameText = new JLabel();
@@ -63,6 +64,8 @@ public final class GameSelectorPanel extends JPanel implements Observer {
   private final JLabel saveGameText = new JLabel();
   private final JLabel roundText = new JLabel();
   private final JLabel kanjiText = new JLabel();
+  private final JLabel jCoinText = new JLabel();
+
   private final JButton loadSavedGame =
       new JButtonBuilder()
           .title("Open Saved Game")
@@ -72,6 +75,11 @@ public final class GameSelectorPanel extends JPanel implements Observer {
       new JButtonBuilder()
           .title("Open Kanji Data")
           .toolTip("Open kanji list for learning.")
+          .build();
+  private final JButton importJCoin =
+      new JButtonBuilder()
+          .title("Import JCoin")
+          .toolTip("Import JCoin from TNAR.")
           .build();
   private final JButton loadNewGame =
       new JButtonBuilder()
@@ -91,6 +99,7 @@ public final class GameSelectorPanel extends JPanel implements Observer {
   public GameSelectorPanel(final GameSelectorModel model) {
     this.model = model;
     this.kanjiModel = new JBGKanjiSelectorModel();
+    this.jcoinModel = new TNARJCoinSelectorModel();
     final GameData data = model.getGameData();
     if (data != null) {
       setOriginalPropertiesMap(data);
@@ -143,6 +152,10 @@ public final class GameSelectorPanel extends JPanel implements Observer {
     add(kanjiText, buildGridCell(1, row, new Insets(0, 0, 3, 0)));
     row++;
 
+    add(new JLabel("JCoin:"), buildGridCell(0, row, new Insets(0, 10, 3, 5)));
+    add(jCoinText, buildGridCell(1, row, new Insets(0, 0, 3, 0)));
+    row++;
+
     add(new JLabel("Loaded Savegame:"), buildGridCell(0, row, new Insets(20, 10, 3, 5)));
     row++;
 
@@ -157,6 +170,10 @@ public final class GameSelectorPanel extends JPanel implements Observer {
 
     add(loadKanjiData, buildGridRow(0, row, new Insets(0, 10, 10, 10)));
     loadKanjiData.setEnabled(false);
+    row++;
+
+    add(importJCoin, buildGridRow(0, row, new Insets(0, 10, 10, 10)));
+    importJCoin.setEnabled(false);
     row++;
 
     final JButton downloadMapButton =
@@ -246,6 +263,12 @@ public final class GameSelectorPanel extends JPanel implements Observer {
         e -> {
           if (canSelectLocalGameData()) {
             selectKanjiDataFile();
+          }
+        });
+    importJCoin.addActionListener(
+        e -> {
+          if (canSelectLocalGameData()) {
+            selectJCoinFile();
           }
         });
     mapOptions.addActionListener(
@@ -407,6 +430,7 @@ public final class GameSelectorPanel extends JPanel implements Observer {
                     .run(
                         () -> {
                           int ttlKj = 0;
+                          int ttlJCoin = 0;
 
                           if (model.load(file)) {
                             setOriginalPropertiesMap(model.getGameData());
@@ -423,13 +447,17 @@ public final class GameSelectorPanel extends JPanel implements Observer {
                                 finally {
                                   gd.releaseWriteLock();
                                 }
+                                ttlJCoin = gd.getJCoinAmount();
                               }
                             }
                             kanjiText.setText(String.valueOf(ttlKj) + " 文字");
+                            jCoinText.setText(String.valueOf( ttlJCoin ));
 
                             if (ttlKj < 1) {
                               loadKanjiData.setEnabled(true);
                             }
+
+                            importJCoin.setEnabled(true);
 
                           }
 
@@ -485,6 +513,54 @@ public final class GameSelectorPanel extends JPanel implements Observer {
                         }));
   }
 
+  private void selectJCoinFile() {
+    TNARJCoinFileSelector.builder()
+        .fileDoesNotExistAction(
+            file ->
+                DialogBuilder.builder()
+                    .parent(this)
+                    .title("JCoin File Not Found")
+                    .errorMessage("File does not exist: " + file.getAbsolutePath())
+                    .showDialog())
+        .build()
+        .selectJCoinFile(JOptionPane.getFrameForComponent(this))
+        .ifPresent(
+            file ->
+                TaskRunner.builder()
+                    .waitDialogTitle("Loading JCoin Export from TNAR")
+                    .exceptionHandler(
+                        e ->
+                            SwingComponents.showDialogWithLinks(
+                                DialogWithLinksParams.builder()
+                                    .title("Failed To Load JCoin Data")
+                                    .dialogType(DialogWithLinksTypes.ERROR)
+                                    .dialogText(
+                                        String.format(
+                                            "<html>Error: %s<br/><br/>"
+                                                + "If this is not expected, please "
+                                                + "file a <a href=%s>bug report</a><br/>"
+                                                + "and attach the error message above and the "
+                                                + "save game you are trying to load.",
+                                            e.getMessage(), UrlConstants.GITHUB_ISSUES))
+                                    .build()))
+                    .build()
+                    .run(
+                        () -> {
+                          GameData gd = model.getGameData();
+                          if (gd != null) {
+                            try {
+                              gd.acquireWriteLock();
+                              gd.setJCoinAmount( gd.getJCoinAmount() + jcoinModel.load(file) );
+                            }
+                            finally {
+                              gd.releaseWriteLock();
+                            }
+                            jCoinText.setText(String.valueOf( gd.getJCoinAmount() ));
+                          }
+                          importJCoin.setEnabled(false);
+                        }));
+  }
+
   private void selectGameFile() {
     try {
       final GameChooserModel gameChooserModel =
@@ -508,6 +584,7 @@ public final class GameSelectorPanel extends JPanel implements Observer {
           // (the first time it is loaded)
           gamePropertiesCache.loadCachedGamePropertiesInto(model.getGameData());
           loadKanjiData.setEnabled(true);
+          importJCoin.setEnabled(true);
         }
       }
     } catch (final InterruptedException e) {
