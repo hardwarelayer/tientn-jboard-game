@@ -115,7 +115,7 @@ final class FileMenu extends JMenu {
         for (int i = 0; i < lstKanjis.size(); i++) {
           String sRow = convertKanjiItemToCSV(lstKanjis.get(i));
           pw.println(sRow);
-          System.out.println(sRow);
+          //System.out.println(sRow);
         }
       } catch (FileNotFoundException e) {
         System.out.println(e.getMessage());

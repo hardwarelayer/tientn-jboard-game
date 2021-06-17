@@ -789,8 +789,8 @@ games/strategy/engine/chat/ChatMessageListener.java
  games.strategy.engine.chat.ChatMessageListener
 org/triplea/game/startup/ServerSetupModel.java
  org.triplea.game.startup.ServerSetupModel
-games/strategy/engine/framework/startup/ui/panels/main/game/selector/JBGTFMTSelectorModel.java
- games.strategy.engine.framework.startup.ui.panels.main.game.selector.JBGTFMTSelectorModel
+games/strategy/engine/framework/startup/ui/panels/main/game/selector/TNARJCoinSelectorModel.java
+ games.strategy.engine.framework.startup.ui.panels.main.game.selector.TNARJCoinSelectorModel
 games/strategy/triplea/ai/pro/logging/ProLogger.java
  games.strategy.triplea.ai.pro.logging.ProLogger
 games/strategy/triplea/delegate/battle/MustFightBattle.java
@@ -897,8 +897,8 @@ games/strategy/engine/posted/game/pbem/IEmailSender.java
  games.strategy.engine.posted.game.pbem.IEmailSender
 org/triplea/game/client/ui/swing/laf/SubstanceLookAndFeelManager.java
  org.triplea.game.client.ui.swing.laf.SubstanceLookAndFeelManager
-games/strategy/triplea/ui/menubar/TripleAMenuBar.java
- games.strategy.triplea.ui.menubar.TripleAMenuBar
+games/strategy/engine/framework/startup/ui/panels/main/game/selector/GameSelectorPanel.java
+ games.strategy.engine.framework.startup.ui.panels.main.game.selector.GameSelectorPanel
 games/strategy/triplea/ui/UnitChooser.java
  games.strategy.triplea.ui.UnitChooser
  games.strategy.triplea.ui.UnitChooser$1
@@ -2497,8 +2497,8 @@ games/strategy/engine/data/changefactory/PlayerOwnerChange.java
  games.strategy.engine.data.changefactory.PlayerOwnerChange
 games/strategy/engine/framework/GameObjectStreamFactory.java
  games.strategy.engine.framework.GameObjectStreamFactory
-games/strategy/triplea/ui/menubar/FileMenu.java
- games.strategy.triplea.ui.menubar.FileMenu
+games/strategy/engine/framework/AutoSaveFileUtils.java
+ games.strategy.engine.framework.AutoSaveFileUtils
 games/strategy/engine/chat/ChatMessage.java
  games.strategy.engine.chat.ChatMessage
 games/strategy/triplea/ui/MacOsIntegration.java
@@ -2601,9 +2601,7 @@ games/strategy/engine/framework/ui/background/TaskRunner.java
  games.strategy.engine.framework.ui.background.TaskRunner$TaskRunnerBuilder
 games/strategy/triplea/ui/DiceChooser.java
  games.strategy.triplea.ui.DiceChooser
-games/strategy/engine/framework/AutoSaveFileUtils.java
- games.strategy.engine.framework.AutoSaveFileUtils
-games/strategy/engine/framework/startup/ui/panels/main/game/selector/GameSelectorPanel.java
- games.strategy.engine.framework.startup.ui.panels.main.game.selector.GameSelectorPanel
-games/strategy/engine/framework/startup/ui/panels/main/game/selector/TNARJCoinSelectorModel.java
- games.strategy.engine.framework.startup.ui.panels.main.game.selector.TNARJCoinSelectorModel
+games/strategy/triplea/ui/menubar/TripleAMenuBar.java
+ games.strategy.triplea.ui.menubar.TripleAMenuBar
+games/strategy/triplea/ui/menubar/FileMenu.java
+ games.strategy.triplea.ui.menubar.FileMenu
