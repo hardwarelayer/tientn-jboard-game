@@ -242,4 +242,9 @@ public interface JBGConstants {
   //turn news
   static final String JBGTURN_NEWS_SMALLATTACK_PREFIX = "JTN_SMALL_ATTK_PREFX";
   static final String JBGTURN_NEWS_PAPER_NAME = "Tien's World War Edition";
+
+  //JBG
+  static final String JBG_NO_COST_CARE_RULE = "JBG_NO_COST_CARE";
+  //
+
 }

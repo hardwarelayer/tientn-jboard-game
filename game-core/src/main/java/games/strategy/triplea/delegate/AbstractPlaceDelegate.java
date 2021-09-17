@@ -36,6 +36,7 @@ import org.triplea.java.collections.CollectionUtils;
 import org.triplea.java.collections.IntegerMap;
 import org.triplea.sound.SoundPath;
 import org.triplea.util.Tuple;
+import games.strategy.engine.data.JBGConstants;
 
 /**
  * Logic for placing units.
@@ -54,6 +55,10 @@ public abstract class AbstractPlaceDelegate extends BaseTripleADelegate
   protected Map<Territory, Collection<Unit>> produced = new HashMap<>();
   // a list of CompositeChanges
   protected List<UndoablePlacement> placements = new ArrayList<>();
+
+  //JBG
+  private boolean notCareAboutCost = false;
+  //
 
   public void initialize(final String name) {
     initialize(name, name);
@@ -185,10 +190,30 @@ public abstract class AbstractPlaceDelegate extends BaseTripleADelegate
   @Override
   public String placeUnits(
       final Collection<Unit> units, final Territory at, final BidMode bidMode) {
+
+    //JBG settings via a special UnitType
+    if (at == null) {
+      final List<Unit> tmpUnitsList = new ArrayList<>(units);
+      if (tmpUnitsList.size() == 1) {
+        final Unit tmpUnit = tmpUnitsList.get(0);
+        if (tmpUnit.toStringNoOwner().equals( JBGConstants.JBG_NO_COST_CARE_RULE )) {
+          //received the special rule, set flag and return immediately
+          notCareAboutCost = true;
+          return null;
+        }
+      }
+    }
+    //
+
     if (units.isEmpty()) {
       return null;
     }
-    final String error = isValidPlacement(units, at, player);
+    /*final*/ String error = isValidPlacement(units, at, player);
+    //JBG
+    if (notCareAboutCost) {
+      error = null;
+    }
+    //
     if (error != null) {
       return error;
     }
@@ -208,6 +233,11 @@ public abstract class AbstractPlaceDelegate extends BaseTripleADelegate
       final Territory producer = producers.remove(0);
 
       int maxPlaceable = maxPlaceableMap.getInt(producer);
+      //JBG
+      if (notCareAboutCost) {
+        maxPlaceable = 9999;
+      }
+      //
       if (maxPlaceable == 0) {
         if (bidMode == BidMode.NOT_BID) {
           continue;
@@ -228,8 +258,14 @@ public abstract class AbstractPlaceDelegate extends BaseTripleADelegate
       }
 
       unitsCanBePlacedByThisProducer.sort(getHardestToPlaceWithRequiresUnitsRestrictions());
-      final int maxForThisProducer =
+      /*final*/ int maxForThisProducer = 
           getMaxUnitsToBePlacedFrom(producer, unitsCanBePlacedByThisProducer, at, player);
+      //JBG
+      if (notCareAboutCost) {
+        maxForThisProducer = 9999;
+      }
+      //
+
       // don't forget that -1 == infinite
       if (maxForThisProducer == -1 || maxForThisProducer >= unitsCanBePlacedByThisProducer.size()) {
         performPlaceFrom(producer, unitsCanBePlacedByThisProducer, at, player);
@@ -742,6 +778,13 @@ public abstract class AbstractPlaceDelegate extends BaseTripleADelegate
       final Collection<Unit> unitsToPlace,
       final boolean simpleCheck) {
     final List<Territory> producers = new ArrayList<>();
+    //JBG
+    if (notCareAboutCost && !to.isWater()) {
+      producers.add(to);
+      return producers;
+    }
+    //
+
     // if not water then must produce in that territory
     if (!to.isWater()) {
       if (simpleCheck || canProduce(to, to, unitsToPlace, player, false) == null) {
@@ -1130,6 +1173,12 @@ public abstract class AbstractPlaceDelegate extends BaseTripleADelegate
     if (producers.isEmpty()) {
       return maxUnitsToBePlacedMap;
     }
+    //JBG
+    if (notCareAboutCost && producers.size() > 0) {
+      maxUnitsToBePlacedMap.put(to, -1);
+      return maxUnitsToBePlacedMap;
+    }
+    //
     producers.sort(getBestProducerComparator(to, units, player));
     final Collection<Territory> notUsableAsOtherProducers = new ArrayList<>(producers);
     final Map<Territory, Integer> currentAvailablePlacementForOtherProducers = new HashMap<>();

@@ -439,6 +439,7 @@ public class JBGTerritoryManagerPanel  extends ActionPanel {
       turnLog.showNewsDialog(gameData);
     } finally {
       gameData.releaseReadLock();
+      gameData.resetHistory();
     }
 
   }

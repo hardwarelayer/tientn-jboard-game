@@ -37,6 +37,7 @@ import java.util.TreeSet;
 import java.util.function.Predicate;
 import org.triplea.java.collections.CollectionUtils;
 import org.triplea.java.collections.IntegerMap;
+import games.strategy.engine.data.JBGConstants;
 
 /**
  * Logic for purchasing units. Subclasses can override canAfford(...) to test if a purchase can be
@@ -51,6 +52,7 @@ public class PurchaseDelegate extends BaseTripleADelegate
           o -> (UnitType) o.getResults().keySet().iterator().next(), new UnitTypeComparator());
 
   private boolean needToInitialize = true;
+  private boolean notCareAboutCost = false;
 
   @Override
   public void start() {
@@ -158,11 +160,28 @@ public class PurchaseDelegate extends BaseTripleADelegate
    * subclasses can over ride this method to use different restrictions as to what a player can buy.
    */
   protected boolean canAfford(final IntegerMap<Resource> costs, final GamePlayer player) {
+    //JBG check
+    if (notCareAboutCost) return true;
+    //
     return player.getResources().has(costs);
   }
 
+  //JBG
+  private IntegerMap<ProductionRule> filterCustomRuleOut(final IntegerMap<ProductionRule> productionRules) {
+    final IntegerMap<ProductionRule> newRules = new IntegerMap<>();
+    for (final ProductionRule rule : productionRules.keySet()) {
+      if (rule.getName().equals(JBGConstants.JBG_NO_COST_CARE_RULE))
+        notCareAboutCost = true;
+      else
+        newRules.add(rule, productionRules.getInt(rule));
+    }
+    return newRules;
+  }
+  //
+
   @Override
-  public String purchase(final IntegerMap<ProductionRule> productionRules) {
+  public String purchase(final IntegerMap<ProductionRule> t_productionRules) {
+    IntegerMap<ProductionRule> productionRules = filterCustomRuleOut(t_productionRules);
     final IntegerMap<Resource> costs = getCosts(productionRules);
     final IntegerMap<NamedAttachable> results = getResults(productionRules);
     if (!canAfford(costs, player)) {
@@ -236,7 +255,11 @@ public class PurchaseDelegate extends BaseTripleADelegate
       changes.add(change);
     }
     // add changes for spent resources
-    final String remaining = removeFromPlayer(costs, changes);
+    /*final*/ String remaining = null;
+    if (notCareAboutCost)
+      remaining = "Remaining resources: mobilization has no cost!!!";
+    else
+      remaining = removeFromPlayer(costs, changes);
     // add history event
     final String transcriptText;
     if (!totalUnits.isEmpty()) {

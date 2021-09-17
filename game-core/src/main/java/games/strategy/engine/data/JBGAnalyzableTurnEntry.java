@@ -692,34 +692,16 @@ public class JBGAnalyzableTurnEntry {
   private String writePlacesContent() {
     StringBuilder sb = new StringBuilder();
     List<String> lstTargets = getPlaceTargetGroups();
-
     if (lstTargets == null) return "No production.";
     for (String loc: lstTargets) {
       sb.append(loc + ": ");
-
       List<String> placeItems = new ArrayList<>();
       for (JBGPlace p: lstPlaces) {
         if (p.getLocation().equals(loc)) {
+          sb.append(p.getTroops() + "<br/>");
           placeItems.add(p.getTroops());
         }
       }
-
-      Map<String, Integer> mapTroops = new HashMap<>();
-      for (String pTroop: placeItems) {
-        List<String> nameWithCount = Arrays.asList(pTroop.split(" "));
-        if (nameWithCount.size() >= 2) {
-          String sName = nameWithCount.get(1);
-          if (!mapTroops.containsKey(sName))
-            mapTroops.put(sName, Integer.parseInt(nameWithCount.get(0)));
-          else
-            mapTroops.put(sName, mapTroops.get(sName)+1);
-        }
-      }
-      for (Map.Entry<String, Integer> entry: mapTroops.entrySet()) {
-        sb.append(String.valueOf(entry.getValue()) + " " + entry.getKey() + ", ");        
-      }
-      sb.setLength(sb.length()-2);
-      sb.append(".<br/>");
     }
     return sb.toString();
   }

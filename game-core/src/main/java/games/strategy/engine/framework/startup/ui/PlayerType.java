@@ -3,9 +3,11 @@ package games.strategy.engine.framework.startup.ui;
 import games.strategy.engine.player.Player;
 import games.strategy.triplea.TripleAPlayer;
 import games.strategy.triplea.ai.fast.FastAi;
+import games.strategy.triplea.ai.fastinf.FastInfAi;
 import games.strategy.triplea.ai.pro.ProAi;
 import games.strategy.triplea.ai.weak.DoesNothingAi;
 import games.strategy.triplea.ai.weak.WeakAi;
+import games.strategy.triplea.ai.weak.Tien1Ai;
 import java.util.Arrays;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -33,6 +35,19 @@ public enum PlayerType {
     @Override
     public Player newPlayerWithName(final String name) {
       return new WeakAi(name);
+    }
+  },
+
+  TIEN1_AI("JBG_MobilizationWeak (AI)") {
+    @Override
+    public Player newPlayerWithName(final String name) {
+      return new Tien1Ai(name);
+    }
+  },
+  FAST_INF_AI("Fast Infantry (AI)") {
+    @Override
+    public Player newPlayerWithName(final String name) {
+      return new FastInfAi(name);
     }
   },
 
