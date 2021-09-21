@@ -288,7 +288,7 @@ Still keep the folder of engine 2.3 before changed in:
 
 ***From 2021-04-08***
 
-    1. bug: validate word ok, but remove selected item, so if we choose an item and move list selected to another, that item will be removed if all selected words are matched -> Should remove selected words not list selected items
+    1. pending bug: JBG validate word ok, but remove selected item, so if we choose an item and move list selected to another, that item will be removed if all selected words are matched -> Should remove selected words not list selected items
 
     [Fixed] 2. bug: can't build news if human are the first player in list
 
@@ -322,9 +322,16 @@ Still keep the folder of engine 2.3 before changed in:
 
     [Done] 17. improve: deduct jCoin if use QUESTION_MARK on WordMatch, deduct jCoin if submit invalid combination
 
-    18. new feature: use jCoin to trade on virtual crypto market (use real market data)
+    18. pending feature: use jCoin to trade on virtual crypto market (use real market data)
 
     [Done] 19. add drawing effects for territory burning in recent battle
+
+    [Fixed] 20. cannot generate full news on place/production deployment in case of multiple units
+
+    [Done] 21. Add first weak Ai (Tien1Ai), with mobilization trigger value, free purchase and deployment/place on conditions
+
+    [Done] 22. First JBG Ai, which is hybrid (both hard and easy), add condition for Ai to focus on neccessary move/moves only, reduce exec time
+
 
 ------------------
 
