@@ -3,8 +3,9 @@ package games.strategy.engine.framework.startup.ui;
 import games.strategy.engine.player.Player;
 import games.strategy.triplea.TripleAPlayer;
 import games.strategy.triplea.ai.fast.FastAi;
-import games.strategy.triplea.ai.fastinf.FastInfAi;
 import games.strategy.triplea.ai.pro.ProAi;
+import games.strategy.triplea.ai.jbg.JBGAi;
+import games.strategy.triplea.ai.jbgfast.JBGFastAi;
 import games.strategy.triplea.ai.weak.DoesNothingAi;
 import games.strategy.triplea.ai.weak.WeakAi;
 import games.strategy.triplea.ai.weak.Tien1Ai;
@@ -44,10 +45,16 @@ public enum PlayerType {
       return new Tien1Ai(name);
     }
   },
-  FAST_INF_AI("Fast Infantry (AI)") {
+  JBG_FAST_AI("JBG Fast (AI)") {
     @Override
     public Player newPlayerWithName(final String name) {
-      return new FastInfAi(name);
+      return new JBGFastAi(name);
+    }
+  },
+  JBG_AI("JBG Hard&Slow(AI)") {
+    @Override
+    public Player newPlayerWithName(final String name) {
+      return new JBGAi(name);
     }
   },
 

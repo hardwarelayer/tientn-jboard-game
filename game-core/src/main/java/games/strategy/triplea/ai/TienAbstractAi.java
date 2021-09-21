@@ -45,6 +45,7 @@ import org.triplea.java.Interruptibles;
 import org.triplea.java.collections.CollectionUtils;
 import org.triplea.java.collections.IntegerMap;
 import org.triplea.util.Tuple;
+import games.strategy.engine.data.JBGConstants;
 
 /**
  * Base class for AIs. Clone from AbstractAi for Tien's custom AIs
@@ -68,7 +69,6 @@ public abstract class TienAbstractAi extends AbstractBasePlayer {
   }
 
   protected static boolean notCareAboutCost = false;
-  protected static int MOBILIZATION_VALUE = 1996;
 
   @Override
   public Territory selectBombardingTerritory(
@@ -554,7 +554,7 @@ public abstract class TienAbstractAi extends AbstractBasePlayer {
       if (canTriggerMobilization(leftTerrs, leftFactories)) {
         //gamePlayer.getName().equals("Thai")
         notCareAboutCost = true;
-        leftToSpend += MOBILIZATION_VALUE;
+        leftToSpend += JBGConstants.MOBILIZATION_VALUE;
       }
 
       purchase(false, leftToSpend, purchaseDelegate, getGameData(), gamePlayer);

@@ -1099,7 +1099,7 @@ public class Tien1Ai extends TienAbstractAi {
     }
     int placementLeft = pu.getMaxUnits();
     if (notCareAboutCost) {
-      placementLeft = MOBILIZATION_VALUE;
+      placementLeft = JBGConstants.MOBILIZATION_VALUE;
     }
     if (placementLeft == -1) {
       placementLeft = Integer.MAX_VALUE;
@@ -1140,7 +1140,7 @@ public class Tien1Ai extends TienAbstractAi {
     if (!landUnits.isEmpty()) {
       final int landPlaceCount = Math.min(placementLeft, landUnits.size());
       final Collection<Unit> toPlace = landUnits.subList(0, landPlaceCount);
-      System.out.println("placing land units ..." + String.valueOf(toPlace.size()));
+      //System.out.println("placing land units ..." + String.valueOf(toPlace.size()));
       doPlace(placeAt, toPlace, placeDelegate);
     }
 
@@ -1149,7 +1149,7 @@ public class Tien1Ai extends TienAbstractAi {
     if (!landUnits.isEmpty()) {
       final int airPlaceCount = Math.min(placementLeft, airUnits.size());
       final Collection<Unit> toPlace = airUnits.subList(0, airPlaceCount);
-      System.out.println("placing air units ..." + String.valueOf(toPlace.size()));
+      //System.out.println("placing air units ..." + String.valueOf(toPlace.size()));
       doPlace(placeAt, toPlace, placeDelegate);
     }
 

@@ -492,6 +492,7 @@ public abstract class AbstractAi extends AbstractBasePlayer {
   @Override
   public final void start(final String name) {
     super.start(name);
+final long start = System.currentTimeMillis();
     final GamePlayer gamePlayer = this.getGamePlayer();
     if (name.endsWith("Bid")) {
       final IPurchaseDelegate purchaseDelegate =
@@ -524,6 +525,7 @@ public abstract class AbstractAi extends AbstractBasePlayer {
     } else if (name.endsWith("EndTurn")) {
       endTurn((IAbstractForumPosterDelegate) getPlayerBridge().getRemoteDelegate(), gamePlayer);
     }
+System.out.println(gamePlayer.getName() + " time for " + name + "=" + String.valueOf((System.currentTimeMillis() - start)/1000) + " seconds");
   }
 
   // The following methods are called when the AI starts a phase.

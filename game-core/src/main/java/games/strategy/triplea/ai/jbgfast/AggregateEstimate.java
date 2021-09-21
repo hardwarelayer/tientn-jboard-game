@@ -1,4 +1,4 @@
-package games.strategy.triplea.ai.fastinf;
+package games.strategy.triplea.ai.jbgfast;
 
 import games.strategy.engine.data.GameData;
 import games.strategy.engine.data.GamePlayer;

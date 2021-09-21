@@ -245,6 +245,7 @@ public interface JBGConstants {
 
   //JBG
   static final String JBG_NO_COST_CARE_RULE = "JBG_NO_COST_CARE";
+  static final int MOBILIZATION_VALUE = 1996;
   //
 
 }

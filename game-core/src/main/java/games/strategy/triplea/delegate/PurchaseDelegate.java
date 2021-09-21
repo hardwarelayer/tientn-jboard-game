@@ -256,8 +256,10 @@ public class PurchaseDelegate extends BaseTripleADelegate
     }
     // add changes for spent resources
     /*final*/ String remaining = null;
+    //JBG
     if (notCareAboutCost)
       remaining = "Remaining resources: mobilization has no cost!!!";
+      //
     else
       remaining = removeFromPlayer(costs, changes);
     // add history event
@@ -275,6 +277,15 @@ public class PurchaseDelegate extends BaseTripleADelegate
     bridge.getHistoryWriter().startEvent(transcriptText, totalUnits);
     // commit changes
     bridge.addChange(changes);
+
+    //JBG
+    if (notCareAboutCost) {
+      //this will be used consequenly by other AIs, so turn it off for this player after use
+      System.out.println("In notCareAboutCost for " + player.getName() + " Turning off after purchase!");
+      notCareAboutCost = false;
+    }
+    //
+
     return null;
   }
 
