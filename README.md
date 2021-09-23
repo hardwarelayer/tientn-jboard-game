@@ -16,9 +16,11 @@ The other games are too simple ...
 
 ### Notes:
 
-I make a board game based on TripleA, this game will be more 'territory building' than the original.
+I make a board game based on TripleA, and add more 'territory building' features than the original. A special jCoin monetary unit, for human player to build bases, and tribute to allies and opponent's AI.
 
-Other feature: Language learning while playing
+A new AI with more realistic behavior, more flexible and faster for the existing Fast and Hard AI, which make the game unplayable because too much time of thinking, emulating, processing... The game is now more fun than before (in my opinion).
+
+Other feature: Language learning while playing to gain jCoin.
 
 I will try to make this game still compatible with the base TripleA, for any updates.
 
@@ -312,7 +314,7 @@ Still keep the folder of engine 2.3 before changed in:
 
     [Fixed] 12. bug: after WordMatch game, back to territory canvas and build dialog, new JCoin has not updated, must close Territory and reopen
 
-    [Done] 13. improve: after a while, we'll have a lot of jCoin each turn, need a mechanism to spend the jCoin, for example: maintenance cost of buildings, if not enough, buildings may disappear ... or tribute to other players, or PUs of region(part of our built) get bombed, so we have to earn jCoin on every turn. -> Finally I added a "tribute" feature to other Ai player
+    [Done] 13. improve: after a while, we'll have a lot of jCoin each turn, need a mechanism to spend the jCoin, for example: maintenance cost of buildings, if not enough, buildings may disappear ... or tribute to other players, or PUs of region(part of our built) get bombed, so we have to earn jCoin on every turn. -> Finally I added a "tribute jCoin" feature to other Ai player
 
     [Done] 14. improve: focus back to first word list after complete one test
 
