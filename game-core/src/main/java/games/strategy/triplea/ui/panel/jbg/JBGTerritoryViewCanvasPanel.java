@@ -79,6 +79,7 @@ public class JBGTerritoryViewCanvasPanel extends JPanel
     @Getter private Rectangle rcWorkIcon = null;
     @Getter private Rectangle rcProdIcon = null;
     @Getter private Rectangle rcNewsIcon = null;
+    @Getter private Rectangle rcTributeIcon = null;
 
     int iEcoLevel = 0;
     int iResLevel = 0;
@@ -134,9 +135,24 @@ public class JBGTerritoryViewCanvasPanel extends JPanel
                 if (isInRect(e.getX(), e.getY(), panel.getRcNewsIcon())) {
                     refMaster.buildNewspaper(panel);
                 }
+                if (isInRect(e.getX(), e.getY(), panel.getRcTributeIcon())) {
+                    if (iJCoin < 200) {
+                        refMaster.showAlert(panel, "You can only tribute from 200JCoin!\nNow you don't have enough!");
+                    }
+                    else {
+                        refMaster.openTributeDialog(panel);
+                    }
+                }
             }
         });
 
+    }
+
+    public void updateInfo(final int iJCoin) {
+        this.iJCoin = iJCoin;
+        if (flgFirstPaintDone) {
+            repaint();
+        }
     }
 
     public void updateInfo(
@@ -196,12 +212,15 @@ public class JBGTerritoryViewCanvasPanel extends JPanel
             iTotalCloud = 8;
         }
         else if (iEco <= 15) {
-            iTotalCloud = 12;
+            iTotalCloud = 15;
         }
         for (int i = 0; i < iTotalCloud; i++) {
             //minimum delay is 1, mean it always change with the standard timer here
+            int iYPos = iY + (i*10);
+            if (iYPos >= 120)
+                iYPos = getRandom(0, 120); //sky height
             JBGCanvasItem item = new JBGCanvasItem(
-                getRandom(0, iCanvasWidth - JBGConstants.TILE_WIDTH), iY + (i*10), DEFAULT_TIMER_CLOCK*i, 1, 0, JBGConstants.Tile.CLOUD, 
+                getRandom(0, iCanvasWidth - JBGConstants.TILE_WIDTH), iYPos, DEFAULT_TIMER_CLOCK*i, 1, 0, JBGConstants.Tile.CLOUD, 
                 iCanvasWidth, iCanvasHeight, JBGConstants.TILE_WIDTH, JBGConstants.TILE_HEIGHT,
                 true);
             movingClouds.add(item);
@@ -341,20 +360,29 @@ public class JBGTerritoryViewCanvasPanel extends JPanel
         drawMultilineString(eg, this.sBasicInfo, 2, 0);
 
         if (this.sInstanceMessage != null && this.sInstanceMessage.length() > 0) {
-          eg.drawString(this.sInstanceMessage, 200, 10);            
+          eg.drawString(this.sInstanceMessage, 400, 40);
         }
 
-        rcWorkIcon = drawIconInTile(eg, 3, 270, 0);
-        eg.drawString(String.valueOf(this.iJCoin), 300, 10);
-
-        rcResIcon = drawIconInTile(eg, 0, 350, 0);
-        eg.drawString(String.valueOf(this.iResLevel), 380, 10);
-        rcEcoIcon = drawIconInTile(eg, 1, 400, 0);
-        eg.drawString(String.valueOf(this.iEcoLevel), 430, 10);
-        rcProdIcon = drawIconInTile(eg, 2, 460, 0);
-        eg.drawString(String.valueOf(this.iProdLevel), 490, 10);
-
-        rcNewsIcon = drawIconInTile(eg, 4, 520, 0);
+        int iIconWidth = 22;
+        int iIconElemX = 180;
+        int iIconTextY = 12;
+        rcWorkIcon = drawIconInTile(eg, 3, iIconElemX, 0); iIconElemX+=iIconWidth;
+        eg.drawString(String.valueOf(this.iJCoin), iIconElemX, iIconTextY);
+        iIconElemX+=60;
+        rcResIcon = drawIconInTile(eg, 0, iIconElemX, 0);iIconElemX+=iIconWidth;
+        eg.drawString(String.valueOf(this.iResLevel), iIconElemX, iIconTextY);
+        iIconElemX+=30;
+        rcEcoIcon = drawIconInTile(eg, 1, iIconElemX, 0);iIconElemX+=iIconWidth;
+        eg.drawString(String.valueOf(this.iEcoLevel), iIconElemX, iIconTextY);
+        iIconElemX+=30;
+        rcProdIcon = drawIconInTile(eg, 2, iIconElemX, 0);iIconElemX+=iIconWidth;
+        eg.drawString(String.valueOf(this.iProdLevel), iIconElemX, iIconTextY);
+        iIconElemX+=30;
+        rcNewsIcon = drawIconInTile(eg, 4, iIconElemX, 0);iIconElemX+=iIconWidth;
+        eg.drawString("Newspaper", iIconElemX, iIconTextY);
+        iIconElemX+=70;
+        rcTributeIcon = drawIconInTile(eg, 5, iIconElemX, 0);iIconElemX+=iIconWidth;
+        eg.drawString("Tribute", iIconElemX, iIconTextY);
 
     }
 
@@ -390,6 +418,10 @@ public class JBGTerritoryViewCanvasPanel extends JPanel
             break;
         case 4: //news
             x_offset = 10;
+            y_offset = 10;
+            break;
+        case 5: //tribute
+            x_offset = 20;
             y_offset = 10;
             break;
         }
@@ -515,7 +547,7 @@ public class JBGTerritoryViewCanvasPanel extends JPanel
     }
 
     protected void drawBunker(Graphics g, int x, int y) {
-        drawTile(g, JBGConstants.Tile.BUNKER, (x*JBGConstants.TILE_WIDTH), JBGConstants.TILE_HEIGHT*y-4);        
+        drawTile(g, JBGConstants.Tile.BUNKER, iCanvasWidth-(x*JBGConstants.TILE_WIDTH), JBGConstants.TILE_HEIGHT*y-4);
     }
 
     protected void drawFactory1(Graphics g, int x, int y) {

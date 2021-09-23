@@ -208,7 +208,7 @@ public class JBGWordMatchPanel {
     JBGWordMatchPanel masterModel = null;
       public ListKeyAction(String name, JBGWordMatchPanel model) {//, BoundedRangeModel model, int scrollableIncrement) {
           super(name);
-          System.out.println("List Key Action constructing ...");
+          //System.out.println("List Key Action constructing ...");
           this.masterModel = model;
           //this.vScrollBarModel = model;
           //this.scrollableIncrement = scrollableIncrement;

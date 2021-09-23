@@ -312,7 +312,7 @@ Still keep the folder of engine 2.3 before changed in:
 
     [Fixed] 12. bug: after WordMatch game, back to territory canvas and build dialog, new JCoin has not updated, must close Territory and reopen
 
-    13. improve: after a while, we'll have a lot of jCoin each turn, need a mechanism to spend the jCoin, for example: maintenance cost of buildings, if not enough, buildings may disappear ... so we have to earn jCoin on every turn
+    [Done] 13. improve: after a while, we'll have a lot of jCoin each turn, need a mechanism to spend the jCoin, for example: maintenance cost of buildings, if not enough, buildings may disappear ... or tribute to other players, or PUs of region(part of our built) get bombed, so we have to earn jCoin on every turn. -> Finally I added a "tribute" feature to other Ai player
 
     [Done] 14. improve: focus back to first word list after complete one test
 
@@ -322,7 +322,7 @@ Still keep the folder of engine 2.3 before changed in:
 
     [Done] 17. improve: deduct jCoin if use QUESTION_MARK on WordMatch, deduct jCoin if submit invalid combination
 
-    18. pending feature: use jCoin to trade on virtual crypto market (use real market data)
+    18. pending feature: Ai use jCoin to trade on virtual crypto market (use real market data), to get PUs from it
 
     [Done] 19. add drawing effects for territory burning in recent battle
 

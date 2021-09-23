@@ -8,6 +8,7 @@ import games.strategy.engine.data.properties.GameProperties;
 import games.strategy.engine.data.JBGKanjiItem;
 import games.strategy.triplea.ui.history.JBGTurnHistoryParser;
 import games.strategy.engine.data.JBGConstants;
+import games.strategy.triplea.ai.jbg.JBGGamePlayerExtInfo;
 
 import games.strategy.engine.delegate.IDelegate;
 import games.strategy.engine.framework.GameDataManager;
@@ -111,12 +112,20 @@ public class GameData implements Serializable {
   private List<JBGKanjiItem> kanjis = null;
   @Setter @Getter private int jCoinAmount = 0;
   @Setter @Getter private String humanPlayerName = "";
-  private List<String> lstPlayerNameByOrder = new ArrayList<>();
+  @Getter private List<String> lstPlayerNameByOrder = new ArrayList<>();
   private List<String> lstPlayerTurnByOrder = new ArrayList<>();
   @Setter @Getter private String currentTurnNews = "";
   @Setter @Getter private String lastTurnNews = "";
   @Getter private int jbgInternalTurnStep = 0;
   private Map<String, Integer> lastBattleTurnOfTerritories = new HashMap<>();
+  //This map is for controlling defensive/aggressive stance of Ai between turns
+  //and later extend to save interraction like tribute ... etc.
+  //It got loaded from two points: 
+  //        1. initPlayerExtendedInfo(), which be called from JBGTerritoryManagerPanel
+  //        2. AbstractJBGAi's move(), which only load AI player using JBGAi
+  //Map's items apply to JBGAi ONLY
+  private Map<String, JBGGamePlayerExtInfo> jbgAiInterracts = new HashMap<>();
+  //
 
   private void readObject(final ObjectInputStream in) throws IOException, ClassNotFoundException {
     // The process of deserializing makes use of this lock,
@@ -162,6 +171,10 @@ public class GameData implements Serializable {
     this.kanjis = kj;
     return kj.size();
   }
+  public Map<String, JBGGamePlayerExtInfo> getJBGAiInterracts() {
+    if (jbgAiInterracts == null) jbgAiInterracts = new HashMap<>();
+    return jbgAiInterracts;
+  }
   private void loadPlayerNamesByOrder() {
 
     if (lstPlayerNameByOrder.size() > 1) return;
@@ -191,7 +204,38 @@ public class GameData implements Serializable {
 
     }
   }
-  public void showSteps() {
+  private void loadAiInterracts() {
+
+    if (jbgAiInterracts == null) jbgAiInterracts = new HashMap<>(); //when load old games without this in GameData
+
+    GameSequence gseq = getSequence();
+    for (int i = 0; i < gseq.size(); i++) {
+      GameStep gs = gseq.getStep(i);
+      GamePlayer gp = gs.getPlayerId();
+
+      if (gp != null && gs != null) {
+
+        String stepName = gs.getDisplayName();
+        String playerName = gp.getName();
+        boolean bIsHuman = gp.getWhoAmI().contains("Human");
+        if (!bIsHuman && humanPlayerName.length() < 1) {
+          humanPlayerName = playerName;
+        }
+        else {
+          if (!jbgAiInterracts.containsKey(playerName)) {
+            JBGGamePlayerExtInfo exInfo = new JBGGamePlayerExtInfo(playerName);
+            jbgAiInterracts.put(playerName, exInfo);
+          }
+        }
+
+      }
+
+    }
+
+
+  }
+  //called by JBGTerritoryManagerPanel's constructor
+  public void initPlayerExtendedInfo() {
     loadPlayerNamesByOrder();
     /*
     System.out.println("---showPlayerNames");
@@ -206,6 +250,7 @@ public class GameData implements Serializable {
       System.out.println(s);
     }
     */
+    loadAiInterracts();
   }
   private String getNews(final boolean isLastTurn) {
     JBGTurnHistoryParser parser = new JBGTurnHistoryParser();

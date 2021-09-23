@@ -118,12 +118,6 @@ public abstract class AbstractJBGAi extends AbstractAi {
   private List<PoliticalActionAttachment> storedPoliticalActions;
   private List<Territory> storedStrafingTerritories;
 
-  //for initial defensive stance control
-  Map<String, Boolean> initStanceLst = new HashMap<>();
-
-  //for controlling defensive/aggressive stance of Ai between turns
-  Map<String, JBGGamePlayerExtInfo> playerStanceLst = new HashMap<>();
-
   public AbstractJBGAi(
       final String name, final IBattleCalculator battleCalculator, final JBGData jbgData) {
     super(name);
@@ -187,33 +181,35 @@ public abstract class AbstractJBGAi extends AbstractAi {
     initializeData();
     prepareData(data);
 
-    if (!playerStanceLst.containsKey(player.getName())) {
+    Map<String, JBGGamePlayerExtInfo> jbgAiInterractLst = data.getJBGAiInterracts();
+
+    if (!jbgAiInterractLst.containsKey(player.getName())) {
       JBGGamePlayerExtInfo exInfo = new JBGGamePlayerExtInfo(player.getName());
-      playerStanceLst.put(player.getName(), exInfo);
+      jbgAiInterractLst.put(player.getName(), exInfo);
     }
 
     if (nonCombat) {
-      if (lastCombatTimeBySeconds >= 30 && !playerStanceLst.get(player.getName()).getDefensiveStance())
+      if (lastCombatTimeBySeconds >= 30 && !jbgAiInterractLst.get(player.getName()).isDefensiveStance())
         simpleDoNonCombatMove(moveDel, player, data);
       else
         nonCombatMoveAi.doNonCombatMove(storedFactoryMoveMap, storedPurchaseTerritories, moveDel);
       storedFactoryMoveMap = null;
     } else {
 
-      if (playerStanceLst.get(player.getName()).getDefensiveStance()) {
+      if (jbgAiInterractLst.get(player.getName()).isDefensiveStance()) {
         System.out.println("Defensive stance: " + player.getName() + " doing nothing!");
       }
       else {
-        playerStanceLst.get(player.getName()).continueOrStopAggressive();
+        jbgAiInterractLst.get(player.getName()).continueOrStopAggressive();
         //if continueOrStopAggressive reach last turn, it will reset the aggressive stance,
-        if (playerStanceLst.get(player.getName()).getDefensiveStance()) {
+        if (jbgAiInterractLst.get(player.getName()).isDefensiveStance()) {
           //new defensive stance
           System.out.println("New defensive stance: " + player.getName() + " doing nothing!");
         }
         else {
 
-          int iAggMax = playerStanceLst.get(player.getName()).getAggressiveTurnMax();
-          int iAggCount = playerStanceLst.get(player.getName()).getAggressiveTurnCount();
+          int iAggMax = jbgAiInterractLst.get(player.getName()).getAggressiveTurnMax();
+          int iAggCount = jbgAiInterractLst.get(player.getName()).getAggressiveTurnCount();
   System.out.println("Aggressive stance: " + player.getName() + " turn " + String.valueOf(iAggCount) + "/" + String.valueOf(iAggMax));
           if (storedCombatMoveMap == null) {
             combatMoveAi.doCombatMove(moveDel);
@@ -272,12 +268,19 @@ public abstract class AbstractJBGAi extends AbstractAi {
       return territoriesWithFactories.size();
     }
 
-    private boolean canTriggerMobilization(final int totalTerritories, final int totalFactories) {
+    private boolean canTriggerMobilization(final int totalTerritories, final int totalFactories, final int availPUs) {
       boolean terrMatched = false;
       boolean factoryMatched = false;
-      if (totalTerritories <= 3) terrMatched = true;
+      boolean lowPUs = false;
+
+      //cannot produce
+      if (totalFactories < 1) return false;
+
+      if (totalTerritories <= 2) terrMatched = true;
       if (totalFactories == 1) factoryMatched = true;
+      if (availPUs < 10) lowPUs = true;
       if (terrMatched && factoryMatched) return true;
+      if (totalTerritories <= 4 && lowPUs) return true;
       return false;
     }
   //end of JBG mobilization feature
@@ -418,12 +421,30 @@ public abstract class AbstractJBGAi extends AbstractAi {
       final int totalPu = pusToSpend;
       int leftToSpend = totalPu;
 
-      int leftTerrs = countMyLandTerritory();
-      int leftFactories = countMyFactories();
-      if (playerStanceLst.get(player.getName()).getDefensiveStance() && canTriggerMobilization(leftTerrs, leftFactories)) {
-        //after mobilization, the player will go out of defensive immediately by the end of this function 
-        notCareAboutCost = true;
-        leftToSpend += JBGConstants.MOBILIZATION_VALUE;
+      Map<String, JBGGamePlayerExtInfo> jbgAiInterractLst = data.getJBGAiInterracts();
+
+      //though we can call this trigger in move(), 
+      //but it will not help Ai to get new units before change to aggressive
+      //so this remain here
+      if (jbgAiInterractLst.get(player.getName()).isDefensiveStance()) {
+        int leftTerrs = countMyLandTerritory();
+        int leftFactories = countMyFactories();
+        int availPUs = player.getResources().getQuantity(pus); //this can be another condition for triggering
+        if (canTriggerMobilization(leftTerrs, leftFactories, availPUs)) {
+          //after mobilization, the player will go out of defensive immediately by the end of this function 
+          notCareAboutCost = true;
+          leftToSpend += JBGConstants.MOBILIZATION_VALUE;
+          jbgAiInterractLst.get(player.getName()).addStockingAmount(JBGConstants.MOBILIZATION_VALUE);
+System.out.println(player.getName() + " spending MOBILIZATION_VALUE");
+        }
+        int tributeAmount = jbgAiInterractLst.get(player.getName()).getTributeAmount();
+        if (tributeAmount > 0) {
+          notCareAboutCost = true;
+          leftToSpend += tributeAmount;
+          jbgAiInterractLst.get(player.getName()).addStockingAmount(tributeAmount);
+          jbgAiInterractLst.get(player.getName()).setTributeAmount(0);
+System.out.println(player.getName() + " spending tribute amount " + String.valueOf(tributeAmount));
+        }
       }
 
       int originSpendingBudget = leftToSpend;
@@ -681,15 +702,15 @@ public abstract class AbstractJBGAi extends AbstractAi {
       movePause();
 
       int spentAmount = originSpendingBudget - leftToSpend;
-      if (playerStanceLst.get(player.getName()).getDefensiveStance()) {
-        int playerStockAmount = playerStanceLst.get(player.getName()).getStockingAmount() + spentAmount;
-System.out.println(player.getName() + " add " + String.valueOf(spentAmount) + " point to total: " + playerStockAmount);
+      if (jbgAiInterractLst.get(player.getName()).isDefensiveStance()) {
+        int playerStockAmount = jbgAiInterractLst.get(player.getName()).getStockingAmount() + spentAmount;
+System.out.println(player.getName() + " added " + String.valueOf(spentAmount) + " point to total: " + playerStockAmount);
         if (playerStockAmount < 100) {
-          playerStanceLst.get(player.getName()).addStockingAmount(spentAmount);
+          jbgAiInterractLst.get(player.getName()).addStockingAmount(spentAmount);
         }
         else {
-System.out.println(player.getName() + " stop stocking, starting aggressive ... ");
-          playerStanceLst.get(player.getName()).setDefensiveStance(false); //will reset incl. setStockingAmount(0)
+System.out.println(player.getName() + " stop stocking, will start offensive in next turn ... ");
+          jbgAiInterractLst.get(player.getName()).setDefensiveStance(false); //will reset incl. setStockingAmount(0)
         }
       }
   }

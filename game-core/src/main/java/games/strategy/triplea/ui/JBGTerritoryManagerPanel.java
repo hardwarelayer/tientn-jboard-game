@@ -156,8 +156,8 @@ import org.triplea.swing.jpanel.JPanelBuilder;
 import javax.swing.SwingConstants;
 import org.triplea.swing.key.binding.KeyCode;
 import org.triplea.swing.key.binding.SwingKeyBinding;
-
 import games.strategy.engine.history.History;
+import games.strategy.triplea.ai.jbg.JBGGamePlayerExtInfo;
 
 /** Orchestrates the rendering of all map tiles. */
 public class JBGTerritoryManagerPanel  extends ActionPanel {
@@ -185,13 +185,19 @@ public class JBGTerritoryManagerPanel  extends ActionPanel {
   private JTextField jModify_ResBuildingList;
   private JTextField jModify_EcoBuildingList;
 
+  String sHumanPlayerName;
+  Map<String, JBGGamePlayerExtInfo> aiInteracts;
+
   public JBGTerritoryManagerPanel(final GameData data, final MapPanel map, final UiContext uiContext) {
     super(data, map);
     this.uiContext = uiContext;
 
-    //getNewKanjiList();
+    data.initPlayerExtendedInfo(); //should be called before getHumanPlayerName() and getJBGAiInterract()
 
-    data.showSteps();
+    //some public function will be called from outside
+    //and they can't access data directly
+    sHumanPlayerName = data.getHumanPlayerName();
+    aiInteracts = data.getJBGAiInterracts();
   }
 
   public List<JBGKanjiItem> getNewKanjiList(final boolean bNewKanjis) {
@@ -526,6 +532,51 @@ public class JBGTerritoryManagerPanel  extends ActionPanel {
     }
   }
 
+  public void openTributeDialog(final Component parent) {
+    System.out.println("Openning tribute ...");
+
+    StringBuilder sb = new StringBuilder();
+    for (String name: aiInteracts.keySet()) {
+      if (!name.equals(sHumanPlayerName))
+        sb.append(name).append("|");
+    }
+    String sPlayers = sb.toString();
+    JBGTributePanel purObj = new JBGTributePanel(
+      this,
+      sPlayers,
+      this.iJCoin
+      ); 
+    purObj.setJCoin(this.iJCoin);
+    JScrollPane p = purObj.makePanel(this.uiContext);
+
+    JOptionPane.showOptionDialog(
+            parent,
+            p,
+            "Tribute to other player",
+            JOptionPane.CANCEL_OPTION,
+            JOptionPane.PLAIN_MESSAGE,
+            null,
+            new Object[]{}, //no button at all!
+            null);
+
+    if (!purObj.isValidated()) return;
+System.out.println("Clicking tribute, checking ...");
+    String targetPlayer = purObj.getTargetPlayer();
+    int tributeAmount = purObj.getTributeAmount();
+
+    if (aiInteracts.containsKey(targetPlayer)) {
+      System.out.println("Contributing to " + targetPlayer);
+      if (tributeAmount == iJCoin) {
+        setJCoin(this.iJCoin - tributeAmount);
+        aiInteracts.get(targetPlayer).setTributeAmount(tributeAmount);
+        if (territoryCanvasPanel != null) {
+          territoryCanvasPanel.updateInfo( getJCoin() );
+        }
+        System.out.println("Contributed to " + targetPlayer);
+      }
+    }
+  }
+
   public void openTerritoryBuild(final Component parent) {
 
     if (this.territoryRef == null) return;
@@ -717,6 +768,8 @@ public class JBGTerritoryManagerPanel  extends ActionPanel {
     infoSection.add(territoryInfo);
 
     JPanel unitSection = new JPanel();
+    //set it smaller, and the canvas will expand it. If we don't set size, if many icons available, the width of this tab will be expanded
+    unitSection.setPreferredSize(new Dimension(300, 300));
     unitSection.add(unitInfo);
 
     for (final UnitCategory item : units) {
@@ -727,7 +780,7 @@ public class JBGTerritoryManagerPanel  extends ActionPanel {
       }
 
       String itemType = item.getType().getName();
-      System.out.println(itemType + " " + String.valueOf(item.getUnits().size()));
+      //System.out.println(itemType + " " + String.valueOf(item.getUnits().size()));
 
       final Optional<ImageIcon> unitIcon =
           uiContext.getUnitImageFactory().getIcon(ImageKey.of(item));

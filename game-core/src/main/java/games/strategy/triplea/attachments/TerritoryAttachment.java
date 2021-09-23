@@ -1002,15 +1002,14 @@ public class TerritoryAttachment extends DefaultAttachment {
     }
     if (production > 0 || (resources != null && resources.toString().length() > 0)) {
       sb.append("Production: ");
-      sb.append(br);
+      //sb.append(br);
       if (production > 0) {
-        sb.append("&nbsp;&nbsp;&nbsp;&nbsp;").append(production).append(" PUs");
+        sb.append(production).append(" PUs");
         sb.append(br);
       }
       if (resources != null) {
         if (useHtml) {
-          sb.append("&nbsp;&nbsp;&nbsp;&nbsp;")
-              .append(
+          sb.append(
                   resources.toStringForHtml().replaceAll("<br>", "<br>&nbsp;&nbsp;&nbsp;&nbsp;"));
         } else {
           sb.append(resources.toString());
@@ -1021,15 +1020,14 @@ public class TerritoryAttachment extends DefaultAttachment {
 
     //if (researchLevel > 0 || (resources != null && resources.toString().length() > 0)) {
       sb.append("Research Level: ");
-      sb.append(br);
+      //sb.append(br);
       if (researchLevel > 0) {
-        sb.append("&nbsp;&nbsp;&nbsp;&nbsp;").append(researchLevel).append(" RUs");
+        sb.append(researchLevel).append(" RUs");
         sb.append(br);
       }
       if (resources != null) {
         if (useHtml) {
-          sb.append("&nbsp;&nbsp;&nbsp;&nbsp;")
-              .append(
+          sb.append(
                   resources.toStringForHtml().replaceAll("<br>", "<br>&nbsp;&nbsp;&nbsp;&nbsp;"));
         } else {
           sb.append(resources.toString());
@@ -1040,15 +1038,14 @@ public class TerritoryAttachment extends DefaultAttachment {
 
     //if (economyLevel > 0 || (resources != null && resources.toString().length() > 0)) {
       sb.append("Economy Level: ");
-      sb.append(br);
+      //sb.append(br);
       if (economyLevel > 0) {
-        sb.append("&nbsp;&nbsp;&nbsp;&nbsp;").append(economyLevel).append(" EUs");
+        sb.append(economyLevel).append(" EUs");
         sb.append(br);
       }
       if (resources != null) {
         if (useHtml) {
-          sb.append("&nbsp;&nbsp;&nbsp;&nbsp;")
-              .append(
+          sb.append(
                   resources.toStringForHtml().replaceAll("<br>", "<br>&nbsp;&nbsp;&nbsp;&nbsp;"));
         } else {
           sb.append(resources.toString());
