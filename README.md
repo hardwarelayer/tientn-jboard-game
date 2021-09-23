@@ -16,22 +16,26 @@ The other games are too simple ...
 
 ### Notes:
 
-I make a board game based on TripleA, and add more 'territory building' features than the original. A special jCoin monetary unit, for human player to build bases, and tribute to allies and opponent's AI.
+I make a board game based on TripleA, and add NEW feature of 'territory building', 'city building'. A special jCoin monetary unit, for human player to build bases, and tribute to allies and opponent's AI. It can be base of a new trading / financial system in game, later.
 
-A new AI with more realistic behavior, more flexible and faster for the existing Fast and Hard AI, which make the game unplayable because too much time of thinking, emulating, processing... The game is now more fun than before (in my opinion).
+The new on map feature which make war battles have more visibility on map.
 
-Other feature: Language learning while playing to gain jCoin.
+A new AI with more realistic behavior, more flexible and faster for the existing Fast and Hard AI, which make the game unplayable because too much time of thinking, emulating, processing...  AI will prepare, start war, stop war by stocking levels. Or it will start war on funding resources from other players (human and AI).
+
+The game is now more fun than before (in my opinion). It will not be restricted in "short game style" anymore.
+
+Other feature: Language learning while playing to gain jCoin. And other new ways of gaining this strategic resource in the future.
+
+Good luck with the game :)
+
+### Updates:
+My edition current version: 0.3
 
 I will try to make this game still compatible with the base TripleA, for any updates.
 
 My branch is always on feature-tientn-j-lang
 
 The branch 'master' will always be used to keep up with newer releases of the core TripA releases, except this file.
-
-Good luck with the game :)
-
-### Updates:
-Current version: 0.2
 
 Current core release: 2.5.22294
 
