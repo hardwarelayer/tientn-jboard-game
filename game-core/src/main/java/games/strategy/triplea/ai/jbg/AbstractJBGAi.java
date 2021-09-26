@@ -56,27 +56,17 @@ import games.strategy.engine.data.ProductionRule;
 import games.strategy.engine.data.RepairRule;
 import games.strategy.engine.data.Resource;
 import games.strategy.engine.data.Route;
-import games.strategy.engine.data.Territory;
-import games.strategy.engine.data.Unit;
 import games.strategy.engine.data.UnitType;
 import games.strategy.engine.framework.startup.ui.PlayerType;
 import games.strategy.triplea.Constants;
-import games.strategy.triplea.Properties;
 import games.strategy.triplea.UnitUtils;
 import games.strategy.triplea.ai.TienAbstractAi;
 import games.strategy.triplea.ai.AiUtils;
 import games.strategy.triplea.attachments.TerritoryAttachment;
 import games.strategy.triplea.attachments.UnitAttachment;
-import games.strategy.triplea.delegate.DelegateFinder;
-import games.strategy.triplea.delegate.Matches;
 import games.strategy.triplea.delegate.TransportTracker;
-import games.strategy.triplea.delegate.battle.BattleDelegate;
 import games.strategy.triplea.delegate.data.PlaceableUnits;
-import games.strategy.triplea.delegate.remote.IAbstractPlaceDelegate;
-import games.strategy.triplea.delegate.remote.IMoveDelegate;
-import games.strategy.triplea.delegate.remote.IPurchaseDelegate;
 import games.strategy.triplea.delegate.PurchaseDelegate;
-import games.strategy.triplea.delegate.remote.ITechDelegate;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -84,11 +74,24 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
-import org.triplea.java.collections.CollectionUtils;
 import org.triplea.java.collections.IntegerMap;
 import games.strategy.triplea.delegate.AbstractPlaceDelegate;
 import games.strategy.engine.data.JBGConstants;
 //
+
+
+import java.awt.Frame;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.BoundedRangeModel;
+import javax.swing.DefaultBoundedRangeModel;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.SwingUtilities;
+
 
 /** JBG AI. */
 public abstract class AbstractJBGAi extends AbstractAi {

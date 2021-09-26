@@ -215,6 +215,10 @@ public final class TripleAFrame extends JFrame implements QuitHandler {
   private final MapUnitTooltipManager tooltipManager;
   private boolean isCtrlPressed = false;
 
+  //JBG
+  JBGFloatingWindow turnInfoWindow;
+  //
+
   private final MapSelectionListener mapSelectionListener =
       new DefaultMapSelectionListener() {
         @Override
@@ -657,6 +661,12 @@ public final class TripleAFrame extends JFrame implements QuitHandler {
     data.addDataChangeListener(dataChangeListener);
     game.getData().addGameDataEventListener(GameDataEvent.GAME_STEP_CHANGED, this::updateStep);
     uiContext.addShutdownWindow(this);
+
+    //JBG
+    //JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(rightHandSidePanel); //equal to this
+    turnInfoWindow = new JBGFloatingWindow( this , uiContext, data);
+    turnInfoWindow.setLocation( 17, 70 );
+    turnInfoWindow.setVisible( true );
   }
 
   private static GridBagConstraints gridBagConstraint(final int columnNumber) {
@@ -1858,6 +1868,16 @@ public final class TripleAFrame extends JFrame implements QuitHandler {
       }
       stepDisplayName = step.getDisplayName();
       player = step.getPlayerId();
+
+      //JBG
+      if (player == null || data.isHumanPlayer(player.getName())) {
+        turnInfoWindow.resetPlayerListStep();
+        turnInfoWindow.setVisible(false);
+      }
+      else
+        turnInfoWindow.setVisible(true);
+      //
+
     } finally {
       data.releaseReadLock();
     }
@@ -1871,6 +1891,10 @@ public final class TripleAFrame extends JFrame implements QuitHandler {
       CompletableFutureUtils.logExceptionWhenComplete(
           future,
           throwable -> log.log(Level.SEVERE, "Failed to set round icon for " + player, throwable));
+      //JBG
+      turnInfoWindow.setLoadPlayerIcon(player);
+      //
+
       lastStepPlayer = currentStepPlayer;
       currentStepPlayer = player;
     }
@@ -1881,6 +1905,11 @@ public final class TripleAFrame extends JFrame implements QuitHandler {
           if (player != null) {
             this.player.setText((isPlaying ? "" : "REMOTE: ") + player.getName());
           }
+
+          //JBG
+          turnInfoWindow.setInfo(isPlaying, player, round, stepDisplayName);
+          //
+
         });
     resourceBar.gameDataChanged(null);
     // if the game control has passed to someone else and we are not just showing the map, show the

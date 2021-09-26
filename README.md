@@ -6,7 +6,7 @@
 
 A board based, turn based war game, made for desktop, more targeted to local play, with newspaper with articles made by computer on each turn, territory building, language learning feature, coded in Java using Swing and Docker instances. 
 
-Since I have played a lot of strategy series, from Civilization and EU4, IronHearts, Victoria ... But they are over complicated
+Since I have played a lot of historic simulation series ... But they are over complicated
 
 The other games are too simple ...
 
@@ -337,6 +337,10 @@ Still keep the folder of engine 2.3 before changed in:
     [Done] 21. Add first weak Ai (Tien1Ai), with mobilization trigger value, free purchase and deployment/place on conditions
 
     [Done] 22. First JBG Ai, which is hybrid (both hard and easy), add condition for Ai to focus on neccessary move/moves only, reduce exec time
+
+    23. Add progress info window for display AI's status, to avoid player become bored while waiting ...
+
+    24. Fix the issue when game panel first load, it will crash due to some misterious delegate (may be because we changed some classes with public function not in I/F?) 
 
 
 ------------------

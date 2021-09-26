@@ -557,8 +557,11 @@ public class ServerGame extends AbstractGame {
     try {
       final IDelegate delegate = getCurrentStep().getDelegate();
       delegate.setDelegateBridgeAndPlayer(bridge);
+final GamePlayer gamePlayer = getCurrentStep().getPlayerId();
+if (gamePlayer != null) {
+  System.out.println( gamePlayer.getName() + "--------Start step--------" + getCurrentStep().getName());
+}
 /*
-System.out.println("------------------Start step---------------------");
 for (final Player gp : gamePlayers.values()) {
   System.out.println(gp.getGamePlayer().toString());
 }
