@@ -116,6 +116,7 @@ public class GameData implements Serializable {
   private List<String> lstPlayerTurnByOrder = new ArrayList<>();
   @Setter @Getter private String currentTurnNews = "";
   @Setter @Getter private String lastTurnNews = "";
+  @Setter @Getter private String eventMessageBuffer = "";
   @Getter private int jbgInternalTurnStep = 0;
   private Map<String, Integer> lastBattleTurnOfTerritories = new HashMap<>();
   //This map is for controlling defensive/aggressive stance of Ai between turns

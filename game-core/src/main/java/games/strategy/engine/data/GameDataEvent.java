@@ -6,7 +6,8 @@ import java.util.Optional;
 /** Enum that represents various possible game data change events. */
 public enum GameDataEvent {
   UNIT_MOVED,
-  GAME_STEP_CHANGED;
+  GAME_STEP_CHANGED,
+  JBG_AI_MESSAGING_EVENT;
 
   /**
    * Converts a 'Change' object to a 'GameDataEvent' object, returns empty if the change object does

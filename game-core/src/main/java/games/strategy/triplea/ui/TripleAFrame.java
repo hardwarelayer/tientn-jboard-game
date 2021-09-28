@@ -660,6 +660,7 @@ public final class TripleAFrame extends JFrame implements QuitHandler {
     dataChangeListener.gameDataChanged(ChangeFactory.EMPTY_CHANGE);
     data.addDataChangeListener(dataChangeListener);
     game.getData().addGameDataEventListener(GameDataEvent.GAME_STEP_CHANGED, this::updateStep);
+    game.getData().addGameDataEventListener(GameDataEvent.JBG_AI_MESSAGING_EVENT, this::updateJBGAiMessage);
     uiContext.addShutdownWindow(this);
 
     //JBG
@@ -1841,6 +1842,21 @@ public final class TripleAFrame extends JFrame implements QuitHandler {
         .result
         .orElse(null);
   }
+
+  //JBG
+  private void updateJBGAiMessage() {
+    final String jbgEventMessage;
+
+    if (!turnInfoWindow.isVisible()) return;
+    data.acquireReadLock();
+    try {
+      jbgEventMessage = data.getEventMessageBuffer();
+    } finally {
+      data.releaseReadLock();
+    }
+    turnInfoWindow.setEventMessage(jbgEventMessage);
+  }
+  //
 
   private void updateStep() {
     if (SwingUtilities.isEventDispatchThread()) {

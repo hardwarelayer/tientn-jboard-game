@@ -1,6 +1,7 @@
 package games.strategy.triplea.ai.jbg;
 
 import games.strategy.engine.data.GameData;
+import games.strategy.engine.data.GameDataEvent;
 import games.strategy.engine.data.GamePlayer;
 import games.strategy.engine.data.GameStep;
 import games.strategy.engine.data.Territory;
@@ -77,6 +78,7 @@ import javax.annotation.Nullable;
 import org.triplea.java.collections.IntegerMap;
 import games.strategy.triplea.delegate.AbstractPlaceDelegate;
 import games.strategy.engine.data.JBGConstants;
+
 //
 
 
@@ -184,6 +186,8 @@ public abstract class AbstractJBGAi extends AbstractAi {
     initializeData();
     prepareData(data);
 
+    doJBGEventMessaging(data, "Start moving ...");
+
     Map<String, JBGGamePlayerExtInfo> jbgAiInterractLst = data.getJBGAiInterracts();
 
     if (!jbgAiInterractLst.containsKey(player.getName())) {
@@ -200,20 +204,20 @@ public abstract class AbstractJBGAi extends AbstractAi {
     } else {
 
       if (jbgAiInterractLst.get(player.getName()).isDefensiveStance()) {
-        System.out.println("Defensive stance: " + player.getName() + " doing nothing!");
+        doJBGEventMessaging(data, "Defensive stance: " + player.getName() + " doing nothing!");
       }
       else {
         jbgAiInterractLst.get(player.getName()).continueOrStopAggressive();
         //if continueOrStopAggressive reach last turn, it will reset the aggressive stance,
         if (jbgAiInterractLst.get(player.getName()).isDefensiveStance()) {
           //new defensive stance
-          System.out.println("New defensive stance: " + player.getName() + " doing nothing!");
+          doJBGEventMessaging(data, "New defensive stance: " + player.getName() + " doing nothing!");
         }
         else {
 
           int iAggMax = jbgAiInterractLst.get(player.getName()).getAggressiveTurnMax();
           int iAggCount = jbgAiInterractLst.get(player.getName()).getAggressiveTurnCount();
-  System.out.println("Aggressive stance: " + player.getName() + " turn " + String.valueOf(iAggCount) + "/" + String.valueOf(iAggMax));
+          doJBGEventMessaging(data, "Aggressive stance: " + player.getName() + " offensive " + String.valueOf(iAggCount) + "/" + String.valueOf(iAggMax));
           if (storedCombatMoveMap == null) {
             combatMoveAi.doCombatMove(moveDel);
           } else {
@@ -238,6 +242,13 @@ public abstract class AbstractJBGAi extends AbstractAi {
             + " time="
             + (System.currentTimeMillis() - start));
   }
+
+  //JBG event messaging
+  private void doJBGEventMessaging(final GameData data, final String msg) {
+    System.out.println(msg);
+    data.setEventMessageBuffer(msg); data.fireGameDataEvent(GameDataEvent.JBG_AI_MESSAGING_EVENT);
+  }
+  //
 
   //JBG mobilization feature
     private List<Territory> getMyTerritories() {
@@ -438,7 +449,7 @@ public abstract class AbstractJBGAi extends AbstractAi {
           notCareAboutCost = true;
           leftToSpend += JBGConstants.MOBILIZATION_VALUE;
           jbgAiInterractLst.get(player.getName()).addStockingAmount(JBGConstants.MOBILIZATION_VALUE);
-System.out.println(player.getName() + " spending MOBILIZATION_VALUE");
+          doJBGEventMessaging(data, player.getName() + " spending MOBILIZATION_VALUE");
         }
         int tributeAmount = jbgAiInterractLst.get(player.getName()).getTributeAmount();
         if (tributeAmount > 0) {
@@ -446,7 +457,7 @@ System.out.println(player.getName() + " spending MOBILIZATION_VALUE");
           leftToSpend += tributeAmount;
           jbgAiInterractLst.get(player.getName()).addStockingAmount(tributeAmount);
           jbgAiInterractLst.get(player.getName()).setTributeAmount(0);
-System.out.println(player.getName() + " spending tribute amount " + String.valueOf(tributeAmount));
+          doJBGEventMessaging(data, player.getName() + " spending tribute amount " + String.valueOf(tributeAmount));
         }
       }
 
@@ -707,12 +718,12 @@ System.out.println(player.getName() + " spending tribute amount " + String.value
       int spentAmount = originSpendingBudget - leftToSpend;
       if (jbgAiInterractLst.get(player.getName()).isDefensiveStance()) {
         int playerStockAmount = jbgAiInterractLst.get(player.getName()).getStockingAmount() + spentAmount;
-System.out.println(player.getName() + " added " + String.valueOf(spentAmount) + " point to total: " + playerStockAmount);
+        doJBGEventMessaging(data, player.getName() + " added " + String.valueOf(spentAmount) + " point to total: " + playerStockAmount);
         if (playerStockAmount < 100) {
           jbgAiInterractLst.get(player.getName()).addStockingAmount(spentAmount);
         }
         else {
-System.out.println(player.getName() + " stop stocking, will start offensive in next turn ... ");
+          doJBGEventMessaging(data, player.getName() + " stop stocking, will start offensive in next turn ... ");
           jbgAiInterractLst.get(player.getName()).setDefensiveStance(false); //will reset incl. setStockingAmount(0)
         }
       }
@@ -725,6 +736,7 @@ System.out.println(player.getName() + " stop stocking, will start offensive in n
       final IAbstractPlaceDelegate placeDelegate,
       final GameData data,
       final GamePlayer player) {
+    doJBGEventMessaging(data, player.getName() + " start placing units ... ");
     simplePlace(bid, placeDelegate, data, player);
   }
 
@@ -1117,6 +1129,8 @@ System.out.println(player.getName() + " stop stocking, will start offensive in n
   protected void tech(
       final ITechDelegate techDelegate, final GameData data, final GamePlayer player) {
     JBGTechAi.tech(techDelegate, data, player);
+
+    doJBGEventMessaging(data, player.getName() + " starting ... ");
   }
 
   @Override

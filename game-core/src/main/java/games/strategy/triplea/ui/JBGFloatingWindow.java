@@ -10,6 +10,8 @@ import javax.swing.BoundedRangeModel;
 import javax.swing.DefaultBoundedRangeModel;
 import javax.swing.JProgressBar;
 import java.awt.BorderLayout;
+import javax.swing.BorderFactory;
+import javax.swing.border.Border;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -44,6 +46,7 @@ public class JBGFloatingWindow extends JWindow
     private final JLabel roundInfoLbl = new JLabel("xxxxxx");
     private final JLabel playerInfoLbl = new JLabel("xxxxxx");
     private final JLabel playerListLbl = new JLabel("?/?");
+    private final JLabel eventMessageLbl = new JLabel("");
     BoundedRangeModel playerListModel = new DefaultBoundedRangeModel();
     JProgressBar playerListBar = new JProgressBar(playerListModel);
     int iPlayerListBarStep = 0;
@@ -51,6 +54,7 @@ public class JBGFloatingWindow extends JWindow
     int iTotalPlayers = 0;
     int iCurrentPlayerIdx = 0;
     String lastPlayerName = "";
+    static String HTML_HEADER_TOKEN = "<html>";
 
     public JBGFloatingWindow( Window hostWindow, UiContext uiCntx, GameData data)
     {
@@ -133,6 +137,20 @@ public class JBGFloatingWindow extends JWindow
         setComponentSize(playerListBar, DISPLAY_WIDTH, LINE_HEIGHT);
         panel.add(playerListBar);
 
+        Border border = BorderFactory.createLineBorder(Color.BLACK);
+        eventMessageLbl.setBorder(border);
+
+        c.fill = GridBagConstraints.HORIZONTAL; //natural height, maximum width
+        c.weightx = 1.0; //spacing
+        c.gridx = 0; //col
+        c.gridy = 5; //row
+        c.gridwidth = 1; //column span
+        c.gridheight = 3; //row span
+        gridbag.setConstraints(eventMessageLbl, c);
+        setComponentSize(eventMessageLbl, DISPLAY_WIDTH, LINE_HEIGHT*3);
+        panel.add(eventMessageLbl);
+
+
         add(panel);
     }
 
@@ -150,7 +168,7 @@ public class JBGFloatingWindow extends JWindow
           throwable -> System.out.println("Failed to set round icon for " + player));
     }
 
-    public void resetPlayerListStep() {
+  public void resetPlayerListStep() {
       iPlayerListBarStep = 0;
       iCurrentPlayerIdx = 0;
     }
@@ -161,12 +179,13 @@ public class JBGFloatingWindow extends JWindow
       this.roundInfoLbl.setText("Round:" + String.valueOf(round) + " ");
       stepInfoLbl.setText(step);
       if (player != null) {
-        this.playerInfoLbl.setText((isPlaying ? "" : "REMOTE: ") + player.getName());
+        this.playerInfoLbl.setText((isPlaying ? "" : "AI: ") + player.getName());
       }
 
       if (!lastPlayerName.equals(player.getName())) {
         lastPlayerName = player.getName();
         iCurrentPlayerIdx++;
+        this.eventMessageLbl.setText(HTML_HEADER_TOKEN);
         playerListLbl.setText(String.valueOf(iCurrentPlayerIdx)+"/"+String.valueOf(iTotalPlayers));
         if (iPlayerListBarStep < 100) {
           iPlayerListBarStep += iPlayerStep;
@@ -175,6 +194,15 @@ public class JBGFloatingWindow extends JWindow
           iPlayerListBarStep = 0;
         playerListModel.setValue(iPlayerListBarStep);
       }
+    }
+
+    public void setEventMessage(final String msg) {
+      String curMsg = this.eventMessageLbl.getText();
+      if (curMsg.length() > HTML_HEADER_TOKEN.length()) 
+        curMsg = (HTML_HEADER_TOKEN + msg + "<br/>" + curMsg.substring(HTML_HEADER_TOKEN.length()));
+      else
+        curMsg = (HTML_HEADER_TOKEN + msg);
+      this.eventMessageLbl.setText(curMsg);
     }
 
     private void setComponentSize(JComponent jCom, final int width, final int height) {
