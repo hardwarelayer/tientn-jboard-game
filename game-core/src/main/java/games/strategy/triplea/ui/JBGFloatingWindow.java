@@ -180,19 +180,19 @@ public class JBGFloatingWindow extends JWindow
       stepInfoLbl.setText(step);
       if (player != null) {
         this.playerInfoLbl.setText((isPlaying ? "" : "AI: ") + player.getName());
-      }
 
-      if (!lastPlayerName.equals(player.getName())) {
-        lastPlayerName = player.getName();
-        iCurrentPlayerIdx++;
-        this.eventMessageLbl.setText(HTML_HEADER_TOKEN);
-        playerListLbl.setText(String.valueOf(iCurrentPlayerIdx)+"/"+String.valueOf(iTotalPlayers));
-        if (iPlayerListBarStep < 100) {
-          iPlayerListBarStep += iPlayerStep;
+        if (!lastPlayerName.equals(player.getName())) {
+          lastPlayerName = player.getName();
+          iCurrentPlayerIdx++;
+          this.eventMessageLbl.setText(HTML_HEADER_TOKEN);
+          playerListLbl.setText(String.valueOf(iCurrentPlayerIdx)+"/"+String.valueOf(iTotalPlayers));
+          if (iPlayerListBarStep < 100) {
+            iPlayerListBarStep += iPlayerStep;
+          }
+          else
+            iPlayerListBarStep = 0;
+          playerListModel.setValue(iPlayerListBarStep);
         }
-        else
-          iPlayerListBarStep = 0;
-        playerListModel.setValue(iPlayerListBarStep);
       }
     }
 
