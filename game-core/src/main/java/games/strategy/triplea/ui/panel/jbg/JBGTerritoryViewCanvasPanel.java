@@ -80,6 +80,7 @@ public class JBGTerritoryViewCanvasPanel extends JPanel
     @Getter private Rectangle rcProdIcon = null;
     @Getter private Rectangle rcNewsIcon = null;
     @Getter private Rectangle rcTributeIcon = null;
+    @Getter private Rectangle rcExchangeIcon = null;
 
     int iEcoLevel = 0;
     int iResLevel = 0;
@@ -141,6 +142,14 @@ public class JBGTerritoryViewCanvasPanel extends JPanel
                     }
                     else {
                         refMaster.openTributeDialog(panel);
+                    }
+                }
+                if (isInRect(e.getX(), e.getY(), panel.getRcExchangeIcon())) {
+                    if (iJCoin < 1) {
+                        refMaster.showAlert(panel, "No jCoin is left!!!");
+                    }
+                    else {
+                        refMaster.openExchangeJCoinDialog(panel);
                     }
                 }
             }
@@ -364,7 +373,7 @@ public class JBGTerritoryViewCanvasPanel extends JPanel
         }
 
         int iIconWidth = 22;
-        int iIconElemX = 180;
+        int iIconElemX = 140;
         int iIconTextY = 12;
         rcWorkIcon = drawIconInTile(eg, 3, iIconElemX, 0); iIconElemX+=iIconWidth;
         eg.drawString(String.valueOf(this.iJCoin), iIconElemX, iIconTextY);
@@ -381,6 +390,9 @@ public class JBGTerritoryViewCanvasPanel extends JPanel
         rcNewsIcon = drawIconInTile(eg, 4, iIconElemX, 0);iIconElemX+=iIconWidth;
         eg.drawString("Newspaper", iIconElemX, iIconTextY);
         iIconElemX+=70;
+        rcExchangeIcon = drawIconInTile(eg, 5, iIconElemX, 0);iIconElemX+=iIconWidth;
+        eg.drawString("Exchange", iIconElemX, iIconTextY);
+        iIconElemX+=60;
         rcTributeIcon = drawIconInTile(eg, 5, iIconElemX, 0);iIconElemX+=iIconWidth;
         eg.drawString("Tribute", iIconElemX, iIconTextY);
 

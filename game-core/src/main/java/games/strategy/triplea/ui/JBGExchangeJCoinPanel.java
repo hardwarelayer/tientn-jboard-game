@@ -80,36 +80,28 @@ import java.awt.event.MouseAdapter;
 import lombok.Getter;
 import lombok.Setter;
 
-public class JBGTributePanel {
+public class JBGExchangeJCoinPanel {
 
   @Getter private JBGTerritoryManagerPanel parent = null;
 
-  private String sPlayerNames;
-  @Getter private String sTargetPlayerName;
   @Setter private int jCoin;
   @Getter private boolean validated = false; //getter will be: isValidated()
-  @Getter private int spendJCoin = 0;
-  //use this to disable unSelect of original selected item in selected list
-  private int iTotalOriginalSelected = 0;
+  @Getter private int exchangeJCoin = 0;
   
-  private static final String TARGET_PLAYER_LIST_NAME = "TributeTo";
+  private static final String TARGET_PLAYER_LIST_NAME = "ExchangeTo";
   private static final String TRIBUTE_AMOUNT_NAME = "Amount";
 
   private JScrollPane jPane = null;
 
-  JLabel lblTargetPlayer;
-  JLabel lblTributeAmount;
+  JLabel lblExchangeAmount;
   JLabel lblJCoinAmount;
-  JComboBox jcbPlayerNames;
 
-  @Getter private String targetPlayer;
-  @Getter private int tributeAmount;
+  @Getter private int exchangeAmount;
 
-  public JBGTributePanel(final JBGTerritoryManagerPanel p, final String sPlayers, final int jCoin) {
+  public JBGExchangeJCoinPanel(final JBGTerritoryManagerPanel p, final int jCoin) {
 
-    this.sPlayerNames = sPlayers;
     this.jCoin = jCoin;
-    this.spendJCoin = 0;
+    this.exchangeJCoin = 0;
     this.validated = false;
     this.parent = p;
   }
@@ -142,16 +134,6 @@ public class JBGTributePanel {
     jCom.setMaximumSize(new Dimension(width, height));
   }
 
-  protected JComboBox makeComboBox(final String[] names, JPanel panel, 
-    GridBagLayout gridbag, GridBagConstraints c, int width) {
-     JComboBox jcb = new JComboBox(names);
-     gridbag.setConstraints(jcb, c);
-     if (width == 0) width = 200;
-     setComponentSize(jcb, width, 20);
-     panel.add(jcb);
-     return jcb;
-  }
-
   protected JLabel makeLabel(String name, JPanel panel, GridBagLayout gridbag, GridBagConstraints c, int width) {
      JLabel lbl = new JLabel(name);
      gridbag.setConstraints(lbl, c);
@@ -167,15 +149,12 @@ public class JBGTributePanel {
   }
 
   private void confirmProcess() {
-    if (lblTargetPlayer.getText().length() > 1) {
-      int iAmount = Integer.valueOf(lblTributeAmount.getText());
-      if (iAmount > 0) {
-        targetPlayer = lblTargetPlayer.getText();
-        tributeAmount = iAmount;
-        validated = true;
-        closeDialog();
-        return;
-      }
+    int iAmount = Integer.valueOf(lblExchangeAmount.getText());
+    if (iAmount > 0) {
+      exchangeAmount = iAmount;
+      validated = true;
+      closeDialog();
+      return;
     }
     validated = false;
   }
@@ -221,65 +200,34 @@ public class JBGTributePanel {
     c.gridx = 0; //col
     c.gridy = 1; //row
     c.gridwidth = 1; //column span
-    makeLabel("Tribute Amount:", panel, gridbag, c, 0);
+    makeLabel("Exchange PUs:", panel, gridbag, c, 0);
 
     c.weightx = 1.0; //spacing
     c.gridx = 1; //col
     c.gridy = 1; //row
     c.gridwidth = 1; //column span
-    this.lblTributeAmount = makeLabel(String.valueOf(this.jCoin), panel, gridbag, c, 0);
-    this.lblTributeAmount.setHorizontalAlignment(SwingConstants.RIGHT);
+    this.lblExchangeAmount = makeLabel(String.valueOf(this.jCoin), panel, gridbag, c, 0);
+    this.lblExchangeAmount.setHorizontalAlignment(SwingConstants.RIGHT);
 
     c.gridx = 2; //col
     c.gridy = 1; //row
     c.gridwidth = 1; //column span
-    makeLabel("jCoin", panel, gridbag, c, 50);
-
-    //3rd row
-    c.gridx = 0; //col
-    c.gridy = 2; //row
-    c.gridwidth = 1; //column span
-    makeLabel("Tribute To:", panel, gridbag, c, 0);
-    //5th
-    c.gridx = 1; //col
-    c.gridy = 2; //row
-    c.gridwidth = 2; //column span
-    lblTargetPlayer = makeLabel("?", panel, gridbag, c, 0);
-
-    //4th
-    c.weightx = 1.0;
-    c.gridx = 0;
-    c.gridy = 3;
-    c.gridwidth = 3;
-    c.gridheight = 1;
-    final String[] arrPlayerNames = this.sPlayerNames.split("\\|", 20);
-    this.jcbPlayerNames  = makeComboBox(arrPlayerNames, panel, gridbag, c, 200);
-    this.jcbPlayerNames.setSelectedIndex(-1);
-    jcbPlayerNames.addActionListener( new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        int iSelected = jcbPlayerNames.getSelectedIndex();
-        if (iSelected >= 0) {
-          String sSelected = (String) jcbPlayerNames.getItemAt(iSelected);
-          lblTargetPlayer.setText(sSelected);
-        }
-      }
-    });
+    makeLabel("PUs", panel, gridbag, c, 50);
 
     //6th
     c.gridx = 0;
     c.gridy = 4;
-    c.gridwidth = 2;
+    c.gridwidth = 1;
     c.gridheight = 1;
-    ActionListener tributeListenerFnc = new ActionListener() {
+    ActionListener exchangeListenerFnc = new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
         confirmProcess();
       }
     };
-    JButton btnSelect = makeButtonWithAction("Tribute", panel, gridbag, c, tributeListenerFnc);
+    JButton btnSelect = makeButtonWithAction("Exchange", panel, gridbag, c, exchangeListenerFnc);
     setComponentSize(btnSelect, 80, 50);
-    c.gridx = 2;
+    c.gridx = 1;
     c.gridy = 4;
     c.gridwidth = 1;
     c.gridheight = 1;

@@ -23,6 +23,8 @@ import games.strategy.engine.data.TerritoryEffect;
 import games.strategy.triplea.attachments.TerritoryAttachment;
 import games.strategy.engine.data.Unit;
 import games.strategy.engine.data.UnitType;
+import games.strategy.engine.data.changefactory.ChangeFactory;
+import games.strategy.engine.data.Change;
 import games.strategy.triplea.Properties;
 import games.strategy.triplea.ResourceLoader;
 import games.strategy.triplea.attachments.TechAttachment;
@@ -158,6 +160,8 @@ import org.triplea.swing.key.binding.KeyCode;
 import org.triplea.swing.key.binding.SwingKeyBinding;
 import games.strategy.engine.history.History;
 import games.strategy.triplea.ai.jbg.JBGGamePlayerExtInfo;
+import games.strategy.triplea.Constants;
+import games.strategy.engine.data.Resource;
 
 /** Orchestrates the rendering of all map tiles. */
 public class JBGTerritoryManagerPanel  extends ActionPanel {
@@ -198,6 +202,7 @@ public class JBGTerritoryManagerPanel  extends ActionPanel {
     //and they can't access data directly
     sHumanPlayerName = data.getHumanPlayerName();
     aiInteracts = data.getJBGAiInterracts();
+    //actually, the issue is solved in function increasePUs()
   }
 
   public List<JBGKanjiItem> getNewKanjiList(final boolean bNewKanjis) {
@@ -560,21 +565,67 @@ public class JBGTerritoryManagerPanel  extends ActionPanel {
             null);
 
     if (!purObj.isValidated()) return;
-System.out.println("Clicking tribute, checking ...");
     String targetPlayer = purObj.getTargetPlayer();
     int tributeAmount = purObj.getTributeAmount();
 
     if (aiInteracts.containsKey(targetPlayer)) {
-      System.out.println("Contributing to " + targetPlayer);
       if (tributeAmount == iJCoin) {
         setJCoin(this.iJCoin - tributeAmount);
         aiInteracts.get(targetPlayer).setTributeAmount(tributeAmount);
         if (territoryCanvasPanel != null) {
           territoryCanvasPanel.updateInfo( getJCoin() );
         }
-        System.out.println("Contributed to " + targetPlayer);
       }
     }
+  }
+
+  public void openExchangeJCoinDialog(final Component parent) {
+    StringBuilder sb = new StringBuilder();
+    for (String name: aiInteracts.keySet()) {
+      if (!name.equals(sHumanPlayerName))
+        sb.append(name).append("|");
+    }
+    String sPlayers = sb.toString();
+    JBGExchangeJCoinPanel purObj = new JBGExchangeJCoinPanel(
+      this,
+      this.iJCoin
+      ); 
+    purObj.setJCoin(this.iJCoin);
+    JScrollPane p = purObj.makePanel(this.uiContext);
+
+    JOptionPane.showOptionDialog(
+            parent,
+            p,
+            "Exchange jCoin",
+            JOptionPane.CANCEL_OPTION,
+            JOptionPane.PLAIN_MESSAGE,
+            null,
+            new Object[]{}, //no button at all!
+            null);
+
+    if (!purObj.isValidated()) return;
+    int exchangeAmount = purObj.getExchangeAmount();
+
+    System.out.println("Exchange to PUs");
+    if (exchangeAmount == iJCoin) {
+      setJCoin(this.iJCoin - exchangeAmount);
+      increasePUs(exchangeAmount);
+      if (territoryCanvasPanel != null) {
+        territoryCanvasPanel.updateInfo( getJCoin() );
+      }
+    }
+  }
+
+  private void increasePUs(int amount) {
+    //we can't use data directly here because data is set to private, and we are calling from outside
+    //we'll get the error: data has private access in JAction ... etc.
+    //we have to get the data by getData, first
+    GameData pData = getData();
+    final GamePlayer player = pData.getSequence().getStep().getPlayerId();
+    final Change change =
+        ChangeFactory.changeResourcesChange(
+            player, pData.getResourceList().getResource(Constants.PUS), amount);
+    pData.performChange(change);
   }
 
   public void openTerritoryBuild(final Component parent) {
