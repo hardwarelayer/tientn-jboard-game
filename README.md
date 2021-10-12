@@ -342,6 +342,7 @@ Still keep the folder of engine 2.3 before changed in:
 
     24. Fix the issue when game panel first load, it will crash due to some misterious delegate (may be because we changed some classes with public function not in I/F?) 
 
+    [Done] 25. Add jCoin to PUs exchange feature in territory management dialog
 
 ------------------
 
