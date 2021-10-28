@@ -586,9 +586,11 @@ public class JBGTerritoryManagerPanel  extends ActionPanel {
         sb.append(name).append("|");
     }
     String sPlayers = sb.toString();
+    int iTotalPUs = getPUsAmount();
     JBGExchangeJCoinPanel purObj = new JBGExchangeJCoinPanel(
       this,
-      this.iJCoin
+      this.iJCoin,
+      iTotalPUs
       ); 
     purObj.setJCoin(this.iJCoin);
     JScrollPane p = purObj.makePanel(this.uiContext);
@@ -605,18 +607,38 @@ public class JBGTerritoryManagerPanel  extends ActionPanel {
 
     if (!purObj.isValidated()) return;
     int exchangeAmount = purObj.getExchangeAmount();
+    boolean exchangeDirection = purObj.isXchgJCoin2PUs();
 
-    System.out.println("Exchange to PUs");
-    if (exchangeAmount == iJCoin) {
-      setJCoin(this.iJCoin - exchangeAmount);
-      increasePUs(exchangeAmount);
-      if (territoryCanvasPanel != null) {
-        territoryCanvasPanel.updateInfo( getJCoin() );
+    if (exchangeDirection) {
+      if (exchangeAmount == iJCoin) {
+        final int iExchangeValue = (int) (exchangeAmount / 2); //jCoin->PUs: only 50%
+        setJCoin(this.iJCoin - exchangeAmount);
+        changePUs(iExchangeValue);
+        if (territoryCanvasPanel != null) {
+          territoryCanvasPanel.updateInfo( getJCoin() );
+        }
+      }
+    }
+    else {
+      if (exchangeAmount == iTotalPUs) {
+        final int iExchangeValue = (int) (exchangeAmount / 10); //PUs->jCoin: only 10%
+        setJCoin(this.iJCoin + iExchangeValue);
+        changePUs(0-exchangeAmount);
+        if (territoryCanvasPanel != null) {
+          territoryCanvasPanel.updateInfo( getJCoin() );
+        }
       }
     }
   }
 
-  private void increasePUs(int amount) {
+  private int getPUsAmount() {
+    GameData pData = getData();
+    final GamePlayer player = pData.getSequence().getStep().getPlayerId();
+    final Resource pus = pData.getResourceList().getResource(Constants.PUS);
+    return player.getResources().getQuantity(pus);
+  }
+
+  private void changePUs(int amount) {
     //we can't use data directly here because data is set to private, and we are calling from outside
     //we'll get the error: data has private access in JAction ... etc.
     //we have to get the data by getData, first
@@ -626,6 +648,7 @@ public class JBGTerritoryManagerPanel  extends ActionPanel {
         ChangeFactory.changeResourcesChange(
             player, pData.getResourceList().getResource(Constants.PUS), amount);
     pData.performChange(change);
+
   }
 
   public void openTerritoryBuild(final Component parent) {

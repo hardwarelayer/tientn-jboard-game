@@ -4,7 +4,7 @@
 
 ![image](https://user-images.githubusercontent.com/20723609/117690774-6a101c80-b1e5-11eb-8beb-2dd0782cbe46.png)
 
-A board based, turn based war game, made for desktop, more targeted to local play, with newspaper with articles made by computer on each turn, territory building, language learning feature, coded in Java using Swing and Docker instances. 
+A board based, turn based war game, made for desktop, more targeted to local play, with newspaper with articles made by computer on each turn, territory building, language learning feature, coded in Java using Swing and Docker instances. AI is developed toward local long sequences play, and saving computer's resources by limiting prediction / learning on every steps.
 
 Since I have played a lot of historic simulation series ... But they are over complicated
 
@@ -338,11 +338,15 @@ Still keep the folder of engine 2.3 before changed in:
 
     [Done] 22. First JBG Ai, which is hybrid (both hard and easy), add condition for Ai to focus on neccessary move/moves only, reduce exec time
 
-    23. Add progress info window for display AI's status, to avoid player become bored while waiting ...
+    [Done] 23. Add progress info window for display AI's status, to avoid player become bored while waiting ...
 
     24. Fix the issue when game panel first load, it will crash due to some misterious delegate (may be because we changed some classes with public function not in I/F?) 
 
     [Done] 25. Add jCoin to PUs exchange feature in territory management dialog
+
+    [Done] 26. Add territory build for my AI, AI can upgrade it's territory's production by building factory and static unit ...
+
+    [Done] 27. Add jCoin to PUs exchange and reverse
 
 ------------------
 

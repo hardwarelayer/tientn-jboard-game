@@ -38,6 +38,7 @@ import games.strategy.triplea.delegate.remote.IPurchaseDelegate;
 import games.strategy.triplea.delegate.remote.ITechDelegate;
 import games.strategy.triplea.odds.calculator.IBattleCalculator;
 import games.strategy.triplea.ui.TripleAFrame;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -71,6 +72,7 @@ import games.strategy.triplea.delegate.PurchaseDelegate;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Comparator;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -257,7 +259,7 @@ public abstract class AbstractJBGAi extends AbstractAi {
       final List<Territory> myTerrs = CollectionUtils.getMatches(
                         data.getMap().getTerritories(),
                         Matches.isTerritoryOwnedBy(me)
-                            .and(Matches.territoryHasUnitsOwnedBy(me))
+                            //.and(Matches.territoryHasUnitsOwnedBy(me))
                             .and(Matches.territoryIsLand()));
       return myTerrs;
     }
@@ -282,19 +284,20 @@ public abstract class AbstractJBGAi extends AbstractAi {
       return territoriesWithFactories.size();
     }
 
-    private boolean canTriggerMobilization(final int totalTerritories, final int totalFactories, final int availPUs) {
+    private boolean canTriggerMobilization(final int totalTerritories, final int totalFactories, final int totalLandUnits, final int availPUs) {
       boolean terrMatched = false;
       boolean factoryMatched = false;
+      boolean landUnitsMatched = false;
       boolean lowPUs = false;
 
       //cannot produce
       if (totalFactories < 1) return false;
-
-      if (totalTerritories <= 2) terrMatched = true;
-      if (totalFactories == 1) factoryMatched = true;
+      if (totalTerritories <= 3) terrMatched = true;
+      //if (totalFactories == 1) factoryMatched = true;
+      if (totalLandUnits <= 200) landUnitsMatched = true;
       if (availPUs < 10) lowPUs = true;
-      if (terrMatched && factoryMatched) return true;
-      if (totalTerritories <= 4 && lowPUs) return true;
+      if (terrMatched && landUnitsMatched) return true;
+      if (totalTerritories <= 2  && lowPUs) return true;
       return false;
     }
   //end of JBG mobilization feature
@@ -364,6 +367,19 @@ public abstract class AbstractJBGAi extends AbstractAi {
           .map(Territory::getUnitCollection)
           .mapToInt(c -> c.countMatches(ownedLandUnit))
           .sum();
+    }
+
+    private void increaseTerritoryProduction(Territory ter, int amount) {
+      final TerritoryAttachment ta = TerritoryAttachment.get(ter);
+
+      if (ta != null) {
+        int currentProduction = ta.getProduction();
+        ta.manualSetProduction(String.valueOf(currentProduction+amount));
+      }
+      //else {
+      //  TerritoryAttachment.manualSetProduction(ter, String.valueOf(this.iProdLevel));
+      //}
+
     }
 
     @Override
@@ -440,11 +456,11 @@ public abstract class AbstractJBGAi extends AbstractAi {
       //though we can call this trigger in move(), 
       //but it will not help Ai to get new units before change to aggressive
       //so this remain here
+      int leftTerrs = countMyLandTerritory();
+      int leftFactories = countMyFactories();
+      int availPUs = player.getResources().getQuantity(pus); //this can be another condition for triggering
       if (jbgAiInterractLst.get(player.getName()).isDefensiveStance()) {
-        int leftTerrs = countMyLandTerritory();
-        int leftFactories = countMyFactories();
-        int availPUs = player.getResources().getQuantity(pus); //this can be another condition for triggering
-        if (canTriggerMobilization(leftTerrs, leftFactories, availPUs)) {
+        if (canTriggerMobilization(leftTerrs, leftFactories, landUnitCount, availPUs)) {
           //after mobilization, the player will go out of defensive immediately by the end of this function 
           notCareAboutCost = true;
           leftToSpend += JBGConstants.MOBILIZATION_VALUE;
@@ -637,42 +653,112 @@ public abstract class AbstractJBGAi extends AbstractAi {
           i++;
         }
       }
+
+      //get the rule of factory first, to force buying
+      ProductionRule factoryRule = null;
+      int factoryCost = 0; 
+      ProductionRule staticUnitRule = null;
+      int staticUnitCost = 0;
+      for (final ProductionRule rule : rules) {
+          final NamedAttachable resourceOrUnit = rule.getResults().keySet().iterator().next();
+          if (!(resourceOrUnit instanceof UnitType)) {
+            continue;
+          }
+          final int cost = rule.getCosts().getInt(pus);
+          final UnitType results = (UnitType) resourceOrUnit;
+          if (Matches.unitTypeCanProduceUnits().test(results)) {
+            factoryRule = rule;
+            factoryCost = cost;
+          }
+          else if (Matches.unitTypeIsStatic(player).test(results)) {
+            //note that factory is also static, so we have to keep in this "else"
+            staticUnitRule = rule;
+            staticUnitCost = cost;
+          }
+      }
+
+      boolean alreadyBoughtFactoryThisTurn = false;
+      boolean alreadyBoughtStaticThisTurn = false;
       int minCost = Integer.MAX_VALUE;
       int i = 0;
       while ((minCost == Integer.MAX_VALUE || leftToSpend >= minCost) && i < 100000) {
         i++;
         for (final ProductionRule rule : rules) {
+          /************************
+           * This rules list has factory at the end, 
+           * so if we want to buy factory we have to wait until the tail of list, 
+           * or we'll get the factoryRule first to use when needed
+           ************************/
           final NamedAttachable resourceOrUnit = rule.getResults().keySet().iterator().next();
           if (!(resourceOrUnit instanceof UnitType)) {
             continue;
           }
           final UnitType results = (UnitType) resourceOrUnit;
 
-          //only purchase land units, air units, infra unit 
-          //other need more complex logics which this AI not supports yet
-          if (Matches.unitTypeHasMaxBuildRestrictions().test(results)
-              || Matches.unitTypeConsumesUnitsOnCreation().test(results)
-              || Matches.unitTypeIsStatic(player).test(results)) {
-            continue;
-          }
-          final int transportCapacity = UnitAttachment.get(results).getTransportCapacity();
-          // buy transports if we can be amphibious
-          if (Matches.unitTypeIsSea().test(results) && (!isAmphib || transportCapacity <= 0)) {
-            continue;
-          }
           final int cost = rule.getCosts().getInt(pus);
           if (cost < 1) {
             continue;
           }
 
-          //System.out.println("Rule name: " + rule.getName() + " cost: " +String.valueOf(cost));
-          /*
-          if (rule.getName().equals("buyTank")) {
-            purchase.add(rule, 1);
-            System.out.println("order to buy 1 tank");
-            continue;
+          if (Matches.unitTypeCanProduceUnits().test(results)) {
+            if (alreadyBoughtFactoryThisTurn || (leftFactories > 2 && leftTerrs <= leftFactories + 1)) {
+              //System.out.println("   ... too much factory unit or already buy 1, skipping type: " + results.getName());
+              continue;
+            }
           }
-          */
+          else {
+            //if our factory is low, force wait until we loop to factory rule to force buying
+            //buy until we have full territories has factory 
+            if (leftTerrs >= leftFactories + 1 && factoryRule != null && !alreadyBoughtFactoryThisTurn && leftToSpend >= factoryCost) {
+              purchase.add(factoryRule, 1);
+              leftToSpend -= factoryCost; //if we don't subtract here, the place routine will have issue
+              alreadyBoughtFactoryThisTurn = true; //avoid buying multiple factory in a turn, which may exceed the placeable territory
+              continue;
+            }
+
+            //always try to buy(forced) a static unit each turn, I made this AI toward defensive style
+            if (Matches.unitTypeIsStatic(player).test(results)) {
+              if (alreadyBoughtStaticThisTurn) continue;
+            }
+            else if (landUnitCount > JBGConstants.MAX_BUILD_LAND_UNITS && 
+              !alreadyBoughtStaticThisTurn && staticUnitRule != null && leftToSpend >= staticUnitCost) {
+              purchase.add(staticUnitRule, 1);
+              leftToSpend -= staticUnitCost;
+              alreadyBoughtStaticThisTurn = true;
+            }
+
+          }
+
+          //only purchase land units, air units, infra unit 
+          //other need more complex logics which this AI not supports yet
+          if (Matches.unitTypeHasMaxBuildRestrictions().test(results)
+              || Matches.unitTypeConsumesUnitsOnCreation().test(results)
+              || Matches.unitTypeIsStatic(player).test(results)
+             ) {
+              continue;
+          }
+          if (landUnitCount > JBGConstants.MAX_BUILD_LAND_UNITS && Matches.unitTypeIsLand().test(results)) {
+            if (!Matches.unitTypeCanProduceUnits().test(results)) {
+              continue;
+            }
+          }
+
+          final int transportCapacity = UnitAttachment.get(results).getTransportCapacity();
+          // buy transports if we can be amphibious
+
+          boolean forceBuyAmphib = false;
+          boolean forceBuyAir = false;
+          if (Matches.unitTypeIsSea().test(results)) {
+            if (isAmphib && landUnitCount > 1000 && transportCount < 100) {
+              //only buy amphib
+              forceBuyAmphib = true;
+            }
+            else {
+              if (!isAmphib || transportCapacity <= 0) {
+                continue;
+              }
+            }
+          }
 
           if (minCost == Integer.MAX_VALUE) {
             minCost = cost;
@@ -688,17 +774,24 @@ public abstract class AbstractJBGAi extends AbstractAi {
             // 25% transports - can be more if frontier is far away
             goodNumberOfTransports = (landUnitCount / 4);
             // boost for transport production
-            if (isTransport
-                && defUnitsAtAmpibRoute > goodNumberOfTransports
-                && landUnitCount > defUnitsAtAmpibRoute
-                && defUnitsAtAmpibRoute > transportCount) {
+            if (forceBuyAmphib || 
+                (isTransport
+                  && defUnitsAtAmpibRoute > goodNumberOfTransports
+                  && landUnitCount > defUnitsAtAmpibRoute
+                  && defUnitsAtAmpibRoute > transportCount
+                )
+              ) {
               final int transports = (leftToSpend / cost);
-              leftToSpend -= cost * transports;
-              purchase.add(rule, transports);
-              //System.out.println("order to buy " + String.valueOf(transports) + rule.getName());
-              continue;
+              if (transports > 0) {
+                leftToSpend -= cost * transports;
+                purchase.add(rule, transports);
+                continue;
+              }
+              else {
+              }
             }
           }
+
           final boolean buyBecauseTransport =
               (Math.random() < 0.7 && transportCount < goodNumberOfTransports)
                   || Math.random() < 0.10;
@@ -708,7 +801,8 @@ public abstract class AbstractJBGAi extends AbstractAi {
               && cost <= leftToSpend) {
             leftToSpend -= cost;
             purchase.add(rule, 1);
-            //System.out.println("order to buy 1 " + rule.getName());
+          }
+          else {
           }
         }
       }
@@ -737,7 +831,8 @@ public abstract class AbstractJBGAi extends AbstractAi {
       final GameData data,
       final GamePlayer player) {
     doJBGEventMessaging(data, player.getName() + " start placing units ... ");
-    simplePlace(bid, placeDelegate, data, player);
+      //proPlace(bid, placeDelegate, data, player);
+      simplePlace(bid, placeDelegate, data, player);
   }
 
   protected void proPlace(
@@ -753,6 +848,20 @@ public abstract class AbstractJBGAi extends AbstractAi {
     JBGLogger.info(player.getName() + " time for place=" + (System.currentTimeMillis() - start));
   }
 
+  public static class TerritoryProductionComparator implements Comparator<Territory> {
+      private Integer getProduction(Territory ter) {
+        final TerritoryAttachment ta = TerritoryAttachment.get(ter);
+        if (ta != null) {
+          return ta.getProduction();
+        }
+        return 1;
+      }
+      @Override
+      public int compare(Territory o1, Territory o2) {
+          return getProduction(o1).compareTo(getProduction(o2));
+      }
+  }
+
   //JBG place (Tien1Ai)
     public void simplePlace(
         final boolean bid,
@@ -762,14 +871,51 @@ public abstract class AbstractJBGAi extends AbstractAi {
       if (player.getUnitCollection().isEmpty()) {
         return;
       }
+
+      final List<Territory> allTerritories = new ArrayList<>(data.getMap().getTerritories());
+      //find a territory without factory to place it
+      for (final Territory t : allTerritories) {
+        if (t.getOwner().equals(player)
+            && !t.getUnitCollection().anyMatch(Matches.unitCanProduceUnits())) {
+          final List<Unit> factoryUnits =
+              new ArrayList<>(player.getUnitCollection().getMatches(Matches.unitCanProduceUnits()));
+          if (!factoryUnits.isEmpty()) {
+            final Collection<Unit> toPlace = factoryUnits.subList(0, 1);
+            doPlace(t, toPlace, placeDelegate);
+            increaseTerritoryProduction(t, JBGConstants.JBG_AI_INCREASE_PRODUCTION_BY_FACTORY);
+          }
+
+        }
+      }
+
+      //place units on non-capital territory first
+      //static unit - factory is also static, but we have placed above
       final @Nullable Territory capitol =
           TerritoryAttachment.getFirstOwnedCapitalOrFirstUnownedCapital(player, data);
-      if (capitol != null) {
-        // place in capitol first
-        placeAllWeCanOn(data, capitol, placeDelegate, player);
-      }
       final List<Territory> randomTerritories = new ArrayList<>(data.getMap().getTerritories());
       Collections.shuffle(randomTerritories);
+
+      Collections.sort(randomTerritories, new TerritoryProductionComparator());
+
+      //unitIsConstruction includes Factory, but we have place factory above
+      final List<Unit> constructionUnits =
+          new ArrayList<>(player.getUnitCollection().getMatches(Matches.unitIsConstruction()));
+      if (!constructionUnits.isEmpty()) {
+        int iStaticUnitIndex = 0;
+        for (final Territory t : randomTerritories) {
+          if (!t.equals(capitol)
+              && t.getOwner().equals(player)
+              && t.getUnitCollection().anyMatch(Matches.unitCanProduceUnits()))
+          {
+            final Collection<Unit> toPlace = constructionUnits.subList(iStaticUnitIndex, iStaticUnitIndex+1);
+            doPlace(t, toPlace, placeDelegate);
+            increaseTerritoryProduction(t, JBGConstants.JBG_AI_INCREASE_PRODUCTION_BY_CONSTRUCTION);
+            iStaticUnitIndex++;
+            if (iStaticUnitIndex >= constructionUnits.size()) break;
+          }
+        }
+      }
+      //other units
       for (final Territory t : randomTerritories) {
         if (!t.equals(capitol)
             && t.getOwner().equals(player)
@@ -777,6 +923,13 @@ public abstract class AbstractJBGAi extends AbstractAi {
           placeAllWeCanOn(data, t, placeDelegate, player);
         }
       }
+
+      //then we place the rest to capitol
+      if (capitol != null) {
+        // place in capitol first
+        placeAllWeCanOn(data, capitol, placeDelegate, player);
+      }
+
     }
 
     private void placeAllWeCanOn(

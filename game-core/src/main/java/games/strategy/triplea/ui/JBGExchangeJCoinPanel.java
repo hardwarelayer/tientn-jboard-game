@@ -85,23 +85,26 @@ public class JBGExchangeJCoinPanel {
   @Getter private JBGTerritoryManagerPanel parent = null;
 
   @Setter private int jCoin;
+  @Setter private int pus;
   @Getter private boolean validated = false; //getter will be: isValidated()
-  @Getter private int exchangeJCoin = 0;
   
   private static final String TARGET_PLAYER_LIST_NAME = "ExchangeTo";
   private static final String TRIBUTE_AMOUNT_NAME = "Amount";
 
   private JScrollPane jPane = null;
 
-  JLabel lblExchangeAmount;
+  JLabel lblPUsAmount;
   JLabel lblJCoinAmount;
 
   @Getter private int exchangeAmount;
+  @Getter private boolean xchgJCoin2PUs;
 
-  public JBGExchangeJCoinPanel(final JBGTerritoryManagerPanel p, final int jCoin) {
+  public JBGExchangeJCoinPanel(final JBGTerritoryManagerPanel p, final int jCoin, final int pus) {
 
     this.jCoin = jCoin;
-    this.exchangeJCoin = 0;
+    this.pus = pus;
+    this.exchangeAmount = 0;
+    this.xchgJCoin2PUs = false;
     this.validated = false;
     this.parent = p;
   }
@@ -148,10 +151,17 @@ public class JBGExchangeJCoinPanel {
     if(w != null) w.setVisible(false);
   }
 
-  private void confirmProcess() {
-    int iAmount = Integer.valueOf(lblExchangeAmount.getText());
+  private void confirmProcess(boolean fromJCoin2PU) {
+    int iAmount = 0;
+    if (fromJCoin2PU) {
+      iAmount = Integer.valueOf(lblJCoinAmount.getText());
+    }
+    else {
+      iAmount = Integer.valueOf(lblPUsAmount.getText());
+    }
     if (iAmount > 0) {
-      exchangeAmount = iAmount;
+      this.exchangeAmount = iAmount;
+      this.xchgJCoin2PUs = fromJCoin2PU;
       validated = true;
       closeDialog();
       return;
@@ -180,7 +190,7 @@ public class JBGExchangeJCoinPanel {
     c.gridx = 0; //col
     c.gridy = 0; //row
     c.gridwidth = 1; //column span
-    makeLabel("Current budget:", panel, gridbag, c, 0);
+    makeLabel("Current jCoin:", panel, gridbag, c, 0);
 
     c.weightx = 1.0; //spacing
     c.gridx = 1; //col
@@ -200,14 +210,14 @@ public class JBGExchangeJCoinPanel {
     c.gridx = 0; //col
     c.gridy = 1; //row
     c.gridwidth = 1; //column span
-    makeLabel("Exchange PUs:", panel, gridbag, c, 0);
+    makeLabel("Current PUs:", panel, gridbag, c, 0);
 
     c.weightx = 1.0; //spacing
     c.gridx = 1; //col
     c.gridy = 1; //row
     c.gridwidth = 1; //column span
-    this.lblExchangeAmount = makeLabel(String.valueOf(this.jCoin), panel, gridbag, c, 0);
-    this.lblExchangeAmount.setHorizontalAlignment(SwingConstants.RIGHT);
+    this.lblPUsAmount = makeLabel(String.valueOf(this.pus), panel, gridbag, c, 0);
+    this.lblPUsAmount.setHorizontalAlignment(SwingConstants.RIGHT);
 
     c.gridx = 2; //col
     c.gridy = 1; //row
@@ -219,15 +229,28 @@ public class JBGExchangeJCoinPanel {
     c.gridy = 4;
     c.gridwidth = 1;
     c.gridheight = 1;
-    ActionListener exchangeListenerFnc = new ActionListener() {
+    ActionListener j2pListenerFnc = new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        confirmProcess();
+        confirmProcess(true);
       }
     };
-    JButton btnSelect = makeButtonWithAction("Exchange", panel, gridbag, c, exchangeListenerFnc);
-    setComponentSize(btnSelect, 80, 50);
+    JButton btnExchangeJCoin2PU = makeButtonWithAction("JCoin->PUs", panel, gridbag, c, j2pListenerFnc);
+    setComponentSize(btnExchangeJCoin2PU, 80, 50);
     c.gridx = 1;
+    c.gridy = 4;
+    c.gridwidth = 1;
+    c.gridheight = 1;
+    ActionListener p2jListenerFnc = new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        confirmProcess(false);
+      }
+    };
+    JButton btnExchangePU2JCoin = makeButtonWithAction("PUs->JCoin", panel, gridbag, c, p2jListenerFnc);
+    setComponentSize(btnExchangePU2JCoin, 80, 50);
+
+    c.gridx = 2;
     c.gridy = 4;
     c.gridwidth = 1;
     c.gridheight = 1;
@@ -244,6 +267,9 @@ public class JBGExchangeJCoinPanel {
     unitsPane.setBorder(BorderFactory.createEmptyBorder());
     unitsPane.getVerticalScrollBar().setUnitIncrement(20);
     unitsPane.setViewportView(panel);
+
+    if (this.jCoin < 1) btnExchangeJCoin2PU.setEnabled(false);
+    if (this.pus < 1) btnExchangePU2JCoin.setEnabled(false);
 
     this.jPane = unitsPane;
 

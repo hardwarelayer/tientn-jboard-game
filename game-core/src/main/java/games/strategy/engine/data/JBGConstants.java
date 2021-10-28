@@ -246,6 +246,9 @@ public interface JBGConstants {
   //JBG
   static final String JBG_NO_COST_CARE_RULE = "JBG_NO_COST_CARE";
   static final int MOBILIZATION_VALUE = 1996;
+  static final int MAX_BUILD_LAND_UNITS = 1500;
+  static final int JBG_AI_INCREASE_PRODUCTION_BY_FACTORY = 4;
+  static final int JBG_AI_INCREASE_PRODUCTION_BY_CONSTRUCTION = 2;
   //
 
 }

@@ -145,12 +145,7 @@ public class JBGTerritoryViewCanvasPanel extends JPanel
                     }
                 }
                 if (isInRect(e.getX(), e.getY(), panel.getRcExchangeIcon())) {
-                    if (iJCoin < 1) {
-                        refMaster.showAlert(panel, "No jCoin is left!!!");
-                    }
-                    else {
-                        refMaster.openExchangeJCoinDialog(panel);
-                    }
+                    refMaster.openExchangeJCoinDialog(panel);
                 }
             }
         });

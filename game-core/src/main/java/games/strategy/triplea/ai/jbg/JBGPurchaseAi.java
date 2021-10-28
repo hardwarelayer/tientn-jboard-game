@@ -276,6 +276,7 @@ class JBGPurchaseAi {
     // Find all purchase/place territories
     final Map<Territory, JBGPurchaseTerritory> purchaseTerritories =
         JBGPurchaseUtils.findPurchaseTerritories(jbgData, player);
+System.out.println("Total purchase territories: " + String.valueOf(purchaseTerritories.size()));
     final Set<Territory> placeTerritories =
         new HashSet<>(
             CollectionUtils.getMatches(

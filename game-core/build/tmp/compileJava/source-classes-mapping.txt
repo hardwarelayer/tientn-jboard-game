@@ -18,8 +18,8 @@ org/triplea/util/Tuple.java
  org.triplea.util.Tuple
 org/triplea/util/LocalizeHtml.java
  org.triplea.util.LocalizeHtml
-games/strategy/triplea/ai/jbg/JBGRetreatAi.java
- games.strategy.triplea.ai.jbg.JBGRetreatAi
+games/strategy/engine/chat/Chat.java
+ games.strategy.engine.chat.Chat
 games/strategy/triplea/ui/EconomyPanel.java
  games.strategy.triplea.ui.EconomyPanel
  games.strategy.triplea.ui.EconomyPanel$ResourceTableModel
@@ -29,8 +29,8 @@ games/strategy/engine/data/PlayerManager.java
  games.strategy.engine.data.PlayerManager
 games/strategy/triplea/delegate/data/BattleListing.java
  games.strategy.triplea.delegate.data.BattleListing
-games/strategy/triplea/ai/jbgfast/JBGFastAi.java
- games.strategy.triplea.ai.jbgfast.JBGFastAi
+games/strategy/triplea/ai/fast/AggregateEstimate.java
+ games.strategy.triplea.ai.fast.AggregateEstimate
 games/strategy/triplea/delegate/UndoablePlacement.java
  games.strategy.triplea.delegate.UndoablePlacement
 games/strategy/triplea/ui/TechPanel.java
@@ -136,8 +136,8 @@ games/strategy/triplea/delegate/TransportTracker.java
  games.strategy.triplea.delegate.TransportTracker
 games/strategy/triplea/Constants.java
  games.strategy.triplea.Constants
-games/strategy/triplea/ai/jbg/util/JBGTransportUtils.java
- games.strategy.triplea.ai.jbg.util.JBGTransportUtils
+games/strategy/triplea/ai/jbgfast/AggregateEstimate.java
+ games.strategy.triplea.ai.jbgfast.AggregateEstimate
 games/strategy/triplea/ui/panels/map/MapSelectionListener.java
  games.strategy.triplea.ui.panels.map.MapSelectionListener
 games/strategy/triplea/ai/pro/ProRetreatAi.java
@@ -183,8 +183,8 @@ games/strategy/engine/history/History.java
  games.strategy.engine.history.History
 games/strategy/engine/data/gameparser/ShallowGameParser.java
  games.strategy.engine.data.gameparser.ShallowGameParser
-games/strategy/triplea/ai/jbg/JBGCombatMoveAi.java
- games.strategy.triplea.ai.jbg.JBGCombatMoveAi
+games/strategy/triplea/delegate/battle/steps/change/RemoveUnprotectedUnits.java
+ games.strategy.triplea.delegate.battle.steps.change.RemoveUnprotectedUnits
 games/strategy/engine/message/RemoteMethodCall.java
  games.strategy.engine.message.RemoteMethodCall
 org/triplea/live/servers/FetchingCache.java
@@ -310,8 +310,8 @@ games/strategy/engine/delegate/IDelegateBridge.java
  games.strategy.engine.delegate.IDelegateBridge
 games/strategy/triplea/ui/mapdata/PlayerColors.java
  games.strategy.triplea.ui.mapdata.PlayerColors
-games/strategy/triplea/ai/jbg/data/JBGMyMoveOptions.java
- games.strategy.triplea.ai.jbg.data.JBGMyMoveOptions
+games/strategy/engine/vault/VaultId.java
+ games.strategy.engine.vault.VaultId
 games/strategy/engine/lobby/moderator/toolbox/tabs/bad/words/BadWordsTabModel.java
  games.strategy.engine.lobby.moderator.toolbox.tabs.bad.words.BadWordsTabModel
  games.strategy.engine.lobby.moderator.toolbox.tabs.bad.words.BadWordsTabModel$BadWordsTabModelBuilder
@@ -510,8 +510,8 @@ games/strategy/engine/data/changefactory/RemoveAttachmentChange.java
  games.strategy.engine.data.changefactory.RemoveAttachmentChange
 games/strategy/triplea/delegate/battle/steps/fire/aa/FiringGroupSplitterAa.java
  games.strategy.triplea.delegate.battle.steps.fire.aa.FiringGroupSplitterAa
-games/strategy/triplea/ai/jbg/JBGData.java
- games.strategy.triplea.ai.jbg.JBGData
+games/strategy/engine/data/RepairRules.java
+ games.strategy.engine.data.RepairRules
 games/strategy/engine/framework/startup/ui/panels/main/game/selector/GameSelectorModel.java
  games.strategy.engine.framework.startup.ui.panels.main.game.selector.GameSelectorModel
 games/strategy/engine/lobby/moderator/toolbox/tabs/access/log/AccessLogTabActions.java
@@ -554,8 +554,8 @@ games/strategy/net/nio/ServerQuarantineConversation.java
  games.strategy.net.nio.ServerQuarantineConversation
  games.strategy.net.nio.ServerQuarantineConversation$1
  games.strategy.net.nio.ServerQuarantineConversation$Step
-games/strategy/triplea/ai/jbg/data/JBGOtherMoveOptions.java
- games.strategy.triplea.ai.jbg.data.JBGOtherMoveOptions
+games/strategy/engine/data/changefactory/AddAvailableTech.java
+ games.strategy.engine.data.changefactory.AddAvailableTech
 games/strategy/triplea/delegate/battle/steps/retreat/sub/SubmergeSubsVsOnlyAirStep.java
  games.strategy.triplea.delegate.battle.steps.retreat.sub.SubmergeSubsVsOnlyAirStep
 games/strategy/engine/framework/startup/ui/panels/main/game/selector/TNARJCoinSelectorModel.java
@@ -570,8 +570,8 @@ games/strategy/engine/data/ChangeAttachmentChange.java
  games.strategy.engine.data.ChangeAttachmentChange
 games/strategy/triplea/ui/history/HistoryLog.java
  games.strategy.triplea.ui.history.HistoryLog
-games/strategy/triplea/ai/jbg/JBGNonCombatMoveAi.java
- games.strategy.triplea.ai.jbg.JBGNonCombatMoveAi
+games/strategy/triplea/ui/screen/drawable/JBGTerritoryMaskLayerDrawable.java
+ games.strategy.triplea.ui.screen.drawable.JBGTerritoryMaskLayerDrawable
 games/strategy/engine/framework/network/ui/BootPlayerAction.java
  games.strategy.engine.framework.network.ui.BootPlayerAction
 games/strategy/engine/lobby/moderator/toolbox/tabs/bad/words/BadWordsTabActions.java
@@ -737,8 +737,8 @@ org/triplea/sound/ISound.java
  org.triplea.sound.ISound
 games/strategy/triplea/ai/pro/util/ProTransportUtils.java
  games.strategy.triplea.ai.pro.util.ProTransportUtils
-games/strategy/triplea/ai/jbg/util/JBGSortMoveOptionsUtils.java
- games.strategy.triplea.ai.jbg.util.JBGSortMoveOptionsUtils
+games/strategy/triplea/delegate/AbstractPlaceDelegate.java
+ games.strategy.triplea.delegate.AbstractPlaceDelegate
 games/strategy/triplea/ui/DicePanel.java
  games.strategy.triplea.ui.DicePanel
 games/strategy/triplea/delegate/power/calculator/SupportCalculationResult.java
@@ -780,8 +780,8 @@ games/strategy/triplea/ai/pro/ProAi.java
  games.strategy.triplea.ai.pro.ProAi
 games/strategy/triplea/ai/pro/data/ProPurchaseOptionMap.java
  games.strategy.triplea.ai.pro.data.ProPurchaseOptionMap
-games/strategy/triplea/ai/jbg/JBGPurchaseAi.java
- games.strategy.triplea.ai.jbg.JBGPurchaseAi
+games/strategy/engine/lobby/client/ui/action/player/info/PlayerGamesTab.java
+ games.strategy.engine.lobby.client.ui.action.player.info.PlayerGamesTab
 org/triplea/debug/console/window/ConsoleView.java
  org.triplea.debug.console.window.ConsoleView
 games/strategy/engine/data/GameDataComponent.java
@@ -795,16 +795,16 @@ games/strategy/triplea/delegate/power/calculator/TotalPowerAndTotalRolls.java
  games.strategy.triplea.delegate.power.calculator.TotalPowerAndTotalRolls$TotalPowerAndTotalRollsBuilder
 games/strategy/engine/message/IRemote.java
  games.strategy.engine.message.IRemote
-games/strategy/triplea/ai/jbg/JBGAi.java
- games.strategy.triplea.ai.jbg.JBGAi
+games/strategy/engine/framework/startup/mc/IObserverWaitingToJoin.java
+ games.strategy.engine.framework.startup.mc.IObserverWaitingToJoin
 games/strategy/engine/framework/map/listing/MapListingFetcher.java
  games.strategy.engine.framework.map.listing.MapListingFetcher
 games/strategy/triplea/ai/pro/data/ProPurchaseTerritory.java
  games.strategy.triplea.ai.pro.data.ProPurchaseTerritory
 games/strategy/engine/history/DelegateHistoryWriter.java
  games.strategy.engine.history.DelegateHistoryWriter
-games/strategy/triplea/ai/jbg/util/JBGPurchaseUtils.java
- games.strategy.triplea.ai.jbg.util.JBGPurchaseUtils
+games/strategy/engine/message/unifiedmessenger/Invoke.java
+ games.strategy.engine.message.unifiedmessenger.Invoke
 games/strategy/engine/data/GameObjectOutputStream.java
  games.strategy.engine.data.GameObjectOutputStream
 games/strategy/engine/framework/startup/ui/posted/game/pbf/PbfSetupPanel.java
@@ -1051,8 +1051,8 @@ games/strategy/engine/framework/lookandfeel/LookAndFeel.java
  games.strategy.engine.framework.lookandfeel.LookAndFeel
 games/strategy/engine/data/changefactory/RelationshipChange.java
  games.strategy.engine.data.changefactory.RelationshipChange
-games/strategy/triplea/ai/jbg/data/JBGTerritory.java
- games.strategy.triplea.ai.jbg.data.JBGTerritory
+org/triplea/debug/error/reporting/ConfirmationDialogController.java
+ org.triplea.debug.error.reporting.ConfirmationDialogController
 games/strategy/engine/data/JBGConstants.java
  games.strategy.engine.data.JBGConstants
  games.strategy.engine.data.JBGConstants$Tile
@@ -1087,8 +1087,8 @@ org/triplea/lobby/common/GameDescription.java
  org.triplea.lobby.common.GameDescription
  org.triplea.lobby.common.GameDescription$GameDescriptionBuilder
  org.triplea.lobby.common.GameDescription$GameStatus
-games/strategy/triplea/ai/jbg/JBGScrambleAi.java
- games.strategy.triplea.ai.jbg.JBGScrambleAi
+games/strategy/triplea/delegate/AbstractDelegate.java
+ games.strategy.triplea.delegate.AbstractDelegate
 tools/map/making/ConnectionFinder.java
  tools.map.making.ConnectionFinder
 games/strategy/triplea/ui/menubar/WebHelpMenu.java
@@ -1175,8 +1175,8 @@ games/strategy/triplea/image/PuImageFactory.java
 games/strategy/net/nio/ForgotPasswordConversation.java
  games.strategy.net.nio.ForgotPasswordConversation
  games.strategy.net.nio.ForgotPasswordConversation$ForgotPasswordConversationBuilder
-games/strategy/triplea/ai/jbgfast/JBGFastOddsEstimator.java
- games.strategy.triplea.ai.jbgfast.JBGFastOddsEstimator
+games/strategy/triplea/delegate/PlaceExtendedDelegateState.java
+ games.strategy.triplea.delegate.PlaceExtendedDelegateState
 games/strategy/triplea/delegate/battle/FinishedBattle.java
  games.strategy.triplea.delegate.battle.FinishedBattle
 games/strategy/engine/message/UnifiedInvocationHandler.java
@@ -1236,8 +1236,8 @@ games/strategy/triplea/ai/pro/util/ProMoveUtils.java
  games.strategy.triplea.ai.pro.util.ProMoveUtils
 games/strategy/engine/framework/startup/ui/panels/main/MainPanelBuilder.java
  games.strategy.engine.framework.startup.ui.panels.main.MainPanelBuilder
-games/strategy/triplea/ai/jbg/JBGPoliticsAi.java
- games.strategy.triplea.ai.jbg.JBGPoliticsAi
+games/strategy/triplea/delegate/data/CasualtyList.java
+ games.strategy.triplea.delegate.data.CasualtyList
 games/strategy/engine/lobby/client/login/CreateAccountPanel.java
  games.strategy.engine.lobby.client.login.CreateAccountPanel
  games.strategy.engine.lobby.client.login.CreateAccountPanel$ReturnValue
@@ -1507,8 +1507,8 @@ games/strategy/engine/lobby/moderator/toolbox/tabs/banned/users/BannedUsersTabMo
  games.strategy.engine.lobby.moderator.toolbox.tabs.banned.users.BannedUsersTabModel
 games/strategy/triplea/delegate/battle/casualty/CasualtySortingUtil.java
  games.strategy.triplea.delegate.battle.casualty.CasualtySortingUtil
-games/strategy/triplea/ai/jbg/simulate/JBGSimulateTurnUtils.java
- games.strategy.triplea.ai.jbg.simulate.JBGSimulateTurnUtils
+games/strategy/triplea/TripleAPlayer.java
+ games.strategy.triplea.TripleAPlayer
 games/strategy/engine/framework/map/file/system/loader/AvailableGamesList.java
  games.strategy.engine.framework.map.file.system.loader.AvailableGamesList
 games/strategy/triplea/delegate/battle/steps/RetreatChecks.java
@@ -1574,8 +1574,9 @@ games/strategy/engine/framework/network/ui/ChangeGameToSaveGameClientAction.java
  games.strategy.engine.framework.network.ui.ChangeGameToSaveGameClientAction
 games/strategy/triplea/delegate/battle/BattleStepStrings.java
  games.strategy.triplea.delegate.battle.BattleStepStrings
-games/strategy/triplea/ai/jbg/util/JBGPurchaseValidationUtils.java
- games.strategy.triplea.ai.jbg.util.JBGPurchaseValidationUtils
+games/strategy/triplea/delegate/AbstractMoveDelegate.java
+ games.strategy.triplea.delegate.AbstractMoveDelegate
+ games.strategy.triplea.delegate.AbstractMoveDelegate$MoveType
 games/strategy/triplea/ai/pro/util/ProUtils.java
  games.strategy.triplea.ai.pro.util.ProUtils
 games/strategy/engine/data/gameparser/XmlReader.java
@@ -1953,8 +1954,11 @@ games/strategy/triplea/delegate/battle/BattleExtendedDelegateState.java
  games.strategy.triplea.delegate.battle.BattleExtendedDelegateState
 games/strategy/triplea/odds/calculator/AggregateResults.java
  games.strategy.triplea.odds.calculator.AggregateResults
-games/strategy/triplea/ai/jbg/util/JBGMoveUtils.java
- games.strategy.triplea.ai.jbg.util.JBGMoveUtils
+games/strategy/triplea/ui/SimpleUnitPanel.java
+ games.strategy.triplea.ui.SimpleUnitPanel
+ games.strategy.triplea.ui.SimpleUnitPanel$1
+ games.strategy.triplea.ui.SimpleUnitPanel$2
+ games.strategy.triplea.ui.SimpleUnitPanel$Style
 games/strategy/engine/data/GameDataEvent.java
  games.strategy.engine.data.GameDataEvent
 games/strategy/triplea/attachments/AbstractConditionsAttachment.java
@@ -2106,8 +2110,8 @@ org/triplea/game/server/HeadlessServerSetup.java
  org.triplea.game.server.HeadlessServerSetup
 games/strategy/engine/message/HubInvoke.java
  games.strategy.engine.message.HubInvoke
-games/strategy/triplea/ai/jbg/simulate/JBGDummyDelegateBridge.java
- games.strategy.triplea.ai.jbg.simulate.JBGDummyDelegateBridge
+games/strategy/triplea/ui/IndividualUnitPanelGrouped.java
+ games.strategy.triplea.ui.IndividualUnitPanelGrouped
 games/strategy/triplea/ai/jbg/util/JBGMatches.java
  games.strategy.triplea.ai.jbg.util.JBGMatches
 games/strategy/engine/data/Resource.java
@@ -2218,8 +2222,8 @@ games/strategy/triplea/ui/AbstractStatPanel.java
  games.strategy.triplea.ui.AbstractStatPanel
 games/strategy/triplea/delegate/battle/casualty/CasualtyUtil.java
  games.strategy.triplea.delegate.battle.casualty.CasualtyUtil
-games/strategy/triplea/ai/jbg/util/JBGOddsCalculator.java
- games.strategy.triplea.ai.jbg.util.JBGOddsCalculator
+games/strategy/engine/chat/SentMessagesHistory.java
+ games.strategy.engine.chat.SentMessagesHistory
 games/strategy/engine/history/Step.java
  games.strategy.engine.history.Step
 games/strategy/triplea/delegate/move/validation/AirMovementValidator.java
@@ -2274,8 +2278,8 @@ games/strategy/engine/message/RemoteNotFoundException.java
  games.strategy.engine.message.RemoteNotFoundException
 games/strategy/triplea/delegate/InitializationDelegate.java
  games.strategy.triplea.delegate.InitializationDelegate
-games/strategy/triplea/ai/jbg/data/JBGTerritoryManager.java
- games.strategy.triplea.ai.jbg.data.JBGTerritoryManager
+org/triplea/game/server/HeadlessGameServer.java
+ org.triplea.game.server.HeadlessGameServer
 games/strategy/engine/history/SerializationWriter.java
  games.strategy.engine.history.SerializationWriter
 org/triplea/game/startup/SetupModel.java
@@ -2307,8 +2311,8 @@ games/strategy/triplea/ui/panel/move/MovableUnitsFilter.java
  games.strategy.triplea.ui.panel.move.MovableUnitsFilter$MoveValidationResultWithDependents
 games/strategy/triplea/ResourceLocationTracker.java
  games.strategy.triplea.ResourceLocationTracker
-games/strategy/triplea/ai/jbg/AbstractJBGAi.java
- games.strategy.triplea.ai.jbg.AbstractJBGAi
+games/strategy/engine/framework/startup/SystemPropertyReader.java
+ games.strategy.engine.framework.startup.SystemPropertyReader
 games/strategy/triplea/ui/menubar/help/UnitStatsTable.java
  games.strategy.triplea.ui.menubar.help.UnitStatsTable
 games/strategy/engine/data/changefactory/ChangeResourceChange.java
@@ -2587,10 +2591,8 @@ games/strategy/engine/posted/game/ForumPosterComponent.java
  games.strategy.engine.posted.game.ForumPosterComponent
 games/strategy/engine/framework/startup/launcher/IServerReady.java
  games.strategy.engine.framework.startup.launcher.IServerReady
-games/strategy/triplea/ai/jbg/util/JBGTerritoryValueUtils.java
- games.strategy.triplea.ai.jbg.util.JBGTerritoryValueUtils
- games.strategy.triplea.ai.jbg.util.JBGTerritoryValueUtils$1
- games.strategy.triplea.ai.jbg.util.JBGTerritoryValueUtils$2
+games/strategy/engine/history/IndexedHistoryNode.java
+ games.strategy.engine.history.IndexedHistoryNode
 org/triplea/util/Arrays.java
  org.triplea.util.Arrays
 games/strategy/engine/framework/startup/ui/InGameLobbyWatcherWrapper.java
@@ -2619,60 +2621,6 @@ games/strategy/engine/data/gameparser/XmlGameElementMapper.java
  games.strategy.engine.data.gameparser.XmlGameElementMapper$AttachmentFactory
 games/strategy/triplea/delegate/AbstractEndTurnDelegate.java
  games.strategy.triplea.delegate.AbstractEndTurnDelegate
-games/strategy/engine/chat/SentMessagesHistory.java
- games.strategy.engine.chat.SentMessagesHistory
-games/strategy/engine/data/RepairRules.java
- games.strategy.engine.data.RepairRules
-games/strategy/engine/message/unifiedmessenger/Invoke.java
- games.strategy.engine.message.unifiedmessenger.Invoke
-games/strategy/triplea/TripleAPlayer.java
- games.strategy.triplea.TripleAPlayer
-games/strategy/triplea/delegate/AbstractDelegate.java
- games.strategy.triplea.delegate.AbstractDelegate
-games/strategy/triplea/delegate/battle/steps/change/RemoveUnprotectedUnits.java
- games.strategy.triplea.delegate.battle.steps.change.RemoveUnprotectedUnits
-games/strategy/triplea/ui/screen/drawable/JBGTerritoryMaskLayerDrawable.java
- games.strategy.triplea.ui.screen.drawable.JBGTerritoryMaskLayerDrawable
-games/strategy/engine/data/changefactory/AddAvailableTech.java
- games.strategy.engine.data.changefactory.AddAvailableTech
-games/strategy/triplea/delegate/AbstractPlaceDelegate.java
- games.strategy.triplea.delegate.AbstractPlaceDelegate
-games/strategy/engine/framework/startup/mc/IObserverWaitingToJoin.java
- games.strategy.engine.framework.startup.mc.IObserverWaitingToJoin
-games/strategy/triplea/delegate/PlaceExtendedDelegateState.java
- games.strategy.triplea.delegate.PlaceExtendedDelegateState
-games/strategy/engine/framework/startup/SystemPropertyReader.java
- games.strategy.engine.framework.startup.SystemPropertyReader
-games/strategy/triplea/ai/jbg/util/JBGBattleUtils.java
- games.strategy.triplea.ai.jbg.util.JBGBattleUtils
-games/strategy/triplea/ui/SimpleUnitPanel.java
- games.strategy.triplea.ui.SimpleUnitPanel
- games.strategy.triplea.ui.SimpleUnitPanel$1
- games.strategy.triplea.ui.SimpleUnitPanel$2
- games.strategy.triplea.ui.SimpleUnitPanel$Style
-games/strategy/triplea/ai/jbgfast/AggregateEstimate.java
- games.strategy.triplea.ai.jbgfast.AggregateEstimate
-games/strategy/triplea/delegate/data/CasualtyList.java
- games.strategy.triplea.delegate.data.CasualtyList
-games/strategy/engine/vault/VaultId.java
- games.strategy.engine.vault.VaultId
-games/strategy/triplea/delegate/AbstractMoveDelegate.java
- games.strategy.triplea.delegate.AbstractMoveDelegate
- games.strategy.triplea.delegate.AbstractMoveDelegate$MoveType
-org/triplea/debug/error/reporting/ConfirmationDialogController.java
- org.triplea.debug.error.reporting.ConfirmationDialogController
-games/strategy/engine/history/IndexedHistoryNode.java
- games.strategy.engine.history.IndexedHistoryNode
-games/strategy/triplea/ai/fast/AggregateEstimate.java
- games.strategy.triplea.ai.fast.AggregateEstimate
-games/strategy/engine/chat/Chat.java
- games.strategy.engine.chat.Chat
-games/strategy/triplea/ui/IndividualUnitPanelGrouped.java
- games.strategy.triplea.ui.IndividualUnitPanelGrouped
-org/triplea/game/server/HeadlessGameServer.java
- org.triplea.game.server.HeadlessGameServer
-games/strategy/engine/lobby/client/ui/action/player/info/PlayerGamesTab.java
- games.strategy.engine.lobby.client.ui.action.player.info.PlayerGamesTab
 games/strategy/triplea/ui/JBGTerritoryBuildingPurchasePanel.java
  games.strategy.triplea.ui.JBGTerritoryBuildingPurchasePanel
  games.strategy.triplea.ui.JBGTerritoryBuildingPurchasePanel$1
@@ -2681,13 +2629,25 @@ games/strategy/triplea/ui/JBGTerritoryBuildingPurchasePanel.java
  games.strategy.triplea.ui.JBGTerritoryBuildingPurchasePanel$4
  games.strategy.triplea.ui.JBGTerritoryBuildingPurchasePanel$5
  games.strategy.triplea.ui.JBGTerritoryBuildingPurchasePanel$6
+games/strategy/triplea/ai/jbg/JBGData.java
+ games.strategy.triplea.ai.jbg.JBGData
+games/strategy/triplea/ui/JBGTerritoryManagerPanel.java
+ games.strategy.triplea.ui.JBGTerritoryManagerPanel
+games/strategy/triplea/ai/jbg/JBGRetreatAi.java
+ games.strategy.triplea.ai.jbg.JBGRetreatAi
+games/strategy/triplea/ai/jbg/util/JBGTransportUtils.java
+ games.strategy.triplea.ai.jbg.util.JBGTransportUtils
+games/strategy/triplea/ai/jbg/util/JBGBattleUtils.java
+ games.strategy.triplea.ai.jbg.util.JBGBattleUtils
 games/strategy/triplea/ui/panel/jbg/JBGTerritoryViewCanvasPanel.java
  games.strategy.triplea.ui.panel.jbg.JBGTerritoryViewCanvasPanel
  games.strategy.triplea.ui.panel.jbg.JBGTerritoryViewCanvasPanel$1
-games/strategy/triplea/ui/JBGExchangeJCoinPanel.java
- games.strategy.triplea.ui.JBGExchangeJCoinPanel
- games.strategy.triplea.ui.JBGExchangeJCoinPanel$1
- games.strategy.triplea.ui.JBGExchangeJCoinPanel$2
+games/strategy/triplea/ai/jbg/JBGPurchaseAi.java
+ games.strategy.triplea.ai.jbg.JBGPurchaseAi
+games/strategy/triplea/ai/jbg/data/JBGTerritoryManager.java
+ games.strategy.triplea.ai.jbg.data.JBGTerritoryManager
+games/strategy/triplea/ai/jbg/simulate/JBGDummyDelegateBridge.java
+ games.strategy.triplea.ai.jbg.simulate.JBGDummyDelegateBridge
 games/strategy/triplea/ui/panels/map/MapPanel.java
  games.strategy.triplea.ui.panels.map.MapPanel
  games.strategy.triplea.ui.panels.map.MapPanel$1
@@ -2698,13 +2658,38 @@ games/strategy/triplea/ui/panels/map/MapPanel.java
  games.strategy.triplea.ui.panels.map.MapPanel$AnimationDuration
  games.strategy.triplea.ui.panels.map.MapPanel$HighlightDelay
  games.strategy.triplea.ui.panels.map.MapPanel$TerritoryHighlighter
-games/strategy/triplea/ui/JBGTerritoryManagerPanel.java
- games.strategy.triplea.ui.JBGTerritoryManagerPanel
-games/strategy/triplea/ui/JBGTributePanel.java
- games.strategy.triplea.ui.JBGTributePanel
- games.strategy.triplea.ui.JBGTributePanel$1
- games.strategy.triplea.ui.JBGTributePanel$2
- games.strategy.triplea.ui.JBGTributePanel$3
+games/strategy/triplea/ai/jbgfast/JBGFastAi.java
+ games.strategy.triplea.ai.jbgfast.JBGFastAi
+games/strategy/triplea/ai/jbg/util/JBGTerritoryValueUtils.java
+ games.strategy.triplea.ai.jbg.util.JBGTerritoryValueUtils
+ games.strategy.triplea.ai.jbg.util.JBGTerritoryValueUtils$1
+ games.strategy.triplea.ai.jbg.util.JBGTerritoryValueUtils$2
+games/strategy/triplea/ai/jbg/data/JBGTerritory.java
+ games.strategy.triplea.ai.jbg.data.JBGTerritory
+games/strategy/triplea/ai/jbg/util/JBGPurchaseValidationUtils.java
+ games.strategy.triplea.ai.jbg.util.JBGPurchaseValidationUtils
+games/strategy/triplea/ai/jbg/data/JBGMyMoveOptions.java
+ games.strategy.triplea.ai.jbg.data.JBGMyMoveOptions
+games/strategy/triplea/ai/jbg/JBGPoliticsAi.java
+ games.strategy.triplea.ai.jbg.JBGPoliticsAi
+games/strategy/triplea/ui/JBGExchangeJCoinPanel.java
+ games.strategy.triplea.ui.JBGExchangeJCoinPanel
+ games.strategy.triplea.ui.JBGExchangeJCoinPanel$1
+ games.strategy.triplea.ui.JBGExchangeJCoinPanel$2
+ games.strategy.triplea.ui.JBGExchangeJCoinPanel$3
+games/strategy/triplea/ai/jbg/util/JBGMoveUtils.java
+ games.strategy.triplea.ai.jbg.util.JBGMoveUtils
+games/strategy/triplea/ai/jbg/data/JBGOtherMoveOptions.java
+ games.strategy.triplea.ai.jbg.data.JBGOtherMoveOptions
+games/strategy/triplea/ai/jbg/AbstractJBGAi.java
+ games.strategy.triplea.ai.jbg.AbstractJBGAi
+ games.strategy.triplea.ai.jbg.AbstractJBGAi$TerritoryProductionComparator
+games/strategy/triplea/ai/jbgfast/JBGFastOddsEstimator.java
+ games.strategy.triplea.ai.jbgfast.JBGFastOddsEstimator
+games/strategy/triplea/ai/jbg/JBGAi.java
+ games.strategy.triplea.ai.jbg.JBGAi
+games/strategy/triplea/ai/jbg/util/JBGSortMoveOptionsUtils.java
+ games.strategy.triplea.ai.jbg.util.JBGSortMoveOptionsUtils
 games/strategy/triplea/ui/JBGWordMatchPanel.java
  games.strategy.triplea.ui.JBGWordMatchPanel
  games.strategy.triplea.ui.JBGWordMatchPanel$1
@@ -2714,3 +2699,20 @@ games/strategy/triplea/ui/JBGWordMatchPanel.java
  games.strategy.triplea.ui.JBGWordMatchPanel$5
  games.strategy.triplea.ui.JBGWordMatchPanel$6
  games.strategy.triplea.ui.JBGWordMatchPanel$ListKeyAction
+games/strategy/triplea/ai/jbg/JBGNonCombatMoveAi.java
+ games.strategy.triplea.ai.jbg.JBGNonCombatMoveAi
+games/strategy/triplea/ai/jbg/JBGCombatMoveAi.java
+ games.strategy.triplea.ai.jbg.JBGCombatMoveAi
+games/strategy/triplea/ai/jbg/JBGScrambleAi.java
+ games.strategy.triplea.ai.jbg.JBGScrambleAi
+games/strategy/triplea/ai/jbg/simulate/JBGSimulateTurnUtils.java
+ games.strategy.triplea.ai.jbg.simulate.JBGSimulateTurnUtils
+games/strategy/triplea/ai/jbg/util/JBGPurchaseUtils.java
+ games.strategy.triplea.ai.jbg.util.JBGPurchaseUtils
+games/strategy/triplea/ui/JBGTributePanel.java
+ games.strategy.triplea.ui.JBGTributePanel
+ games.strategy.triplea.ui.JBGTributePanel$1
+ games.strategy.triplea.ui.JBGTributePanel$2
+ games.strategy.triplea.ui.JBGTributePanel$3
+games/strategy/triplea/ai/jbg/util/JBGOddsCalculator.java
+ games.strategy.triplea.ai.jbg.util.JBGOddsCalculator
