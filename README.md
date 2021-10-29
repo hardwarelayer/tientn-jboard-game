@@ -4,32 +4,41 @@
 
 ![image](https://user-images.githubusercontent.com/20723609/117690774-6a101c80-b1e5-11eb-8beb-2dd0782cbe46.png)
 
-A board based, turn based war game, made for desktop, more targeted to local play, with newspaper with articles made by computer on each turn, territory building, language learning feature, coded in Java using Swing and Docker instances. AI is developed toward local long sequences play, and saving computer's resources by limiting prediction / learning on every steps.
-
 Since I have played a lot of historic simulation series ... But they are over complicated
 
 The other games are too simple ...
 
-... so I think it's time to forge a game of my imagination.
+... so I think it's time to craft a game of my imagination.
 
+A board based, turn based war game, made for desktop, more targeted to local play, multiple turns play, machine generated newspaper with articles on each turn, territory building, language learning feature, coded in Java using Swing and Docker instances. The opponent AI is now developed toward local long sequences play, can build territories, and saving computer's resources by limiting prediction / learning on every steps. AI now became more dangerous and can crush human in just one or two turns, if careless.
+
+Game play with my new resource, a special jCoin, with can be earned by other activities inside/outside the game.
+
+This game used the infamous TripleA engine, but being customized heavily by me.
+
+This game also serves my AI learning process: rules based, predictive analytics, desision making.
+
+Features
 ---------------
 
 ### Notes:
 
-I make a board game based on TripleA, and add NEW feature of 'territory building', 'city building'. A special jCoin monetary unit, for human player to build bases, and tribute to allies and opponent's AI. It can be base of a new trading / financial system in game, later.
+NEW feature of 'territory building', 'city building'. A special jCoin monetary unit, for human player to build bases, and tribute to allies and opponent's AI. It can be base of a new trading / financial system in game, later.
 
 The new on map feature which make war battles have more visibility on map.
 
-A new AI with more realistic behavior, more flexible and faster for the existing Fast and Hard AI, which make the game unplayable because too much time of thinking, emulating, processing...  AI will prepare, start war, stop war by stocking levels. Or it will start war on funding resources from other players (human and AI).
+A new AI with more realistic behavior, more flexible and faster for the existing Fast and Hard AI, which make the game unplayable because too much time of thinking, emulating, processing...  AI will now build up territories, prepare, start war, stop war by resources stocking levels. Or it will start war on funding resources from other players (human and AI - randomly after getting the fund).
 
-The game is now more fun than before (in my opinion). It will not be restricted in "short game style" anymore.
+A world news magazine built by machine, to serve player's need of reading about events and analyze situation. It also make the game more "historic" like, which one governor get events from "paper based" materials.
 
-Other feature: Language learning while playing to gain jCoin. And other new ways of gaining this strategic resource in the future.
+The game is now more fun than before (in my opinion). It will not be restricted in "short game style" anymore. And it is more competitive between human player and AI, too (more difficult).
 
-Good luck with the game :)
+Other feature: Foreign language learning while playing to gain jCoin. And other new ways of gaining this strategic resource in the future.
+
+Have fun with the game :)
 
 ### Updates:
-My edition current version: 0.3
+My edition current version: 0.35
 
 I will try to make this game still compatible with the base TripleA, for any updates.
 
@@ -346,7 +355,11 @@ Still keep the folder of engine 2.3 before changed in:
 
     [Done] 26. Add territory build for my AI, AI can upgrade it's territory's production by building factory and static unit ...
 
-    [Done] 27. Add jCoin to PUs exchange and reverse
+    [Done] 27. Add jCoin to PUs exchange and reverse for human territory management
+
+    [Done] 28. AI can balance buying with forced items: air, warships, transport, land units
+
+    29. On mouse over territory information on the right panel (owner, units)
 
 ------------------
 
