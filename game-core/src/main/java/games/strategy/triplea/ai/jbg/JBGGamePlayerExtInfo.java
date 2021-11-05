@@ -2,6 +2,7 @@ package games.strategy.triplea.ai.jbg;
 import java.io.Serializable;
 import lombok.Getter;
 import lombok.Setter;
+import games.strategy.engine.data.JBGConstants;
 
 @Getter
 @Setter
@@ -19,11 +20,19 @@ public class JBGGamePlayerExtInfo implements Serializable {
     stockingAmount += val;
     stockingTurnCount++;
   }
-  @Getter @Setter private int aggressiveTurnMax = 0;
+  @Setter private int aggressiveTurnMax = 0;
+  public int getAggressiveTurnMax() {
+    if (this.aggressiveTurnMax > 4) {
+      this.aggressiveTurnMax = 4; //minimum aggressive turn is 4
+    }
+    return this.aggressiveTurnMax;
+  }
   @Getter @Setter private int aggressiveTurnCount = 0;
   private void initAggressiveMode() {
     if (stockingTurnCount < 1) stockingTurnCount = 1;
     aggressiveTurnMax = stockingTurnCount;
+    if (aggressiveTurnMax < JBGConstants.AI_MINIMUM_AGGRESSIVE_TURNS)
+      aggressiveTurnMax = JBGConstants.AI_MINIMUM_AGGRESSIVE_TURNS;
     aggressiveTurnCount = 0;
     setStockingAmount(0);
   }

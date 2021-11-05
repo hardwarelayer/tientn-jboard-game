@@ -10,7 +10,27 @@ The other games are too simple ...
 
 ... so I think it's time to craft a game of my imagination.
 
-A board based, turn based war game, made for desktop, more targeted to local play, multiple turns play, machine generated newspaper with articles on each turn, territory building, language learning feature, coded in Java using Swing and Docker instances. The opponent AI is now developed toward local long sequences play, can build territories, and saving computer's resources by limiting prediction / learning on every steps. AI now became more dangerous and can crush human in just one or two turns, if careless.
+A turn based strategy war game:
+
+-Use the infamous tripleA engine
+
+-Made for desktop
+
+-Targeted to local play vs AI
+
+-Long sequence play
+
+-Special made AI opponents
+
+-Machine generated historic like newspaper on world events
+
+-Territory/city building
+
+-Spend jCoin to build
+
+-Earn jCoin by learning / playing
+
+Implemented in Java using Swing and Docker instances. The opponent AI is now developed toward local long sequences play, can build territories, and saving computer's resources by limiting prediction / learning on every steps. AI now became more dangerous and can crush human in just one or two turns, if careless.
 
 Game play with my new resource, a special jCoin, with can be earned by other activities inside/outside the game.
 
@@ -23,9 +43,9 @@ Features
 
 ### Notes:
 
-NEW feature of 'territory building', 'city building'. A special jCoin monetary unit, for human player to build bases, and tribute to allies and opponent's AI. It can be base of a new trading / financial system in game, later.
+World war game between Axis and Allies, with 'territory building', 'city building'. A special jCoin monetary unit, for human player to build bases, and tribute to allies and opponent's AI. It can be base of a new trading / financial system in game, later.
 
-The new on map feature which make war battles have more visibility on map.
+On map event feature which make war battles have more visibility on map.
 
 A new AI with more realistic behavior, more flexible and faster for the existing Fast and Hard AI, which make the game unplayable because too much time of thinking, emulating, processing...  AI will now build up territories, prepare, start war, stop war by resources stocking levels. Or it will start war on funding resources from other players (human and AI - randomly after getting the fund).
 

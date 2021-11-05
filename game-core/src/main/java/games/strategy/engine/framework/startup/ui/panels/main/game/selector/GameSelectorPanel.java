@@ -585,6 +585,9 @@ public final class GameSelectorPanel extends JPanel implements Observer {
           gamePropertiesCache.loadCachedGamePropertiesInto(model.getGameData());
           loadKanjiData.setEnabled(true);
           importJCoin.setEnabled(true);
+
+          //init default empty Kanjis list, now we don't need player to always load Kanjis (20211105)
+          model.getGameData().setKanjis( kanjiModel.loadDummy() );
         }
       }
     } catch (final InterruptedException e) {

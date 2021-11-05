@@ -198,6 +198,10 @@ public abstract class AbstractJBGAi extends AbstractAi {
       jbgAiInterractLst.put(player.getName(), exInfo);
     }
 
+   //force aggressive
+    //jbgAiInterractLst.get(player.getName()).setStockingTurnCount(10);
+    //jbgAiInterractLst.get(player.getName()).setDefensiveStance(true);
+
     if (nonCombat) {
       if (lastCombatTimeBySeconds >= 30 && !jbgAiInterractLst.get(player.getName()).isDefensiveStance())
         simpleDoNonCombatMove(moveDel, player, data);
@@ -412,6 +416,20 @@ public abstract class AbstractJBGAi extends AbstractAi {
 
     }
 
+    //not used, because in TripleA, the delegate will be dismissed once player lost capitol 
+    private boolean isPlayerStillHasCapitol(GamePlayer player, GameData data) {
+      List<Territory> capitols = TerritoryAttachment.getAllCapitals(player, data);
+      if (capitols == null || capitols.size() < 1) {
+        return false;
+      }
+      for (Territory ter: capitols) {
+        if (!ter.getOwner().equals(player)) {
+          return false;
+        }
+      }
+      return true;
+    }
+
     @Override
     public void purchase(
         final boolean purchaseForBid,
@@ -492,6 +510,7 @@ public abstract class AbstractJBGAi extends AbstractAi {
       int leftTerrs = countMyLandTerritory();
       int leftFactories = countMyFactories();
       int availPUs = player.getResources().getQuantity(pus); //this can be another condition for triggering
+
       if (jbgAiInterractLst.get(player.getName()).isDefensiveStance()) {
         if (canTriggerMobilization(leftTerrs, leftFactories, landUnitCount, availPUs)) {
           //after mobilization, the player will go out of defensive immediately by the end of this function 
@@ -511,7 +530,6 @@ public abstract class AbstractJBGAi extends AbstractAi {
       }
 
       int originSpendingBudget = leftToSpend;
-
       final @Nullable Territory capitol =
           TerritoryAttachment.getFirstOwnedCapitalOrFirstUnownedCapital(player, data);
       final List<ProductionRule> rules = player.getProductionFrontier().getRules();
@@ -685,7 +703,7 @@ public abstract class AbstractJBGAi extends AbstractAi {
           i++;
         }
       }
-//System.out.println("   leftTerrs: " + String.valueOf(leftTerrs) + " factories: " + String.valueOf(leftFactories) + " PUs: " + String.valueOf(leftToSpend));
+System.out.println("   leftTerrs: " + String.valueOf(leftTerrs) + " factories: " + String.valueOf(leftFactories) + " PUs: " + String.valueOf(leftToSpend));
 
       //get the rule of factory first, to force buying
       ProductionRule factoryRule = null;
@@ -723,25 +741,38 @@ public abstract class AbstractJBGAi extends AbstractAi {
       boolean forceBuyAmphib = false;
       boolean forceBuyAir = false;
 System.out.println("Current land units count: " + String.valueOf(landUnitCount));
+System.out.println("Current air units count: " + String.valueOf(airUnitCount));
+System.out.println("Current transport units count: " + String.valueOf(transportCount));
       //build land first
-      //then air, transport, warship
-      if (landUnitCount > JBGConstants.MAX_BUILD_LAND_UNITS) {
-        if (airUnitCount < JBGConstants.MIN_BUILD_AIR_UNITS) {
+      //then air, if isAmphib: transport, warship
+
+      if (landUnitCount > JBGConstants.MIN_BUILD_LAND_UNITS) {
+        //start balancing build
+        if ((landUnitCount / 10) > airUnitCount) {
+  System.out.println("Forcing air buy!");
           forceBuyAir = true;
         }
-        else if (isAmphib) {
-          if (transportCount < JBGConstants.MIN_BUILD_AMPHIB_UNITS ) {
-            //only buy amphib
-            forceBuyAmphib = true;
-          }
-          else {
-            //I don't want to check whether the player has sea or not,
-            //so I let it build amphib first, then fighting sea units
-            if (warshipUnitCount < JBGConstants.MIN_BUILD_FIGHTING_SEA_UNITS) {
-              forceBuyWarship = true;
+        else if ((landUnitCount / 10) > transportCount) {
+
+          if (isAmphib) {
+            if (transportCount < JBGConstants.MIN_BUILD_AMPHIB_UNITS ) {
+              //only buy amphib
+  System.out.println("Forcing amphib buy!");
+              forceBuyAmphib = true;
+            }
+            else {
+              //I don't want to check whether the player has sea or not,
+              //so I let it build amphib first, then fighting sea units
+              if (warshipUnitCount < JBGConstants.MIN_BUILD_FIGHTING_SEA_UNITS) {
+  System.out.println("Forcing warship buy!");
+                forceBuyWarship = true;
+              }
             }
           }
+          //else: just buying land to MAX_BUILD_LAND_UNITS quota and then the other rules
+
         }
+
       }
 
       boolean alreadyBoughtFactoryThisTurn = false;
@@ -792,6 +823,8 @@ System.out.println("   ... force buying factory unit ");
             }
             else if ((landUnitCount > JBGConstants.MAX_BUILD_LAND_UNITS || factoryRule == null) && 
               !alreadyBoughtStaticThisTurn && staticUnitRule != null && leftToSpend >= staticUnitCost) {
+              //if enough land unit, force buying bunker (static)
+              //
               //why I check factoryRule == null?
               //by scenario setting, some players have no factory, in this case, we have to buy at least 1 static unit
               //to buy territory instead of factory
@@ -850,7 +883,7 @@ System.out.println("   ... force buying static unit ");
                       if (transports > 0) {
                         leftToSpend -= cost * transports;
                         purchase.add(rule, transports);
-System.out.println("Forcing buy air transport: " + rule.getName() + " qty: " + String.valueOf(transports));
+System.out.println("Forcing buy transport: " + rule.getName() + " qty: " + String.valueOf(transports));
                         continue;
                       }
                     }
@@ -886,7 +919,7 @@ System.out.println("Forcing buy air units: " + rule.getName() + " qty: " + Strin
               }
             }
           }
-          else {
+          else if (!forceBuyAir) {
               //other unit types
               int maxBuyQty = leftToSpend / cost;
               int toBuyQty = maxBuyQty;
@@ -929,7 +962,17 @@ System.out.println("   ... Cleanup buy air units: " + airUnitRule.getName() + " 
         }
       }
 
-      purchaseDelegate.purchase(purchase);
+      //if the original PUs cannot afford a factory
+      //then we don't execute the build, until we can buy at least one factory each turn 
+      //(even when we dont need factory anymore -> but at that time, we have enough PUs for other things)
+      //
+      if (factoryRule != null && originSpendingBudget < factoryCost) {
+System.out.println("---> Skip buying, because player can't afford a factory ...");
+        leftToSpend = 0;
+      }
+      else {
+        purchaseDelegate.purchase(purchase);
+      }
       movePause();
 
       int spentAmount = originSpendingBudget - leftToSpend;

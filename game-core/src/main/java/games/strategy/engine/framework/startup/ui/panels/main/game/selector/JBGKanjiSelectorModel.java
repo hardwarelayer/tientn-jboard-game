@@ -165,4 +165,9 @@ public class JBGKanjiSelectorModel extends Observable {
     return null;
   }
 
+  public List<JBGKanjiItem> loadDummy() {
+    List<JBGKanjiItem> dummyList = new ArrayList<JBGKanjiItem>();
+    return dummyList;
+  }
+
 }

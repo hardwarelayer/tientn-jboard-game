@@ -169,9 +169,9 @@ public interface JBGConstants {
   static final String KANJI_COMMA_DELIMITER = ",";
 
   //for jCoint price calculation
-  static final double BUILDING_ECO_PRICE_MULTIPLIER = 0.75;
-  static final double BUILDING_RES_PRICE_MULTIPLIER = 1.0;
-  static final int BUILDING_ECO_PRICE_MINIMUM = 10;
+  static final double BUILDING_ECO_PRICE_MULTIPLIER = 0.85;
+  static final double BUILDING_RES_PRICE_MULTIPLIER = 1.2;
+  static final int BUILDING_ECO_PRICE_MINIMUM = 15;
   static final int BUILDING_RES_PRICE_MINIMUM = 20;
 
   //turn history parser constants
@@ -247,12 +247,14 @@ public interface JBGConstants {
   static final String JBG_NO_COST_CARE_RULE = "JBG_NO_COST_CARE";
   static final int MOBILIZATION_VALUE = 1996;
   static final int MAX_BUILD_LAND_UNITS = 1200;
+  static final int MIN_BUILD_LAND_UNITS = 200;
   static final int JBG_AI_INCREASE_PRODUCTION_BY_FACTORY = 4;
   static final int JBG_AI_INCREASE_PRODUCTION_BY_CONSTRUCTION = 2;
   static final int MIN_BUILD_AMPHIB_UNITS = 60;
   static final int MIN_BUILD_AIR_UNITS = 100;
   static final int MIN_BUILD_FIGHTING_SEA_UNITS = 1000;
   static final int BUILD_UP_PRODUCTION_FOR_PLAYER_WITH_NO_FACTORY = 20;
+  static final int AI_MINIMUM_AGGRESSIVE_TURNS = 4;
   //
 
 }
