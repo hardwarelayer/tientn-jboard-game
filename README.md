@@ -12,8 +12,6 @@ The other games are too simple ...
 
 A turn based strategy war game:
 
--Use the infamous tripleA engine
-
 -Made for desktop
 
 -Targeted to local play vs AI
@@ -390,9 +388,9 @@ Still keep the folder of engine 2.3 before changed in:
 This project is licensed under the terms of the
 [GNU General Public License v3.0 with additional permissions](/LICENSE).
 
-Copyright (C) 2001-2019 TripleA contributors.
+The new game features in tientn-jboard-game (c) by Tran Ngoc Tien.
 
-All newly added features in tientn-jboard-game (c) by Tran Ngoc Tien.
+Base engine copyright (C) 2001-2019 TripleA contributors.
 
 This program is free software; you can redistribute it and/or modify it under the terms
 of the GNU General Public License as published by the Free Software Foundation; either
