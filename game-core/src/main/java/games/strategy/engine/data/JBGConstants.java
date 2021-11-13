@@ -201,6 +201,7 @@ public interface JBGConstants {
   static final String HI_MOVE_TO_PATT = " to ";
   static final String HI_MOVE_TAKE_PATT = " take ";
   static final String HI_TAG_MOVE_TAKE_PROV = "@MOVETAKEN:";
+  static final String HI_TAG_MOBILIZATION_COST = "@MOBILIZATION_COST:";
   static final String HI_ROUND_IDX_PATT = ", round ";
   static final String HI_NONE_VAL = "None";
 
@@ -242,6 +243,10 @@ public interface JBGConstants {
   //turn news
   static final String JBGTURN_NEWS_SMALLATTACK_PREFIX = "JTN_SMALL_ATTK_PREFX";
   static final String JBGTURN_NEWS_PAPER_NAME = "Tien's World War Edition";
+  static final String JBGTURN_NEWS_AIROP_IMG = "@TURNNEWS_AIROP";
+  static final String JBGTURN_NEWS_MOBILIZATION_IMG_URL = "file:jbg/assets/turnnews/jbg_mobilization.png";
+  static final String JBGTURN_NEWS_AIROP_IMG_URL = "file:jbg/assets/turnnews/jbg_airop.png";
+
 
   //JBG
   static final String JBG_NO_COST_CARE_RULE = "JBG_NO_COST_CARE";
@@ -254,7 +259,16 @@ public interface JBGConstants {
   static final int MIN_BUILD_AIR_UNITS = 100;
   static final int MIN_BUILD_FIGHTING_SEA_UNITS = 1000;
   static final int BUILD_UP_PRODUCTION_FOR_PLAYER_WITH_NO_FACTORY = 20;
+  static final int AI_MINIMUM_STOCKING_FOR_AGGRESSIVE = 100;
   static final int AI_MINIMUM_AGGRESSIVE_TURNS = 4;
+  static final int GENERAL_FORCE_BUY_BLOCK = 10;
+  static final int WARSHIP_FORCE_BUY_BLOCK = 10;
+  static final int AMPHIB_FORCE_BUY_BLOCK = 20;
+  static final int CAPITOL_DANGER_SEA = 1;
+  static final int CAPITOL_DANGER_LAND = 2; 
+  static final int CAPITOL_DANGER_LOST = 3;
+  static final int CAPITOL_DANGER_SEA_MOBILIZATION_RATE = 2;
+  static final int CAPITOL_DANGER_LAND_MOBILIZATION_RATE = 3;
   //
 
 }

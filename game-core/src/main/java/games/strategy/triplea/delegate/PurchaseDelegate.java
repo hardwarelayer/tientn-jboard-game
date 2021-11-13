@@ -258,7 +258,7 @@ public class PurchaseDelegate extends BaseTripleADelegate
     /*final*/ String remaining = null;
     //JBG
     if (notCareAboutCost)
-      remaining = "Remaining resources: mobilization has no cost!!!";
+      remaining = JBGConstants.HI_TAG_MOBILIZATION_COST;
       //
     else
       remaining = removeFromPlayer(costs, changes);

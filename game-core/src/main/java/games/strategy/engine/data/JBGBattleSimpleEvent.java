@@ -18,7 +18,7 @@ public class JBGBattleSimpleEvent implements Comparable<JBGBattleSimpleEvent> {
 
   @Getter @Setter private String location;
   @Getter @Setter private String attacker;
-  @Getter @Setter private String defender;
+  @Setter private String defender;
   @Getter @Setter private String winner;
   @Getter @Setter private String attackerTroops;
   @Getter @Setter private String defenderTroops;
@@ -52,6 +52,13 @@ public class JBGBattleSimpleEvent implements Comparable<JBGBattleSimpleEvent> {
   @Override
   public int compareTo(JBGBattleSimpleEvent b) {
     return this.getScore().compareTo(b.getScore());
+  }
+
+  public String getDefender() {
+    if (this.defender.equals("None")) {
+      return "Neutral";
+    }
+    return this.defender;
   }
 
   public boolean isPlayerAttack(final String playerName) {

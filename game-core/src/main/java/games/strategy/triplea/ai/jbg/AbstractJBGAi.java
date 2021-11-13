@@ -97,6 +97,8 @@ import javax.swing.JProgressBar;
 import javax.swing.SwingUtilities;
 import java.util.concurrent.ThreadLocalRandom;
 
+import java.lang.Math;
+
 /** JBG AI. */
 public abstract class AbstractJBGAi extends AbstractAi {
 
@@ -105,6 +107,9 @@ public abstract class AbstractJBGAi extends AbstractAi {
   int lastCombatTimeBySeconds = 0;
   int lastNoneCombatTimeBySeconds = 0;
   boolean playerDoesNotHasFactory = false;
+  int iCapitolDangerLevel = 0;
+  int iLastCapitolDangerCount = 0;
+  int iLastCapitolDangerTurn = -1;
   //
 
   private final JBGOddsCalculator calc;
@@ -201,6 +206,7 @@ public abstract class AbstractJBGAi extends AbstractAi {
    //force aggressive
     //jbgAiInterractLst.get(player.getName()).setStockingTurnCount(10);
     //jbgAiInterractLst.get(player.getName()).setDefensiveStance(true);
+    checkPlayerCapitolDangerLevel(player, data);
 
     if (nonCombat) {
       if (lastCombatTimeBySeconds >= 30 && !jbgAiInterractLst.get(player.getName()).isDefensiveStance())
@@ -210,13 +216,13 @@ public abstract class AbstractJBGAi extends AbstractAi {
       storedFactoryMoveMap = null;
     } else {
 
-      if (jbgAiInterractLst.get(player.getName()).isDefensiveStance()) {
+      if (this.iCapitolDangerLevel == 0 && jbgAiInterractLst.get(player.getName()).isDefensiveStance()) {
         doJBGEventMessaging(data, "Defensive stance: " + player.getName() + " doing nothing!");
       }
       else {
         jbgAiInterractLst.get(player.getName()).continueOrStopAggressive();
         //if continueOrStopAggressive reach last turn, it will reset the aggressive stance,
-        if (jbgAiInterractLst.get(player.getName()).isDefensiveStance()) {
+        if (this.iCapitolDangerLevel == 0 && jbgAiInterractLst.get(player.getName()).isDefensiveStance()) {
           //new defensive stance
           doJBGEventMessaging(data, "New defensive stance: " + player.getName() + " doing nothing!");
         }
@@ -224,6 +230,11 @@ public abstract class AbstractJBGAi extends AbstractAi {
 
           int iAggMax = jbgAiInterractLst.get(player.getName()).getAggressiveTurnMax();
           int iAggCount = jbgAiInterractLst.get(player.getName()).getAggressiveTurnCount();
+
+          if (this.iCapitolDangerLevel > 0) {
+            iAggMax = 10;
+            iAggCount = 1;
+          }
           doJBGEventMessaging(data, "Aggressive stance: " + player.getName() + " offensive " + String.valueOf(iAggCount) + "/" + String.valueOf(iAggMax));
           if (storedCombatMoveMap == null) {
             combatMoveAi.doCombatMove(moveDel);
@@ -416,20 +427,109 @@ public abstract class AbstractJBGAi extends AbstractAi {
 
     }
 
-    //not used, because in TripleA, the delegate will be dismissed once player lost capitol 
-    private boolean isPlayerStillHasCapitol(GamePlayer player, GameData data) {
+    private boolean isTwoPlayerAllied(GameData data, GamePlayer pl1, GamePlayer pl2) {
+      return data.getRelationshipTracker().isAllied(pl1, pl2);
+    }
+
+    private Territory isNeighbourTerritoryDanger(GameData data, GamePlayer player, Set<Territory> neightbors) {
+      Territory tResult = null;
+      this.iLastCapitolDangerCount = 0;
+System.out.println("checking isNeighbourTerritoryDanger ...");
+      for (Territory neighborT: neightbors) {
+        final String neighborName = neighborT.getOwner().getName();
+System.out.println("checking isNeighbourTerritoryDanger ..." + neighborT.getName() + " owner " + neighborName);
+        if (neighborName != null && !neighborName.equals(player.getName())) {
+          if (!neighborName.equals("Neutral")) {
+            if (!isTwoPlayerAllied(data, player, neighborT.getOwner()) ) {
+              Collection<Unit> terrUnits  = neighborT.getUnits();
+              if (terrUnits != null && terrUnits.size() > 0) {
+                this.iLastCapitolDangerCount += terrUnits.size();
+              }
+System.out.println("Neighbor terr danger: " + neighborT.getName() + " owned by " + neighborName);
+              tResult = neighborT;
+            }
+          }
+          else {
+            //sea is seems always neutral, but it can contains enemy units
+            Collection<Unit> terrUnits  = neighborT.getUnits();
+            if (terrUnits != null && terrUnits.size() > 0) {
+              this.iLastCapitolDangerCount += terrUnits.size();
+              Unit firstUnit = terrUnits.iterator().next();
+              if (firstUnit != null) {
+                GamePlayer owner = firstUnit.getOwner();
+                if (!owner.getName().equals(player.getName()) && !isTwoPlayerAllied(data, player, owner)) {
+System.out.println("Neighbor neutral terr danger: " + neighborT.getName() + " has enemy unit " + firstUnit.toStringNoOwner() + " of " + owner.getName());
+                  tResult = neighborT;
+                }
+              }
+            }
+          }
+
+        }
+      }
+      return tResult;
+    }
+
+    //in TripleA, the delegate may be dismissed or disable for some turns once player lost capitol 
+    private void checkPlayerCapitolDangerLevel(GamePlayer player, GameData data) {
       List<Territory> capitols = TerritoryAttachment.getAllCapitals(player, data);
       if (capitols == null || capitols.size() < 1) {
-        return false;
+        this.iLastCapitolDangerTurn = data.getJbgInternalTurnStep();
+        this.iCapitolDangerLevel = JBGConstants.CAPITOL_DANGER_LOST;
+        return;
       }
       for (Territory ter: capitols) {
         if (!ter.getOwner().equals(player)) {
-          return false;
+          this.iLastCapitolDangerTurn = data.getJbgInternalTurnStep();
+          this.iCapitolDangerLevel = JBGConstants.CAPITOL_DANGER_LOST;
+          return;
         }
+
+        final Set<Territory> seaNeighbors =
+            data.getMap().getNeighbors(ter, Matches.territoryIsWater());
+
+        if (!seaNeighbors.isEmpty() && isNeighbourTerritoryDanger(data, player, seaNeighbors) != null) {
+
+          this.iLastCapitolDangerTurn = data.getJbgInternalTurnStep();
+          this.iCapitolDangerLevel = JBGConstants.CAPITOL_DANGER_SEA;
+          return;
+        }
+
+        final Set<Territory> landNeighbors =
+            data.getMap().getNeighbors(ter, Matches.territoryIsLand());
+        if (!landNeighbors.isEmpty() && isNeighbourTerritoryDanger(data, player, landNeighbors) != null) {
+          this.iLastCapitolDangerTurn = data.getJbgInternalTurnStep();
+          this.iCapitolDangerLevel = JBGConstants.CAPITOL_DANGER_LAND;
+          return;
+        }
+
       }
-      return true;
+
+      //Tien's explain:
+      //the AI seems not working like human, eg in "Rising Sun" scenario: 
+      //human turns is: move->purchase->noncombat->place
+      //one AI turns is the same 
+      //for example, Chinese's move->purchase->noncombat->place then Hisaichi's move->purchase->noncomat->place
+      //  so, in Chinese  turn:
+      //  move: it detects that capitol is in danger, an start mobilization, and also recapture the danger territory
+      //  purchase: buy in mobilization mode (territory is recaptured, so the capitol is not in danger anymore)
+      //  place: now capitol is not in danger anymore, so not place in danger (mean to place in capitol to protect it)
+      //  The problem is: after Chinese's move&purchase, Hisaichi's move&purchase recapture that territory
+      //  so, the Chinese's capitol is in danger again, but no additional troops to protect it
+      //Temporary solution: in two turns including the turn we found out that capital is in danger
+      // we judge that the capitol is still in danger!!!
+      if (Math.abs(this.iLastCapitolDangerTurn - data.getJbgInternalTurnStep()) <= 1) {
+System.out.println("Forcing capitol DANGER! " + String.valueOf(this.iLastCapitolDangerTurn) + "<> " + String.valueOf(data.getJbgInternalTurnStep()));
+        //leave as it, if it not danger, force reset it to land danger
+        if (this.iCapitolDangerLevel == 0) this.iCapitolDangerLevel = JBGConstants.CAPITOL_DANGER_LAND;
+        return;
+      }
+
+      this.iCapitolDangerLevel = 0;
     }
 
+    //this function so long
+    //but may be because of "delegation", I can't split it up yet
     @Override
     public void purchase(
         final boolean purchaseForBid,
@@ -437,6 +537,20 @@ public abstract class AbstractJBGAi extends AbstractAi {
         final IPurchaseDelegate purchaseDelegate,
         final GameData data,
         final GamePlayer player) {
+System.out.println("----Revoke JBGAi's purchase!");
+
+      checkPlayerCapitolDangerLevel(player, data);
+
+      int iMaxUnitCost = 0;
+      if (this.iCapitolDangerLevel > 0 & this.iLastCapitolDangerCount > 0) {
+System.out.println("    Capitol in danger, enemy units: " + String.valueOf(this.iLastCapitolDangerCount));
+        final Resource pus = data.getResourceList().getResource(Constants.PUS);
+        final List<ProductionRule> rules = player.getProductionFrontier().getRules();
+        for (final ProductionRule rule : rules) {
+          final int cost = rule.getCosts().getInt(pus);
+          if (cost > iMaxUnitCost) iMaxUnitCost = cost;
+        }
+      }
 
       if (purchaseForBid) {
         // bid will only buy land units, due to weak ai placement for bid not being able to handle sea
@@ -494,6 +608,7 @@ public abstract class AbstractJBGAi extends AbstractAi {
       final int landUnitCount = countLandUnits(data, player);
       int defUnitsAtAmpibRoute = 0;
       if (isAmphib && amphibRoute != null) {
+System.out.println("~~~~~~~~~~~~~~~~\\\\__//~~~~~~~~~~this player has amphib capability!!!");
         defUnitsAtAmpibRoute = amphibRoute.getEnd().getUnitCollection().getUnitCount();
       }
       final Resource pus = data.getResourceList().getResource(Constants.PUS);
@@ -511,22 +626,31 @@ public abstract class AbstractJBGAi extends AbstractAi {
       int leftFactories = countMyFactories();
       int availPUs = player.getResources().getQuantity(pus); //this can be another condition for triggering
 
-      if (jbgAiInterractLst.get(player.getName()).isDefensiveStance()) {
-        if (canTriggerMobilization(leftTerrs, leftFactories, landUnitCount, availPUs)) {
-          //after mobilization, the player will go out of defensive immediately by the end of this function 
-          notCareAboutCost = true;
-          leftToSpend += JBGConstants.MOBILIZATION_VALUE;
-          jbgAiInterractLst.get(player.getName()).addStockingAmount(JBGConstants.MOBILIZATION_VALUE);
-          doJBGEventMessaging(data, player.getName() + " spending MOBILIZATION_VALUE");
-        }
-        int tributeAmount = jbgAiInterractLst.get(player.getName()).getTributeAmount();
-        if (tributeAmount > 0) {
-          notCareAboutCost = true;
-          leftToSpend += tributeAmount;
-          jbgAiInterractLst.get(player.getName()).addStockingAmount(tributeAmount);
-          jbgAiInterractLst.get(player.getName()).setTributeAmount(0);
-          doJBGEventMessaging(data, player.getName() + " spending tribute amount " + String.valueOf(tributeAmount));
-        }
+
+      if (this.iCapitolDangerLevel > 0) {
+        //after mobilization, the player will go out of defensive immediately by the end of this function 
+        notCareAboutCost = true;
+        int mobilizationRate = JBGConstants.CAPITOL_DANGER_LAND_MOBILIZATION_RATE;
+        if (this.iCapitolDangerLevel == JBGConstants.CAPITOL_DANGER_SEA) mobilizationRate = JBGConstants.CAPITOL_DANGER_SEA_MOBILIZATION_RATE;
+        int mobilizationValue = iMaxUnitCost * (this.iLastCapitolDangerCount * mobilizationRate);
+        leftToSpend += mobilizationValue;
+        jbgAiInterractLst.get(player.getName()).addStockingAmount(mobilizationValue);
+        doJBGEventMessaging(data, player.getName() + " spending MOBILIZATION_VALUE");
+      }
+      if (canTriggerMobilization(leftTerrs, leftFactories, landUnitCount, availPUs)) {
+        //after mobilization, the player will go out of defensive immediately by the end of this function 
+        notCareAboutCost = true;
+        leftToSpend += JBGConstants.MOBILIZATION_VALUE;
+        jbgAiInterractLst.get(player.getName()).addStockingAmount(JBGConstants.MOBILIZATION_VALUE);
+        doJBGEventMessaging(data, player.getName() + " spending MOBILIZATION_VALUE");
+      }
+      int tributeAmount = jbgAiInterractLst.get(player.getName()).getTributeAmount();
+      if (tributeAmount > 0) {
+        notCareAboutCost = true;
+        leftToSpend += tributeAmount;
+        jbgAiInterractLst.get(player.getName()).addStockingAmount(tributeAmount);
+        jbgAiInterractLst.get(player.getName()).setTributeAmount(0);
+        doJBGEventMessaging(data, player.getName() + " spending tribute amount " + String.valueOf(tributeAmount));
       }
 
       int originSpendingBudget = leftToSpend;
@@ -703,6 +827,7 @@ public abstract class AbstractJBGAi extends AbstractAi {
           i++;
         }
       }
+
 System.out.println("   leftTerrs: " + String.valueOf(leftTerrs) + " factories: " + String.valueOf(leftFactories) + " PUs: " + String.valueOf(leftToSpend));
 
       //get the rule of factory first, to force buying
@@ -712,6 +837,10 @@ System.out.println("   leftTerrs: " + String.valueOf(leftTerrs) + " factories: "
       int staticUnitCost = 0;
       ProductionRule airUnitRule = null;
       int airUnitCost = 0;
+      ProductionRule transportUnitRule = null;
+      int transportUnitCost = 0;
+      ProductionRule warshipUnitRule = null;
+      int warshipUnitCost = 0;
       for (final ProductionRule rule : rules) {
           final NamedAttachable resourceOrUnit = rule.getResults().keySet().iterator().next();
           if (!(resourceOrUnit instanceof UnitType)) {
@@ -732,6 +861,17 @@ System.out.println("   leftTerrs: " + String.valueOf(leftTerrs) + " factories: "
             airUnitRule = rule;
             airUnitCost = cost;
           }
+          else if (Matches.unitTypeIsSea().test(results)) {
+            if ( UnitAttachment.get(results).getTransportCapacity() > 0 ) {
+              transportUnitRule = rule;
+              transportUnitCost = cost;
+            }
+            else {
+              warshipUnitRule = rule;
+              warshipUnitCost = cost;
+            }
+          }
+
       }
       if (factoryRule == null) {
         this.playerDoesNotHasFactory = true;
@@ -749,23 +889,33 @@ System.out.println("Current transport units count: " + String.valueOf(transportC
       if (landUnitCount > JBGConstants.MIN_BUILD_LAND_UNITS) {
         //start balancing build
         if ((landUnitCount / 10) > airUnitCount) {
-  System.out.println("Forcing air buy!");
+System.out.println("Forcing air buy!");
           forceBuyAir = true;
         }
         else if ((landUnitCount / 10) > transportCount) {
 
           if (isAmphib) {
-            if (transportCount < JBGConstants.MIN_BUILD_AMPHIB_UNITS ) {
+            if (transportUnitRule != null && transportCount < JBGConstants.MIN_BUILD_AMPHIB_UNITS ) {
               //only buy amphib
-  System.out.println("Forcing amphib buy!");
               forceBuyAmphib = true;
+              //make sure at least some
+              int toBuyQty = leftToSpend / transportUnitCost;
+              if (toBuyQty > 0) {
+                  if (toBuyQty > JBGConstants.AMPHIB_FORCE_BUY_BLOCK) toBuyQty = JBGConstants.AMPHIB_FORCE_BUY_BLOCK;
+System.out.println("Forcing buy units: " + transportUnitRule.getName() + " qty: " + String.valueOf(toBuyQty));
+                  leftToSpend -= transportUnitCost * toBuyQty;
+                  purchase.add(transportUnitRule, toBuyQty);
+              }
             }
-            else {
-              //I don't want to check whether the player has sea or not,
-              //so I let it build amphib first, then fighting sea units
-              if (warshipUnitCount < JBGConstants.MIN_BUILD_FIGHTING_SEA_UNITS) {
-  System.out.println("Forcing warship buy!");
-                forceBuyWarship = true;
+            if (warshipUnitRule != null && warshipUnitCount < JBGConstants.MIN_BUILD_FIGHTING_SEA_UNITS) {
+              forceBuyWarship = true;
+              //make sure at least some
+              int toBuyQty = leftToSpend / warshipUnitCost;
+              if (toBuyQty > 0) {
+                  if (toBuyQty > JBGConstants.WARSHIP_FORCE_BUY_BLOCK) toBuyQty = JBGConstants.WARSHIP_FORCE_BUY_BLOCK;
+System.out.println("Forcing buy units: " + warshipUnitRule.getName() + " qty: " + String.valueOf(toBuyQty));
+                  leftToSpend -= warshipUnitCost * toBuyQty;
+                  purchase.add(warshipUnitRule, toBuyQty);
               }
             }
           }
@@ -777,16 +927,17 @@ System.out.println("Current transport units count: " + String.valueOf(transportC
 
       boolean alreadyBoughtFactoryThisTurn = false;
       boolean alreadyBoughtStaticThisTurn = false;
+
       int minCost = Integer.MAX_VALUE;
       int i = 0;
       while ((minCost == Integer.MAX_VALUE || leftToSpend >= minCost) && i < 100000) {
         i++;
         for (final ProductionRule rule : rules) {
-          /************************
-           * This rules list has factory at the end, 
-           * so if we want to buy factory we have to wait until the tail of list, 
-           * or we'll get the factoryRule first to use when needed
-           ************************/
+          //
+          // This rules list has factory at the end, 
+          // so if we want to buy factory we have to wait until the tail of list, 
+          // or we'll get the factoryRule first to use when needed
+          //
           final NamedAttachable resourceOrUnit = rule.getResults().keySet().iterator().next();
           if (!(resourceOrUnit instanceof UnitType)) {
             continue;
@@ -796,6 +947,36 @@ System.out.println("Current transport units count: " + String.valueOf(transportC
           final int cost = rule.getCosts().getInt(pus);
           if (cost < 1) {
             continue;
+          }
+
+          if (this.iCapitolDangerLevel > 0) {
+            //disable other "force" directive
+            alreadyBoughtFactoryThisTurn = true;
+            alreadyBoughtStaticThisTurn = true;
+            forceBuyWarship = false;
+            forceBuyAmphib = false;
+            forceBuyAir = false;
+            //
+            if (this.iCapitolDangerLevel == JBGConstants.CAPITOL_DANGER_LAND || this.iCapitolDangerLevel == JBGConstants.CAPITOL_DANGER_LOST) {
+              if (!Matches.unitTypeIsLand().test(results) && !Matches.unitTypeIsAir().test(results)) {
+                continue;
+              }
+            }
+            else if (this.iCapitolDangerLevel == JBGConstants.CAPITOL_DANGER_SEA) {
+              if (!Matches.unitTypeIsSea().test(results)) {
+                continue;
+              }
+            }
+
+            int toBuyQty = (leftToSpend / cost);
+            if (toBuyQty > 0) {
+              if (toBuyQty > JBGConstants.GENERAL_FORCE_BUY_BLOCK) toBuyQty = JBGConstants.GENERAL_FORCE_BUY_BLOCK;
+              leftToSpend -= cost * toBuyQty;
+              purchase.add(rule, toBuyQty);
+System.out.println("Forcing buy: " + rule.getName() + " qty: " + String.valueOf(toBuyQty));
+              continue;
+            }
+
           }
 
           if (Matches.unitTypeCanProduceUnits().test(results)) {
@@ -859,37 +1040,30 @@ System.out.println("   ... force buying static unit ");
             minCost = cost;
           }
 
-          final int transportCapacity = UnitAttachment.get(results).getTransportCapacity();
-          // buy transports if we can be amphibious
-
-          if (Matches.unitTypeIsSea().test(results)) {
+          if (Matches.unitTypeIsSea().test(results) && amphibRoute != null) {
+            final int transportCapacity = UnitAttachment.get(results).getTransportCapacity();
+            // buy transports if we can be amphibious
             if (transportCapacity > 0) {
 
-              if (forceBuyAmphib) {
-
-                  int goodNumberOfTransports = 0;
-                  final boolean isTransport = transportCapacity > 0;
-                  if (amphibRoute != null) {
-                    // 25% transports - can be more if frontier is far away
-                    goodNumberOfTransports = (landUnitCount / 4);
-                    // boost for transport production
-                    if (forceBuyAmphib || 
-                        (defUnitsAtAmpibRoute > goodNumberOfTransports
-                          && landUnitCount > defUnitsAtAmpibRoute
-                          && defUnitsAtAmpibRoute > transportCount
-                        )
-                      ) {
-                      final int transports = (leftToSpend / cost);
-                      if (transports > 0) {
-                        leftToSpend -= cost * transports;
-                        purchase.add(rule, transports);
-System.out.println("Forcing buy transport: " + rule.getName() + " qty: " + String.valueOf(transports));
-                        continue;
-                      }
-                    }
+                int goodNumberOfTransports = 0;
+                final boolean isTransport = transportCapacity > 0;
+                // 25% transports - can be more if frontier is far away
+                goodNumberOfTransports = (landUnitCount / 4);
+                // boost for transport production
+                if (forceBuyAmphib || 
+                    (defUnitsAtAmpibRoute > goodNumberOfTransports
+                      && landUnitCount > defUnitsAtAmpibRoute
+                      && defUnitsAtAmpibRoute > transportCount
+                    )
+                  ) {
+                  final int toBuyQty = (leftToSpend / cost);
+                  if (toBuyQty > 0) {
+                    leftToSpend -= cost * toBuyQty;
+                    purchase.add(rule, toBuyQty);
+System.out.println("Forcing buy transport: " + rule.getName() + " qty: " + String.valueOf(toBuyQty));
+                    continue;
                   }
-
-              }
+                }
 
             }
             else if (forceBuyWarship) {
@@ -901,7 +1075,7 @@ System.out.println("Forcing buy transport: " + rule.getName() + " qty: " + Strin
               if (toBuyQty > 0) {
                 leftToSpend -= cost * toBuyQty;
                 purchase.add(rule, toBuyQty);
-System.out.println("Forcing buy warship: " + rule.getName() + " qty: " + String.valueOf(toBuyQty));
+System.out.println("Forcing buy amphib/warship: " + rule.getName() + " qty: " + String.valueOf(toBuyQty));
                 continue;
               }
             }
@@ -919,7 +1093,8 @@ System.out.println("Forcing buy air units: " + rule.getName() + " qty: " + Strin
               }
             }
           }
-          else if (!forceBuyAir) {
+
+          if (!forceBuyAir && !forceBuyAmphib && !forceBuyWarship) {
               //other unit types
               int maxBuyQty = leftToSpend / cost;
               int toBuyQty = maxBuyQty;
@@ -979,7 +1154,7 @@ System.out.println("---> Skip buying, because player can't afford a factory ..."
       if (jbgAiInterractLst.get(player.getName()).isDefensiveStance()) {
         int playerStockAmount = jbgAiInterractLst.get(player.getName()).getStockingAmount() + spentAmount;
         doJBGEventMessaging(data, player.getName() + " added " + String.valueOf(spentAmount) + " point to total: " + playerStockAmount);
-        if (playerStockAmount < 100) {
+        if (playerStockAmount < JBGConstants.AI_MINIMUM_STOCKING_FOR_AGGRESSIVE) {
           jbgAiInterractLst.get(player.getName()).addStockingAmount(spentAmount);
         }
         else {
@@ -987,6 +1162,7 @@ System.out.println("---> Skip buying, because player can't afford a factory ..."
           jbgAiInterractLst.get(player.getName()).setDefensiveStance(false); //will reset incl. setStockingAmount(0)
         }
       }
+
   }
     //end JBG purchase
 
@@ -996,6 +1172,7 @@ System.out.println("---> Skip buying, because player can't afford a factory ..."
       final IAbstractPlaceDelegate placeDelegate,
       final GameData data,
       final GamePlayer player) {
+System.out.println("AI:place" + player.getName() + " start placing units ... ");
       doJBGEventMessaging(data, player.getName() + " start placing units ... ");
       //proPlace(bid, placeDelegate, data, player);
       simplePlace(bid, placeDelegate, data, player);
@@ -1034,13 +1211,48 @@ System.out.println("---> Skip buying, because player can't afford a factory ..."
         final IAbstractPlaceDelegate placeDelegate,
         final GameData data,
         final GamePlayer player) {
-      if (player.getUnitCollection().isEmpty()) {
-        return;
+
+      if (player.getUnitCollection().isEmpty()) return;
+      final @Nullable Territory capitol =
+          TerritoryAttachment.getFirstOwnedCapitalOrFirstUnownedCapital(player, data);
+
+      checkPlayerCapitolDangerLevel(player, data);
+
+System.out.println("Capitol danger level: " + String.valueOf(this.iCapitolDangerLevel));
+      if (this.iCapitolDangerLevel > 0 && notCareAboutCost) {
+System.out.println("    Placing units in danger");
+        if (capitol != null) {
+          if (this.iCapitolDangerLevel == JBGConstants.CAPITOL_DANGER_LAND) {
+            // place all in capitol, for sea, placeAllWeCanOn can choose neighbour sea to place
+System.out.println("    Placing land units in capital");
+            placeAllWeCanOn(data, capitol, placeDelegate, player);
+          }
+          else if (this.iCapitolDangerLevel == JBGConstants.CAPITOL_DANGER_SEA) {
+System.out.println("    Placing in capital danger (SEA) ");
+            //find sea neighbors with enemy to place, so AI will fight the threat immediately
+            final Set<Territory> capSeaNeighbors =
+                data.getMap().getNeighbors(capitol, Matches.territoryIsWater());
+            if (!capSeaNeighbors.isEmpty()) {
+              Territory seaPlaceAt = isNeighbourTerritoryDanger(data, player, capSeaNeighbors);
+              if (seaPlaceAt != null) {
+System.out.println("    Placing sea unit at enemy fleet " + seaPlaceAt.getName());
+                forcePlaceAllSeaUnitOn(data, seaPlaceAt, placeDelegate, player);
+              }
+              else {
+                //will choose any neighbor near capitol
+System.out.println("    Placing sea unit at capitol ");
+                placeAllWeCanOn(data, capitol, placeDelegate, player);
+              }
+            }
+
+          }
+          return;
+        }
       }
 
       //note that, doPlace may not always success, for example, we can place on a territory with a just placed factory
       //
-      List<String> territoriesBuildingFactory = new ArrayList<String>();
+      List<String> territoriesHasJustBuiltFactory = new ArrayList<String>();
 
       final List<Territory> allTerritories = new ArrayList<>(data.getMap().getTerritories());
       //find a territory without factory to place it
@@ -1054,7 +1266,7 @@ System.out.println("---> Skip buying, because player can't afford a factory ..."
 System.out.println("    Placing factory at " + t.getName());
             doPlace(t, toPlace, placeDelegate);
             increaseTerritoryProduction(t, JBGConstants.JBG_AI_INCREASE_PRODUCTION_BY_FACTORY);
-            territoriesBuildingFactory.add(t.getName());
+            territoriesHasJustBuiltFactory.add(t.getName());
           }
 
         }
@@ -1062,13 +1274,12 @@ System.out.println("    Placing factory at " + t.getName());
 
       //place units on non-capital territory first
       //static unit - factory is also static, but we have placed above
-      final @Nullable Territory capitol =
-          TerritoryAttachment.getFirstOwnedCapitalOrFirstUnownedCapital(player, data);
       final List<Territory> randomTerritories = new ArrayList<>(data.getMap().getTerritories());
       Collections.shuffle(randomTerritories);
 
       Collections.sort(randomTerritories, new TerritoryProductionComparator());
 
+      //factory and static
       //unitIsConstruction includes Factory, but we have place factory above
       final List<Unit> constructionUnits =
           new ArrayList<>(player.getUnitCollection().getMatches(Matches.unitIsConstruction()));
@@ -1125,7 +1336,7 @@ System.out.println("    Player has " + String.valueOf(airUnits.size()) + " air u
         for (final Territory t : randomTerritories) {
           if (t.getOwner().equals(player)
               && t.getUnitCollection().anyMatch(Matches.unitCanProduceUnits())
-              && !territoriesBuildingFactory.contains(t.getName()))
+              && !territoriesHasJustBuiltFactory.contains(t.getName()))
           {
             int iMaxPlace = getTerrProduction(t);
             int iPlaceMaxIndex = iAirUnitIndex + iMaxPlace;
@@ -1140,12 +1351,55 @@ System.out.println("    Placing " + String.valueOf(toPlace.size()) + " air unit 
           }
         }
       }
+
+      //sea units, put anywhere
+      final List<Unit> seaUnits =
+          new ArrayList<>(player.getUnitCollection().getMatches(Matches.unitIsSea()));
+      if (!seaUnits.isEmpty()) {
+System.out.println("simplePlace: Player has sea units!");
+        final Route amphibRoute = getAmphibRoute(player, data);
+        Territory seaPlaceAt = null;
+        if (amphibRoute != null) {
+          seaPlaceAt = amphibRoute.getAllTerritories().get(1);
+System.out.println("simplePlace: Player has sea territory to place: " + seaPlaceAt.getName());
+        }
+
+        if (seaPlaceAt != null) {
+          int iMaxPlace = getTerrProduction(seaPlaceAt);
+          final Collection<Unit> toPlace = seaUnits.subList(0, seaUnits.size());
+          if (toPlace.size() > 0) {
+System.out.println("    simplePlace: " + String.valueOf(toPlace.size()) + " sea unit at " + seaPlaceAt.getName());
+            doPlace(seaPlaceAt, toPlace, placeDelegate);
+          }
+        }
+      }
+
       //others
+      //first deploy to territory with no units
+      Territory lowestUnitCountTerr = null;
+      int lowestUnitCountInTerr = Integer.MAX_VALUE;
+      for (final Territory t : randomTerritories) {
+        if (t.getOwner().equals(player)
+            && t.getUnitCollection().anyMatch(Matches.unitCanProduceUnits())
+            && !territoriesHasJustBuiltFactory.contains(t.getName())
+          ) {
+            if (t.getUnitCollection().size() < lowestUnitCountInTerr) {
+              lowestUnitCountTerr = t;
+              lowestUnitCountInTerr = t.getUnitCollection().size();
+              if (lowestUnitCountInTerr < 1) break;
+            }
+        }
+      }
+      if (lowestUnitCountTerr != null) {
+System.out.println("place units to lowest unit territory: " + lowestUnitCountTerr.getName());
+        placeAllWeCanOn(data, lowestUnitCountTerr, placeDelegate, player);
+      }
+      //then place randomly, if still avail
       for (final Territory t : randomTerritories) {
         if (!t.equals(capitol)
             && t.getOwner().equals(player)
             && t.getUnitCollection().anyMatch(Matches.unitCanProduceUnits())
-            && !territoriesBuildingFactory.contains(t.getName())
+            && !territoriesHasJustBuiltFactory.contains(t.getName())
             ) {
           placeAllWeCanOn(data, t, placeDelegate, player);
         }
@@ -1241,6 +1495,48 @@ System.out.println("    placeAllWeCanOn " + String.valueOf(toPlace.size()) + " a
         final Territory where, final Collection<Unit> toPlace, final IAbstractPlaceDelegate del) {
       del.placeUnits(new ArrayList<>(toPlace), where, IAbstractPlaceDelegate.BidMode.NOT_BID);
       movePause();
+    }
+
+    private void forcePlaceAllSeaUnitOn(
+        final GameData data,
+        final Territory placeAt,
+        final IAbstractPlaceDelegate placeDelegate,
+        final GamePlayer player) {
+      final PlaceableUnits pu = placeDelegate.getPlaceableUnits(player.getUnits(), placeAt);
+      if (pu.getErrorMessage() != null) {
+        return;
+      }
+      int placementLeft = pu.getMaxUnits();
+      if (notCareAboutCost) {
+        placementLeft = JBGConstants.MOBILIZATION_VALUE;
+      }
+      if (placementLeft == -1) {
+        placementLeft = Integer.MAX_VALUE;
+      }
+
+      if (notCareAboutCost) {
+        final Unit costRuleUnit = new Unit(new UnitType(JBGConstants.JBG_NO_COST_CARE_RULE, data), player, data);
+        List<Unit> costRules = new ArrayList<Unit>();
+        costRules.add(costRuleUnit);
+        doPlace(null, costRules, placeDelegate);
+System.out.println("    forcePlaceAllSeaUnitOn JBG_NO_COST_CARE_RULE");
+      }
+
+      final List<Unit> seaUnits =
+          new ArrayList<>(player.getUnitCollection().getMatches(Matches.unitIsSea()));
+      if (!seaUnits.isEmpty()) {
+          final Collection<Unit> toPlace = seaUnits.subList(0, seaUnits.size());
+          if (toPlace.size() > 0) {
+System.out.println("    forcePlaceAllSeaUnitOn " + String.valueOf(toPlace.size()) + " sea unit at " + placeAt.getName());
+            doPlace(placeAt, toPlace, placeDelegate);
+          }
+      }
+
+      if (notCareAboutCost) {
+        //turn it off after placing
+        notCareAboutCost = false;
+      }
+
     }
   // end JBG place
 

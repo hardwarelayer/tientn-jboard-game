@@ -20,6 +20,7 @@ public class JBGAnalyzableTurnEntry {
 
   @Getter @Setter private String player;
 
+  @Getter private boolean justMobilization = false;
   private List<JBGBattleSimpleEvent> lstBattles = null;
   private List<JBGMove> lstCombatMoves = null;
   private List<JBGPlace> lstPlaces =  null;
@@ -54,7 +55,15 @@ public class JBGAnalyzableTurnEntry {
   }
 
   public void addPurchase(final String p) {
-    lstPurchases.add(p);
+    String tmpStr = null;
+    if (p.contains(JBGConstants.HI_TAG_MOBILIZATION_COST)) {
+      tmpStr = p.replace(JBGConstants.HI_TAG_MOBILIZATION_COST, "");
+      this.justMobilization = true;
+    }
+    else {
+      tmpStr = p;
+    }
+    lstPurchases.add(tmpStr);
   }
 
   public boolean isPlayer(final String p) {
@@ -184,7 +193,8 @@ public class JBGAnalyzableTurnEntry {
         }
         else {
           if (isAirforceOnly)
-            sb.append(player + " bombed " + regionName + " of " + battleEvent.getDefender());
+            sb.append(JBGConstants.JBGTURN_NEWS_AIROP_IMG)
+              .append(player + " bombed " + regionName + " of " + battleEvent.getDefender());
           else
             sb.append("Failed to capture " + regionName + " from " + battleEvent.getDefender());
         }

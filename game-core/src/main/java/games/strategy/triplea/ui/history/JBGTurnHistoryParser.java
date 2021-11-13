@@ -106,7 +106,6 @@ public class JBGTurnHistoryParser {
     StringBuilder sb = new StringBuilder();
     StringBuilder sbDetailedNews = new StringBuilder();
     for (JBGAnalyzableTurnEntry e: lst) {
-
       if (isLastTurn) {
         if (posType == JBGConstants.TURN_SEQ_FIRST || posType == JBGConstants.TURN_SEQ_LAST) {
           sb.append(e.writeBattlesHeadlines(false) + "\n\n");
@@ -117,7 +116,8 @@ public class JBGTurnHistoryParser {
             sb.append(e.writeBattlesHeadlines(false) + "\n\n");
             sbDetailedNews.append(e.toStringWithBasicNews() + "\n");
           }
-        }        
+        }
+
       }
       else {
         sb.append(e.writeBattlesHeadlines(false) + "\n\n");
@@ -171,14 +171,40 @@ public class JBGTurnHistoryParser {
     }
   }
 
+  private String writeMobilizationHeadlines(List<String> lst) {
+    StringBuilder sb = new StringBuilder();
+    sb.append("<br><p><center>")
+      .append("<img src='" + JBGConstants.JBGTURN_NEWS_MOBILIZATION_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>")
+      .append("<span class=\"headline\">")
+      .append(String. join(",", lst))
+      .append(": mobilized population for defending the " + ((lst.size()==1)?"nation!":"nations!!!"))
+      .append("</span></center></p>");
+    return sb.toString();
+  }
+
+  private String addImageToBasicNews(String news) {
+    if (news.contains(JBGConstants.JBGTURN_NEWS_AIROP_IMG)) {
+      news = news.replace(JBGConstants.JBGTURN_NEWS_AIROP_IMG, 
+        "<img src='" + JBGConstants.JBGTURN_NEWS_AIROP_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>"
+        );
+    }
+    return news;
+  }
+
   public String parseHTML(final GameData data, final boolean isLastTurn, final int posType, final List<String> excludePlayers) {
     Collection<GamePlayer> playersAllowed = data.getPlayerList().getPlayers();
     List<JBGAnalyzableTurnEntry> lst = parseFullTurn(data, true, playersAllowed);
+
+    List<String> mobilizationPlayerList = new ArrayList<String>();
 
     StringBuilder sb = new StringBuilder();
     StringBuilder sbDetailedNews = new StringBuilder();
     sb.append("<p>");
     for (JBGAnalyzableTurnEntry e: lst) {
+
+      if (e.isJustMobilization() && !mobilizationPlayerList.contains(e.getPlayer())) {
+        mobilizationPlayerList.add(e.getPlayer());
+      }
 
       if (isLastTurn) {
         if (posType == JBGConstants.TURN_SEQ_FIRST || posType == JBGConstants.TURN_SEQ_LAST) {
@@ -194,7 +220,7 @@ public class JBGTurnHistoryParser {
             for (String ln: lstHeadlines) {
               addHeadline(ln, sb);
             }
-            sbDetailedNews.append(e.toHTMLWithBasicNews());
+            sbDetailedNews.append(addImageToBasicNews(e.toHTMLWithBasicNews()));
           }
         }        
       }
@@ -203,13 +229,20 @@ public class JBGTurnHistoryParser {
         for (String ln: lstHeadlines) {
           addHeadline(ln, sb);
         }
+
         sbDetailedNews.append(e.toHTMLWithBasicNews());
       }
 
     }
     sb.append("</p><br/>"); //class row
 
-    sb.append("<center><span class=\"headline-detail\">Detailed News from our frontline correspondences</span></center>" + sbDetailedNews.toString());
+    StringBuilder mobilizationNews = new StringBuilder();
+    if (mobilizationPlayerList.size() > 0) 
+      mobilizationNews.append(writeMobilizationHeadlines(mobilizationPlayerList) + "<br><br>");
+
+    sb.append("<center><span class=\"headline-detail\">Detailed News from our frontline correspondences</span></center>")
+      .append(mobilizationNews.toString())
+      .append(sbDetailedNews.toString());
     return sb.toString();
   }
 
@@ -341,9 +374,11 @@ public class JBGTurnHistoryParser {
       item = null;
     }
 
+    /*
     for (JBGAnalyzableTurnEntry e: lstEntries) {
-      //System.out.println(e.toString());
+      System.out.println(e.toString());
     }
+    */
 
     return lstEntries;
   }
@@ -538,8 +573,8 @@ public class JBGTurnHistoryParser {
         );
     }
 
-    if (sb.toString().length() < 1)
-      System.out.println(title);
+if (sb.toString().length() < 1) System.out.println("Empty move history event: "+title);
+
     return sb.toString();
 
   }
@@ -592,8 +627,9 @@ public class JBGTurnHistoryParser {
     return JBGConstants.HI_TAG_BATTLE_REMM;
   }
 
+  //I put this here, not in beginning of class because it easier to merge new tripleA code, if needed
+  //same reason for getMobilizationPlayerList(), not use Getter tag
   private List<JBGTurnLogItem> turnLogs = new ArrayList<>();
-
   private boolean saveBlockText(final String blockName, final String playerId, final String txtVal) {
     final String plName = playerId; //extractSecondWord(playerId, ":", "PlayerId named");
     if (plName.length() < 1)
@@ -770,8 +806,10 @@ public class JBGTurnHistoryParser {
                     || title.matches("\\w+ attack with .*")
                     || title.matches("\\w+ defend with .*")) {
 
-                  if (title.contains("buy"))
-                    saveBlockText(JBGConstants.HI_PURCHASE_TITLE, parsingPlayerName, title.substring(title.indexOf(JBGConstants.HI_PURCHASE_PATT)+JBGConstants.HI_PURCHASE_PATT.length()));
+                  if (title.contains("buy")) {
+                    saveBlockText(JBGConstants.HI_PURCHASE_TITLE, 
+                      parsingPlayerName, title.substring(title.indexOf(JBGConstants.HI_PURCHASE_PATT)+JBGConstants.HI_PURCHASE_PATT.length()));
+                  }
                   else {
 
                     String tmpStr = "", curMovePlayer = "", sTag = "";
@@ -898,7 +936,7 @@ stringBuilder.append(" -- This is unhandled1 --\n");
               // empty collection of something
               if (title.matches("\\w+ win")) {
                 conquerStr = new StringBuilder(title + conquerStr + " with no units remaining");
-saveBlockText(JBGConstants.HI_BATTLE_TITLE, parsingPlayerName, conquerStr.toString());
+                saveBlockText(JBGConstants.HI_BATTLE_TITLE, parsingPlayerName, conquerStr.toString());
               } else {
                 // empty collection of unhandled objects
 stringBuilder.append(" -- This is unhandled2 --\n");

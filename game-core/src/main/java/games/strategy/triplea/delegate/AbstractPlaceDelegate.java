@@ -194,13 +194,17 @@ public abstract class AbstractPlaceDelegate extends BaseTripleADelegate
     //JBG settings via a special UnitType
     if (at == null) {
       final List<Unit> tmpUnitsList = new ArrayList<>(units);
-      if (tmpUnitsList.size() == 1) {
-        final Unit tmpUnit = tmpUnitsList.get(0);
-        if (tmpUnit.toStringNoOwner().equals( JBGConstants.JBG_NO_COST_CARE_RULE )) {
-          //received the special rule, set flag and return immediately
-          notCareAboutCost = true;
-          return null;
+      boolean hasNormalUnit = false;
+      for (Unit unit: tmpUnitsList) {
+        if (!unit.toStringNoOwner().equals( JBGConstants.JBG_NO_COST_CARE_RULE )) {
+          hasNormalUnit = true;
+          break;
         }
+      }
+      if (!hasNormalUnit) {
+        //received the special rule, set flag and return immediately
+        notCareAboutCost = true;
+        return null;
       }
     }
     //

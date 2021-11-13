@@ -381,6 +381,8 @@ Still keep the folder of engine 2.3 before changed in:
 
     29. On mouse over territory information on the right panel (owner, units)
 
+    [Done] 30. AI will start mobilization when enemy approach sea or land neighbour of it's capitol, and deploy land unit in capitol, or start sea battle. 
+
 ------------------
 
 ## License
