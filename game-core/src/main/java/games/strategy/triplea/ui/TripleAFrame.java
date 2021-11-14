@@ -299,6 +299,33 @@ public final class TripleAFrame extends JFrame implements QuitHandler {
                   0,
                   0));
 
+          //JBG part for showing territory owner
+          String ownerName = "";
+          if (territoryLastEntered.getOwner() != null) {
+            ownerName = territoryLastEntered.getOwner().getName();
+            if (ownerName != null) {
+              final JLabel territoryOwnerLabel = new JLabel(" owned by " + ownerName);
+
+              //territoryOwnerLabel.setFont(
+                //territoryOwnerLabel.getFont().deriveFont(Map.of(TextAttribute.WEIGHT, TextAttribute.WEIGHT_BOLD)));
+              territoryInfo.add(
+                  territoryOwnerLabel,
+                  new GridBagConstraints(
+                      count++,
+                      0,
+                      1,
+                      1,
+                      0,
+                      0,
+                      GridBagConstraints.WEST,
+                      GridBagConstraints.NONE,
+                      new Insets(0, 0, 0, 0),
+                      0,
+                      0));
+            }
+          }
+          //end of JBG part for showing territory owner
+
           if (territoryEffectText.length() > 0) {
             territoryEffectText.setLength(territoryEffectText.length() - 2);
             final JLabel territoryEffectTextLabel = new JLabel();
