@@ -415,6 +415,14 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 See the GNU General Public License below for more details.
 
+## Demo map:
+
+Currently I use the TripleA's map "THE RISING SUN Game" "Design by Sieg"
+
+I will create my own map soon.
+
+So the credit of the current demo map and units images belong to Sieg.
+
 #### Additional permission under GNU GPL version 3 section 7
 
 If you modify this Program, or any covered work, by linking or combining it with any
