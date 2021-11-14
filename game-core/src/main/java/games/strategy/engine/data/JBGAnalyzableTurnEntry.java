@@ -128,6 +128,7 @@ public class JBGAnalyzableTurnEntry {
   }
 
   private boolean isAirUnit(final String s) {
+    if (s == null) return false;
     String sl = s.toLowerCase();
     if (sl.indexOf("fighter") >= 0 || 
       sl.indexOf("bomber") >= 0 ||
