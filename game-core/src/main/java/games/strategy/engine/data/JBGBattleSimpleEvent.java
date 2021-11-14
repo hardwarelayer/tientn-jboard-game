@@ -27,6 +27,7 @@ public class JBGBattleSimpleEvent implements Comparable<JBGBattleSimpleEvent> {
   @Getter @Setter private String defenderCasualties;
   @Getter @Setter private Integer score;
   @Getter @Setter private int rounds;
+  @Getter @Setter private boolean seaBattle;
   @Getter private boolean moveTaken;
 
   public JBGBattleSimpleEvent(final String loc) {
@@ -47,6 +48,8 @@ public class JBGBattleSimpleEvent implements Comparable<JBGBattleSimpleEvent> {
     score = 0;
     rounds = 0;
     moveTaken = false;
+
+    seaBattle = false;
   }
 
   @Override

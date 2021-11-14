@@ -5,3 +5,8 @@ cp ../j_swing_tile_set/jbg_turnnews_banner.png game-headed/jbg/assets/turnnews/t
 cp ../j_swing_tile_set/jbg_turnnews_bkgnd.png game-headed/jbg/assets/turnnews/turnnews_bkgnd.png
 cp ../j_swing_tile_set/jbg_mobilization.png game-headed/jbg/assets/turnnews/jbg_mobilization.png
 cp ../j_swing_tile_set/jbg_airop.png game-headed/jbg/assets/turnnews/jbg_airop.png
+cp ../j_swing_tile_set/jbg_airbomb.png game-headed/jbg/assets/turnnews/jbg_airbomb.png
+cp ../j_swing_tile_set/jbg_seaop.png game-headed/jbg/assets/turnnews/jbg_seaop.png
+cp ../j_swing_tile_set/jbg_seaop_failure.png game-headed/jbg/assets/turnnews/jbg_seaop_failure.png
+cp ../j_swing_tile_set/jbg_sea_airop.png game-headed/jbg/assets/turnnews/jbg_sea_airop.png
+cp ../j_swing_tile_set/jbg_sea_airbomb.png game-headed/jbg/assets/turnnews/jbg_sea_airbomb.png

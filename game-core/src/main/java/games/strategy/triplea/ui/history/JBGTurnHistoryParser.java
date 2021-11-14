@@ -95,11 +95,26 @@ import games.strategy.triplea.ui.UiContext;
 public class JBGTurnHistoryParser {
   private static final long serialVersionUID = 4880602702815333376L;
   private final StringBuilder stringBuilder = new StringBuilder();
+  private Collection<Territory> territories = null;
 
   public JBGTurnHistoryParser() {
   }
 
+  private void loadTerritories(GameData data) {
+    if (territories == null) {
+      data.acquireReadLock();
+      try {
+        territories = data.getMap().getTerritories();
+      } finally {
+        data.releaseReadLock();
+      }
+    }
+  }
+
   public String parse(final GameData data, final boolean isLastTurn, final int posType, final List<String> excludePlayers) {
+
+    loadTerritories(data);
+
     Collection<GamePlayer> playersAllowed = data.getPlayerList().getPlayers();
     List<JBGAnalyzableTurnEntry> lst = parseFullTurn(data, true, playersAllowed);
 
@@ -130,6 +145,9 @@ public class JBGTurnHistoryParser {
   }
 
   public String parseSinglePlayerTurn(final GameData data, final boolean isLastTurn, final int posType, final String playerName) {
+
+    loadTerritories(data);
+
     Collection<GamePlayer> playersAllowed = new ArrayList<GamePlayer>();
     playersAllowed.add(data.getPlayerList().getPlayerId(playerName));
     List<JBGAnalyzableTurnEntry> lst = parseFullTurn(data, true, playersAllowed);
@@ -182,16 +200,10 @@ public class JBGTurnHistoryParser {
     return sb.toString();
   }
 
-  private String addImageToBasicNews(String news) {
-    if (news.contains(JBGConstants.JBGTURN_NEWS_AIROP_IMG)) {
-      news = news.replace(JBGConstants.JBGTURN_NEWS_AIROP_IMG, 
-        "<img src='" + JBGConstants.JBGTURN_NEWS_AIROP_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>"
-        );
-    }
-    return news;
-  }
-
   public String parseHTML(final GameData data, final boolean isLastTurn, final int posType, final List<String> excludePlayers) {
+
+    loadTerritories(data);
+
     Collection<GamePlayer> playersAllowed = data.getPlayerList().getPlayers();
     List<JBGAnalyzableTurnEntry> lst = parseFullTurn(data, true, playersAllowed);
 
@@ -220,7 +232,7 @@ public class JBGTurnHistoryParser {
             for (String ln: lstHeadlines) {
               addHeadline(ln, sb);
             }
-            sbDetailedNews.append(addImageToBasicNews(e.toHTMLWithBasicNews()));
+            sbDetailedNews.append(e.toHTMLWithBasicNews());
           }
         }        
       }
@@ -247,6 +259,8 @@ public class JBGTurnHistoryParser {
   }
 
   public String parseHTMLSinglePlayerTurn(final GameData data, final boolean isLastTurn, final int posType, final String playerName) {
+    loadTerritories(data);
+
     Collection<GamePlayer> playersAllowed = new ArrayList<GamePlayer>();
     playersAllowed.add(data.getPlayerList().getPlayerId(playerName));
     List<JBGAnalyzableTurnEntry> lst = parseFullTurn(data, true, playersAllowed);
@@ -300,6 +314,16 @@ public class JBGTurnHistoryParser {
     stringBuilder.setLength(0);
   }
 
+  private boolean isTerritorySeaZone(final String s) {
+    if (territories == null) return false;
+    for (Territory t: territories) {
+      if (t.getName().equals(s)) {
+        return Matches.territoryIsWater().test(t);
+      }
+    }
+    return false;
+  }
+
   /**
    * Adds details about the current turn for each player in {@code playersAllowed} to the log.
    * Information about each step and event that occurred during the turn are included.
@@ -347,10 +371,12 @@ public class JBGTurnHistoryParser {
       log.severe("No step node found in!");
     }
 
-    //System.out.println("----------------------------------------Verbose entries----------------------------------------");
+    /*
+    System.out.println("----------------------------------------Verbose entries----------------------------------------");
     for (JBGTurnLogItem item: turnLogs) {
-      //System.out.println(item.toString());
+      System.out.println(item.toString());
     }
+    */
     //System.out.println("----------------------------------------Build simple entries----------------------------------------");
     List<JBGAnalyzableTurnEntry> lstEntries = new ArrayList<>();
     for (JBGTurnLogItem item: turnLogs) {
@@ -434,6 +460,11 @@ public class JBGTurnHistoryParser {
           if (e != null)
             entry.addBattle(e);
           e = new JBGBattleSimpleEvent(line);
+          final String location = e.getLocation();
+          if (isTerritorySeaZone(location)) {
+System.out.println("Sea battles: " + location);
+            e.setSeaBattle(true);
+          }
         }
         else if (e != null)
           e.processLine(line);
@@ -1080,26 +1111,21 @@ stringBuilder.append(" -- This is unknown detail 4 --\n");
    * summary includes each unit present in the territory.
    */
   public void printTerritorySummary(final HistoryNode printNode, final GameData data) {
-    final Collection<Territory> territories;
     final GamePlayer player = getPlayerId(printNode);
-    data.acquireReadLock();
-    try {
-      territories = data.getMap().getTerritories();
-    } finally {
-      data.releaseReadLock();
-    }
+    if (territories == null) return;
     final Collection<GamePlayer> players = new HashSet<>();
     players.add(player);
     printTerritorySummary(players, territories);
   }
 
   private void printTerritorySummary(final GameData data) {
-    final Collection<Territory> territories;
     final GamePlayer player;
+
+    if (territories == null) return;
+
     data.acquireReadLock();
     try {
       player = data.getSequence().getStep().getPlayerId();
-      territories = data.getMap().getTerritories();
     } finally {
       data.releaseReadLock();
     }

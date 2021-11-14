@@ -1,8 +1,20 @@
-## TienTN JBoard Game: War of the words
+## The Pacific - Raise of the South-East Asian countries
 
-![image](https://user-images.githubusercontent.com/20723609/117677335-91142180-b1d8-11eb-9859-8c3f8891e5e1.png)
+### Original project name: TienTN JBoard Game
 
-![image](https://user-images.githubusercontent.com/20723609/117690774-6a101c80-b1e5-11eb-8beb-2dd0782cbe46.png)
+This is a historic simulation turn-based strategy war game:
+
+![image](https://raw.githubusercontent.com/hardwarelayer/my_public_images/main/images/jboard_intro_map.png)
+
+![image](https://raw.githubusercontent.com/hardwarelayer/my_public_images/main/images/jboard_intro_map2.png)
+
+![image](https://raw.githubusercontent.com/hardwarelayer/my_public_images/main/images/jboard_intro_city.png)
+
+![image](https://raw.githubusercontent.com/hardwarelayer/my_public_images/main/images/jboard_intro_progress.png)
+
+![image](https://raw.githubusercontent.com/hardwarelayer/my_public_images/main/images/jboard_intro_newspaper1.png)
+
+![image](https://raw.githubusercontent.com/hardwarelayer/my_public_images/main/images/jboard_intro_newspaper2.png)
 
 Since I have played a lot of historic simulation series ... But they are over complicated
 
@@ -10,7 +22,7 @@ The other games are too simple ...
 
 ... so I think it's time to craft a game of my imagination.
 
-A turn based strategy war game:
+This game is:
 
 -Made for desktop
 
@@ -36,12 +48,14 @@ This game used the infamous TripleA engine, but being customized heavily by me.
 
 This game also serves my AI learning process: rules based, predictive analytics, desision making.
 
+I plan to focus on the Asia-Pacific theater. But because the TripleA engine, we can make any theater of operation for the game.
+
 Features
 ---------------
 
 ### Notes:
 
-World war game between Axis and Allies, with 'territory building', 'city building'. A special jCoin monetary unit, for human player to build bases, and tribute to allies and opponent's AI. It can be base of a new trading / financial system in game, later.
+World war game like Axis and Allies, with 'territory building', 'city building'. A special jCoin monetary unit, for human player to build bases, and tribute to allies and opponent's AI. It can be base of a new trading / financial system in game, later.
 
 On map event feature which make war battles have more visibility on map.
 
@@ -56,6 +70,7 @@ Other feature: Foreign language learning while playing to gain jCoin. And other 
 Have fun with the game :)
 
 ### Updates:
+
 My edition current version: 0.35
 
 I will try to make this game still compatible with the base TripleA, for any updates.

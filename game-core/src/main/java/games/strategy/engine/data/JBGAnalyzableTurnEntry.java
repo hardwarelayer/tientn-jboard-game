@@ -156,6 +156,7 @@ public class JBGAnalyzableTurnEntry {
 
       String lineBreak = isHtml?"<br/>":"\n";
       String regionName = battleEvent.getLocation();
+      boolean bIsSeaBattle = battleEvent.isSeaBattle();
       boolean bIsPlayerVictory = false;
       boolean bIsAttackerWon = false;
       boolean bIsPlayerAttack = false;
@@ -176,27 +177,46 @@ public class JBGAnalyzableTurnEntry {
       sb.append("<u>");
       if (bIsPlayerVictory) {
         if (bIsAttackerWon) {
-          if (isAirforceOnly)
+          if (isAirforceOnly) {
             //use combined air operation here because sometime it's wrong for OP with air cover (may be on load game), not AO
             //so use this to make it usable for both case
+            if (!bIsSeaBattle)
+              sb.append(JBGConstants.JBGTURN_NEWS_AIROP_IMG);
+            else
+              sb.append(JBGConstants.JBGTURN_NEWS_SEA_AIROP_IMG);
+
             sb.append("Combined air operation over " + battleEvent.getDefender() + " in " + regionName);
-          else
+          }
+          else {
+            if (bIsSeaBattle)
+              sb.append(JBGConstants.JBGTURN_NEWS_SEAOP_VICTORY_IMG);
             sb.append("Victory over " + battleEvent.getDefender() + " in " + regionName);
+          }
         }
         else {
+          if (bIsSeaBattle)
+            sb.append(JBGConstants.JBGTURN_NEWS_SEAOP_VICTORY_IMG);
           sb.append("Successfully defended " + regionName + " against " + battleEvent.getAttacker());
         }
       }
       else {
+        //not a player victory, another player attacks this player
         if (bIsAttackerWon) {
           sb.append("Lost " + regionName + " to " + battleEvent.getAttacker());
         }
         else {
-          if (isAirforceOnly)
-            sb.append(JBGConstants.JBGTURN_NEWS_AIROP_IMG)
-              .append(player + " bombed " + regionName + " of " + battleEvent.getDefender());
-          else
+          if (isAirforceOnly) {
+            if (!bIsSeaBattle)
+              sb.append(JBGConstants.JBGTURN_NEWS_AIRBOMB_IMG);
+            else 
+              sb.append(JBGConstants.JBGTURN_NEWS_SEA_AIRBOMB_IMG);
+            sb.append(player + " bombed " + regionName + " of " + battleEvent.getDefender());
+          }
+          else {
+            if (bIsSeaBattle)
+              sb.append(JBGConstants.JBGTURN_NEWS_SEAOP_FAILURE_IMG);
             sb.append("Failed to capture " + regionName + " from " + battleEvent.getDefender());
+          }
         }
       }
       sb.append("</u>");
@@ -302,7 +322,7 @@ public class JBGAnalyzableTurnEntry {
       int iRounds = battleEvent.getRounds();
       if (!isAirforceOnly) {
         if (iRounds < 2) {
-          sb.append("In a swift movement, ");
+          sb.append("In a blitz movement, ");
         }
         else if (iRounds < 4) {
           sb.append("After a week of moderate clashes, ");
@@ -327,7 +347,10 @@ public class JBGAnalyzableTurnEntry {
       if (iScore < 1) {
         if (battleEvent.isAttackerWon()) {
           if (battleEvent.getAttackerCasualties().length() > 2)
-            sb.append(player + " got a pyrrhic victory. ");
+            if (iRounds < 2)
+              sb.append(player + " quickly seized the territory. ");
+            else
+              sb.append(player + " got a pyrrhic victory. ");
           else
             sb.append(player + " annexed the territory. ");          
         }
@@ -742,8 +765,42 @@ public class JBGAnalyzableTurnEntry {
     sb.append(writePlacesContent());
     sb.append("</p");
 
-    return sb.toString();
+    return addImageToBasicNews(sb.toString());
 
+  }
+
+  private String addImageToBasicNews(String news) {
+    if (news.contains(JBGConstants.JBGTURN_NEWS_AIROP_IMG)) {
+      news = news.replace(JBGConstants.JBGTURN_NEWS_AIROP_IMG, 
+        "<img src='" + JBGConstants.JBGTURN_NEWS_AIROP_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>"
+        );
+    }
+    if (news.contains(JBGConstants.JBGTURN_NEWS_AIRBOMB_IMG)) {
+      news = news.replace(JBGConstants.JBGTURN_NEWS_AIRBOMB_IMG, 
+        "<img src='" + JBGConstants.JBGTURN_NEWS_AIRBOMB_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>"
+        );
+    }
+    if (news.contains(JBGConstants.JBGTURN_NEWS_SEA_AIROP_IMG)) {
+      news = news.replace(JBGConstants.JBGTURN_NEWS_SEA_AIROP_IMG, 
+        "<img src='" + JBGConstants.JBGTURN_NEWS_SEA_AIROP_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>"
+        );
+    }
+    if (news.contains(JBGConstants.JBGTURN_NEWS_SEA_AIRBOMB_IMG)) {
+      news = news.replace(JBGConstants.JBGTURN_NEWS_SEA_AIRBOMB_IMG, 
+        "<img src='" + JBGConstants.JBGTURN_NEWS_SEA_AIRBOMB_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>"
+        );
+    }
+    if (news.contains(JBGConstants.JBGTURN_NEWS_SEAOP_VICTORY_IMG)) {
+      news = news.replace(JBGConstants.JBGTURN_NEWS_SEAOP_VICTORY_IMG, 
+        "<img src='" + JBGConstants.JBGTURN_NEWS_SEAOP_VICTORY_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>"
+        );
+    }
+    if (news.contains(JBGConstants.JBGTURN_NEWS_SEAOP_FAILURE_IMG)) {
+      news = news.replace(JBGConstants.JBGTURN_NEWS_SEAOP_FAILURE_IMG, 
+        "<img src='" + JBGConstants.JBGTURN_NEWS_SEAOP_FAILURE_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>"
+        );
+    }
+    return news;
   }
 
   public String toStringWithBasicNews() {

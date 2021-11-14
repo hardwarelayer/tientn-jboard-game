@@ -244,9 +244,18 @@ public interface JBGConstants {
   static final String JBGTURN_NEWS_SMALLATTACK_PREFIX = "JTN_SMALL_ATTK_PREFX";
   static final String JBGTURN_NEWS_PAPER_NAME = "Tien's World War Edition";
   static final String JBGTURN_NEWS_AIROP_IMG = "@TURNNEWS_AIROP";
+  static final String JBGTURN_NEWS_SEA_AIROP_IMG = "@TURNNEWS_SEAAIROP";
+  static final String JBGTURN_NEWS_AIRBOMB_IMG = "@TURNNEWS_AIRBOMB";
+  static final String JBGTURN_NEWS_SEA_AIRBOMB_IMG = "@TURNNEWS_SEABOMB";
+  static final String JBGTURN_NEWS_SEAOP_VICTORY_IMG = "@TURNNEWS_VIC_SEAOP";
+  static final String JBGTURN_NEWS_SEAOP_FAILURE_IMG = "@TURNNEWS_FAIL_SEAOP";
   static final String JBGTURN_NEWS_MOBILIZATION_IMG_URL = "file:jbg/assets/turnnews/jbg_mobilization.png";
   static final String JBGTURN_NEWS_AIROP_IMG_URL = "file:jbg/assets/turnnews/jbg_airop.png";
-
+  static final String JBGTURN_NEWS_AIRBOMB_IMG_URL = "file:jbg/assets/turnnews/jbg_airbomb.png";
+  static final String JBGTURN_NEWS_SEA_AIROP_IMG_URL = "file:jbg/assets/turnnews/jbg_sea_airop.png";
+  static final String JBGTURN_NEWS_SEA_AIRBOMB_IMG_URL = "file:jbg/assets/turnnews/jbg_sea_airbomb.png";
+  static final String JBGTURN_NEWS_SEAOP_VICTORY_IMG_URL = "file:jbg/assets/turnnews/jbg_seaop.png";
+  static final String JBGTURN_NEWS_SEAOP_FAILURE_IMG_URL = "file:jbg/assets/turnnews/jbg_seaop_failure.png";
 
   //JBG
   static final String JBG_NO_COST_CARE_RULE = "JBG_NO_COST_CARE";
