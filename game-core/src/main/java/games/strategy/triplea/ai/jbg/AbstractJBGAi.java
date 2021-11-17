@@ -82,8 +82,6 @@ import games.strategy.triplea.delegate.AbstractPlaceDelegate;
 import games.strategy.engine.data.JBGConstants;
 
 //
-
-
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -196,56 +194,24 @@ public abstract class AbstractJBGAi extends AbstractAi {
 
     doJBGEventMessaging(data, "Start moving ...");
 
-    Map<String, JBGGamePlayerExtInfo> jbgAiInterractLst = data.getJBGAiInterracts();
-
-    if (!jbgAiInterractLst.containsKey(player.getName())) {
-      JBGGamePlayerExtInfo exInfo = new JBGGamePlayerExtInfo(player.getName());
-      jbgAiInterractLst.put(player.getName(), exInfo);
-    }
-
-   //force aggressive
-    //jbgAiInterractLst.get(player.getName()).setStockingTurnCount(10);
-    //jbgAiInterractLst.get(player.getName()).setDefensiveStance(true);
     checkPlayerCapitolDangerLevel(player, data);
 
     if (nonCombat) {
-      if (lastCombatTimeBySeconds >= 30 && !jbgAiInterractLst.get(player.getName()).isDefensiveStance())
+      if (lastCombatTimeBySeconds >= 30)
         simpleDoNonCombatMove(moveDel, player, data);
       else
         nonCombatMoveAi.doNonCombatMove(storedFactoryMoveMap, storedPurchaseTerritories, moveDel);
       storedFactoryMoveMap = null;
     } else {
 
-      if (this.iCapitolDangerLevel == 0 && jbgAiInterractLst.get(player.getName()).isDefensiveStance()) {
-        doJBGEventMessaging(data, "Defensive stance: " + player.getName() + " doing nothing!");
+      combatMoveAi.setGameTurnIndex(data.getJbgInternalTurnStep());
+      if (storedCombatMoveMap == null) {
+        combatMoveAi.doCombatMove(moveDel);
+      } else {
+        combatMoveAi.doMove(storedCombatMoveMap, moveDel, data, player);
+        storedCombatMoveMap = null;
       }
-      else {
-        jbgAiInterractLst.get(player.getName()).continueOrStopAggressive();
-        //if continueOrStopAggressive reach last turn, it will reset the aggressive stance,
-        if (this.iCapitolDangerLevel == 0 && jbgAiInterractLst.get(player.getName()).isDefensiveStance()) {
-          //new defensive stance
-          doJBGEventMessaging(data, "New defensive stance: " + player.getName() + " doing nothing!");
-        }
-        else {
 
-          int iAggMax = jbgAiInterractLst.get(player.getName()).getAggressiveTurnMax();
-          int iAggCount = jbgAiInterractLst.get(player.getName()).getAggressiveTurnCount();
-
-          if (this.iCapitolDangerLevel > 0) {
-            iAggMax = 10;
-            iAggCount = 1;
-          }
-          doJBGEventMessaging(data, "Aggressive stance: " + player.getName() + " offensive " + String.valueOf(iAggCount) + "/" + String.valueOf(iAggMax));
-          if (storedCombatMoveMap == null) {
-            combatMoveAi.doCombatMove(moveDel);
-          } else {
-            combatMoveAi.doMove(storedCombatMoveMap, moveDel, data, player);
-            storedCombatMoveMap = null;
-          }
-
-        }
-
-      }
     }
     final int consumedTimeBySeconds = (int) (System.currentTimeMillis() - start) / 1000;
     if (nonCombat)
@@ -470,6 +436,13 @@ System.out.println("Neighbor neutral terr danger: " + neighborT.getName() + " ha
       return tResult;
     }
 
+    private boolean isPlayerCapitolHasGoodAmountOfLandUnits(final Territory t, final int neededAmount) {
+      if (t != null && 
+        t.getUnitCollection().size() >= neededAmount)
+        return true;
+      return false;
+    }
+
     //in TripleA, the delegate may be dismissed or disable for some turns once player lost capitol 
     private void checkPlayerCapitolDangerLevel(GamePlayer player, GameData data) {
       List<Territory> capitols = TerritoryAttachment.getAllCapitals(player, data);
@@ -489,7 +462,6 @@ System.out.println("Neighbor neutral terr danger: " + neighborT.getName() + " ha
             data.getMap().getNeighbors(ter, Matches.territoryIsWater());
 
         if (!seaNeighbors.isEmpty() && isNeighbourTerritoryDanger(data, player, seaNeighbors) != null) {
-
           this.iLastCapitolDangerTurn = data.getJbgInternalTurnStep();
           this.iCapitolDangerLevel = JBGConstants.CAPITOL_DANGER_SEA;
           return;
@@ -498,9 +470,17 @@ System.out.println("Neighbor neutral terr danger: " + neighborT.getName() + " ha
         final Set<Territory> landNeighbors =
             data.getMap().getNeighbors(ter, Matches.territoryIsLand());
         if (!landNeighbors.isEmpty() && isNeighbourTerritoryDanger(data, player, landNeighbors) != null) {
-          this.iLastCapitolDangerTurn = data.getJbgInternalTurnStep();
-          this.iCapitolDangerLevel = JBGConstants.CAPITOL_DANGER_LAND;
-          return;
+          if (!isPlayerCapitolHasGoodAmountOfLandUnits(ter, 
+            this.iLastCapitolDangerCount*JBGConstants.CAPITOL_DANGER_LAND_MOBILIZATION_RATE)
+            ) {
+            this.iLastCapitolDangerTurn = data.getJbgInternalTurnStep();
+            this.iCapitolDangerLevel = JBGConstants.CAPITOL_DANGER_LAND;
+            return;
+          }
+          else {
+System.out.println("Capitol in danger, but troop is enough");
+            this.iCapitolDangerLevel = 0;
+          }
         }
 
       }
@@ -518,7 +498,7 @@ System.out.println("Neighbor neutral terr danger: " + neighborT.getName() + " ha
       //  so, the Chinese's capitol is in danger again, but no additional troops to protect it
       //Temporary solution: in two turns including the turn we found out that capital is in danger
       // we judge that the capitol is still in danger!!!
-      if (Math.abs(this.iLastCapitolDangerTurn - data.getJbgInternalTurnStep()) <= 1) {
+      if (this.iLastCapitolDangerTurn >= 0 && Math.abs(this.iLastCapitolDangerTurn - data.getJbgInternalTurnStep()) <= 1) {
 System.out.println("Forcing capitol DANGER! " + String.valueOf(this.iLastCapitolDangerTurn) + "<> " + String.valueOf(data.getJbgInternalTurnStep()));
         //leave as it, if it not danger, force reset it to land danger
         if (this.iCapitolDangerLevel == 0) this.iCapitolDangerLevel = JBGConstants.CAPITOL_DANGER_LAND;
@@ -542,7 +522,7 @@ System.out.println("----Revoke JBGAi's purchase!");
       checkPlayerCapitolDangerLevel(player, data);
 
       int iMaxUnitCost = 0;
-      if (this.iCapitolDangerLevel > 0 & this.iLastCapitolDangerCount > 0) {
+      if (this.iCapitolDangerLevel > 0 && this.iLastCapitolDangerCount > 0) {
 System.out.println("    Capitol in danger, enemy units: " + String.valueOf(this.iLastCapitolDangerCount));
         final Resource pus = data.getResourceList().getResource(Constants.PUS);
         final List<ProductionRule> rules = player.getProductionFrontier().getRules();
@@ -631,24 +611,25 @@ System.out.println("~~~~~~~~~~~~~~~~\\\\__//~~~~~~~~~~this player has amphib cap
         //after mobilization, the player will go out of defensive immediately by the end of this function 
         notCareAboutCost = true;
         int mobilizationRate = JBGConstants.CAPITOL_DANGER_LAND_MOBILIZATION_RATE;
-        if (this.iCapitolDangerLevel == JBGConstants.CAPITOL_DANGER_SEA) mobilizationRate = JBGConstants.CAPITOL_DANGER_SEA_MOBILIZATION_RATE;
+        if (this.iCapitolDangerLevel == JBGConstants.CAPITOL_DANGER_SEA)
+          mobilizationRate = JBGConstants.CAPITOL_DANGER_SEA_MOBILIZATION_RATE;
+        if (Math.abs(this.iLastCapitolDangerTurn - data.getJbgInternalTurnStep()) <= 1)
+          mobilizationRate = JBGConstants.CAPITOL_DANGER_ADDITIONAL_MOBILIZATION_RATE;
         int mobilizationValue = iMaxUnitCost * (this.iLastCapitolDangerCount * mobilizationRate);
+        if (mobilizationValue > JBGConstants.MAX_MOBILIZATION_VALUE) mobilizationValue = JBGConstants.MAX_MOBILIZATION_VALUE;
         leftToSpend += mobilizationValue;
-        jbgAiInterractLst.get(player.getName()).addStockingAmount(mobilizationValue);
         doJBGEventMessaging(data, player.getName() + " spending MOBILIZATION_VALUE");
       }
       if (canTriggerMobilization(leftTerrs, leftFactories, landUnitCount, availPUs)) {
         //after mobilization, the player will go out of defensive immediately by the end of this function 
         notCareAboutCost = true;
         leftToSpend += JBGConstants.MOBILIZATION_VALUE;
-        jbgAiInterractLst.get(player.getName()).addStockingAmount(JBGConstants.MOBILIZATION_VALUE);
         doJBGEventMessaging(data, player.getName() + " spending MOBILIZATION_VALUE");
       }
       int tributeAmount = jbgAiInterractLst.get(player.getName()).getTributeAmount();
       if (tributeAmount > 0) {
         notCareAboutCost = true;
         leftToSpend += tributeAmount;
-        jbgAiInterractLst.get(player.getName()).addStockingAmount(tributeAmount);
         jbgAiInterractLst.get(player.getName()).setTributeAmount(0);
         doJBGEventMessaging(data, player.getName() + " spending tribute amount " + String.valueOf(tributeAmount));
       }
@@ -1149,20 +1130,6 @@ System.out.println("---> Skip buying, because player can't afford a factory ..."
         purchaseDelegate.purchase(purchase);
       }
       movePause();
-
-      int spentAmount = originSpendingBudget - leftToSpend;
-      if (jbgAiInterractLst.get(player.getName()).isDefensiveStance()) {
-        int playerStockAmount = jbgAiInterractLst.get(player.getName()).getStockingAmount() + spentAmount;
-        doJBGEventMessaging(data, player.getName() + " added " + String.valueOf(spentAmount) + " point to total: " + playerStockAmount);
-        if (playerStockAmount < JBGConstants.AI_MINIMUM_STOCKING_FOR_AGGRESSIVE) {
-          jbgAiInterractLst.get(player.getName()).addStockingAmount(spentAmount);
-        }
-        else {
-          doJBGEventMessaging(data, player.getName() + " stop stocking, will start offensive in next turn ... ");
-          jbgAiInterractLst.get(player.getName()).setDefensiveStance(false); //will reset incl. setStockingAmount(0)
-        }
-      }
-
   }
     //end JBG purchase
 

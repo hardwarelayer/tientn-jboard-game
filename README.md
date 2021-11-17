@@ -59,7 +59,7 @@ World war game like Axis and Allies, with 'territory building', 'city building'.
 
 On map event feature which make war battles have more visibility on map.
 
-A new AI with more realistic behavior, more flexible and faster for the existing Fast and Hard AI, which make the game unplayable because too much time of thinking, emulating, processing...  AI will now build up territories, prepare, start war, stop war by resources stocking levels. Or it will start war on funding resources from other players (human and AI - randomly after getting the fund).
+A new AI with more realistic behavior, more flexible and faster for the existing Fast and Hard AI, which make the game unplayable because too much time of thinking, emulating, processing...  AI will now build up territories, use limited war or full scale war. Or it will start war on funding resources from other players (human and AI - randomly after getting the fund).
 
 A world news magazine built by machine, to serve player's need of reading about events and analyze situation. It also make the game more "historic" like, which one governor get events from "paper based" materials.
 
@@ -397,6 +397,13 @@ Still keep the folder of engine 2.3 before changed in:
     [Done] 30. AI will start mobilization when enemy approach sea or land neighbour of it's capitol, and deploy land unit in capitol, or start sea battle. 
 
     [Done] 31. Add territory owner information on bottom bar of Map panel
+
+    [Done] 32. Remove the stocking levels which affect the choose of AI between war and peace (I added before). Now focus on AI limited move or full scale move(time consuming)
+
+    [Done] 33. AI to decide when to do limited war or full scale war, to save time of a turn.
+
+    34. TripleA based AI calculate all units to get possible move, which is very slow. So the more units, the slow AI runs. Must change somehow (e.g cache calculated moves of same type and position, target in each calculate phase)
+
 
 ------------------
 

@@ -368,7 +368,8 @@ public class JBGTurnHistoryParser {
       }
       printRemainingTurn(turnStartNode, verbose, data.getDiceSides(), players);
     } else {
-      log.severe("No step node found in!");
+      //log.severe("No step node found in!");
+      return new ArrayList<>();
     }
 
     /*
@@ -462,7 +463,6 @@ public class JBGTurnHistoryParser {
           e = new JBGBattleSimpleEvent(line);
           final String location = e.getLocation();
           if (isTerritorySeaZone(location)) {
-System.out.println("Sea battles: " + location);
             e.setSeaBattle(true);
           }
         }

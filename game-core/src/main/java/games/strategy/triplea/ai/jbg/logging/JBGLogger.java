@@ -57,7 +57,7 @@ public final class JBGLogger {
     }
 
     //my first step is only need console log
-    //System.out.println("Log level: " + String.valueOf(level) + " message: "+ message);
+    //System.out.println("JBGLogger: level: " + String.valueOf(level) + " message: "+ message);
     //JBGLogUi.notifyAiLogMessage(formatMessage(message, t, level));
   }
 

@@ -450,7 +450,8 @@ public class JBGTerritoryManagerPanel  extends ActionPanel {
       turnLog.showNewsDialog(gameData);
     } finally {
       gameData.releaseReadLock();
-      //gameData.resetHistory(); //will cause history node error
+//System.out.println("Resetting history ...... ");
+//      gameData.resetHistory(); //will cause history node error
     }
 
   }

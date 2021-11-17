@@ -257,9 +257,10 @@ public interface JBGConstants {
   static final String JBGTURN_NEWS_SEAOP_VICTORY_IMG_URL = "file:jbg/assets/turnnews/jbg_seaop.png";
   static final String JBGTURN_NEWS_SEAOP_FAILURE_IMG_URL = "file:jbg/assets/turnnews/jbg_seaop_failure.png";
 
-  //JBG
+  //JBG AI
   static final String JBG_NO_COST_CARE_RULE = "JBG_NO_COST_CARE";
   static final int MOBILIZATION_VALUE = 1996;
+  static final int MAX_MOBILIZATION_VALUE = 5000;
   static final int MAX_BUILD_LAND_UNITS = 1200;
   static final int MIN_BUILD_LAND_UNITS = 200;
   static final int JBG_AI_INCREASE_PRODUCTION_BY_FACTORY = 4;
@@ -278,6 +279,17 @@ public interface JBGConstants {
   static final int CAPITOL_DANGER_LOST = 3;
   static final int CAPITOL_DANGER_SEA_MOBILIZATION_RATE = 2;
   static final int CAPITOL_DANGER_LAND_MOBILIZATION_RATE = 3;
+  static final int CAPITOL_DANGER_ADDITIONAL_MOBILIZATION_RATE = 1;
+  static final int CAPITOL_GOOD_AMOUNT_OF_DEF_UNITS = 250;
+
+  static final int MIN_TURNS_FOR_GET_ATTK_OPTS = 4;
+  static final int MAX_TURNS_FOR_GET_ATTK_OPTS = 12;
+  static final int MIN_TURNS_FOR_POPULATE_ENEMY_ATTK = 3;
+  static final int MAX_TURNS_FOR_POPULATE_ENEMY_ATTK = 8;
+  static final int MIN_TURNS_FOR_CALC_TRANSPORT_ATTACK = 5;
+  static final int MAX_TURNS_FOR_CALC_TRANSPORT_ATTACK = 12;
   //
+
+
 
 }

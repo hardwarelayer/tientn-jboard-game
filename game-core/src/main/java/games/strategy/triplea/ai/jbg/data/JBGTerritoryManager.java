@@ -49,6 +49,9 @@ public class JBGTerritoryManager {
   private JBGOtherMoveOptions enemyDefendOptions;
   private JBGOtherMoveOptions enemyAttackOptions;
 
+  //default value of rushingMode
+  static final boolean isRushingDefault = true; 
+
   public JBGTerritoryManager(final JBGOddsCalculator calc, final JBGData jbgData) {
     this.calc = calc;
     this.jbgData = jbgData;
@@ -76,6 +79,9 @@ public class JBGTerritoryManager {
 
   /** Sets 'alliedAttackOptions' field to possible available attack options. */
   public void populateAttackOptions() {
+    populateAttackOptions(isRushingDefault);
+  }
+  public void populateAttackOptions(final boolean rushingMode) {
     findAttackOptions(
         jbgData,
         player,
@@ -89,12 +95,16 @@ public class JBGTerritoryManager {
         new ArrayList<>(),
         new ArrayList<>(),
         false,
-        false);
+        false,
+        rushingMode);
     findBombingOptions();
-    alliedAttackOptions = findAlliedAttackOptions(player);
+    alliedAttackOptions = findAlliedAttackOptions(player, rushingMode);
   }
 
   public void populatePotentialAttackOptions() {
+    populatePotentialAttackOptions(isRushingDefault);
+  }
+  public void populatePotentialAttackOptions(final boolean rushingMode) {
     findPotentialAttackOptions(
         jbgData,
         player,
@@ -103,10 +113,14 @@ public class JBGTerritoryManager {
         potentialAttackOptions.getUnitMoveMap(),
         potentialAttackOptions.getTransportMoveMap(),
         potentialAttackOptions.getBombardMap(),
-        potentialAttackOptions.getTransportList());
+        potentialAttackOptions.getTransportList(),
+        rushingMode);
   }
 
   public void populateDefenseOptions(final List<Territory> clearedTerritories) {
+    populateDefenseOptions(clearedTerritories, isRushingDefault);
+  }
+  public void populateDefenseOptions(final List<Territory> clearedTerritories, final boolean rushingMode) {
     findDefendOptions(
         jbgData,
         player,
@@ -116,18 +130,27 @@ public class JBGTerritoryManager {
         defendOptions.getTransportMoveMap(),
         defendOptions.getTransportList(),
         clearedTerritories,
-        false);
+        false,
+        rushingMode);
   }
 
   public void populateEnemyAttackOptions(
       final List<Territory> clearedTerritories, final List<Territory> territoriesToCheck) {
+    populateEnemyAttackOptions(clearedTerritories, territoriesToCheck, isRushingDefault);
+  }
+  public void populateEnemyAttackOptions(
+      final List<Territory> clearedTerritories, final List<Territory> territoriesToCheck, final boolean rushingMode) {
     enemyAttackOptions =
-        findEnemyAttackOptions(jbgData, player, clearedTerritories, territoriesToCheck);
+        findEnemyAttackOptions(jbgData, player, clearedTerritories, territoriesToCheck, rushingMode);
   }
 
   public void populateEnemyDefenseOptions() {
+    populateEnemyDefenseOptions(isRushingDefault);
+  }
+  public void populateEnemyDefenseOptions(final boolean rushingMode) {
+    if (rushingMode) return;
     findScrambleOptions(jbgData, player, attackOptions.getTerritoryMap());
-    enemyDefendOptions = findEnemyDefendOptions(jbgData, player);
+    enemyDefendOptions = findEnemyDefendOptions(jbgData, player, rushingMode);
   }
 
   public List<JBGTerritory> removeTerritoriesThatCantBeConquered() {
@@ -417,6 +440,36 @@ public class JBGTerritoryManager {
       final List<Territory> territoriesToCheck,
       final boolean isCheckingEnemyAttacks,
       final boolean isIgnoringRelationships) {
+    findAttackOptions(jbgData, player, 
+      myUnitTerritories,
+      moveMap,
+      unitMoveMap,
+      transportMoveMap,
+      bombardMap,
+      transportMapList,
+      enemyTerritories,
+      alliedTerritories,
+      territoriesToCheck,
+      isCheckingEnemyAttacks,
+      isIgnoringRelationships, 
+      isRushingDefault
+      );
+  }
+  private static void findAttackOptions(
+      final JBGData jbgData,
+      final GamePlayer player,
+      final List<Territory> myUnitTerritories,
+      final Map<Territory, JBGTerritory> moveMap,
+      final Map<Unit, Set<Territory>> unitMoveMap,
+      final Map<Unit, Set<Territory>> transportMoveMap,
+      final Map<Unit, Set<Territory>> bombardMap,
+      final List<JBGTransport> transportMapList,
+      final List<Territory> enemyTerritories,
+      final List<Territory> alliedTerritories,
+      final List<Territory> territoriesToCheck,
+      final boolean isCheckingEnemyAttacks,
+      final boolean isIgnoringRelationships,
+      final boolean rushingMode) {
     final GameData data = jbgData.getData();
 
     final Map<Territory, Set<Territory>> landRoutesMap = new HashMap<>();
@@ -433,7 +486,8 @@ public class JBGTerritoryManager {
             player, data, territoriesThatCantBeHeld),
         enemyTerritories,
         true,
-        isCheckingEnemyAttacks);
+        isCheckingEnemyAttacks,
+        rushingMode);
     findLandMoveOptions(
         jbgData,
         player,
@@ -446,7 +500,8 @@ public class JBGTerritoryManager {
         alliedTerritories,
         true,
         isCheckingEnemyAttacks,
-        isIgnoringRelationships);
+        isIgnoringRelationships,
+        rushingMode);
     findAirMoveOptions(
         jbgData,
         player,
@@ -458,7 +513,8 @@ public class JBGTerritoryManager {
         alliedTerritories,
         true,
         isCheckingEnemyAttacks,
-        isIgnoringRelationships);
+        isIgnoringRelationships,
+        rushingMode);
     findAmphibMoveOptions(
         jbgData,
         player,
@@ -469,7 +525,8 @@ public class JBGTerritoryManager {
         JBGMatches.territoryIsEnemyOrCantBeHeld(player, data, territoriesThatCantBeHeld),
         true,
         isCheckingEnemyAttacks,
-        isIgnoringRelationships);
+        isIgnoringRelationships,
+        rushingMode);
     findBombardOptions(
         jbgData,
         player,
@@ -477,7 +534,8 @@ public class JBGTerritoryManager {
         moveMap,
         bombardMap,
         transportMapList,
-        isCheckingEnemyAttacks);
+        isCheckingEnemyAttacks,
+        rushingMode);
   }
 
   private void findBombingOptions() {
@@ -491,6 +549,9 @@ public class JBGTerritoryManager {
   }
 
   private JBGOtherMoveOptions findAlliedAttackOptions(final GamePlayer player) {
+    return findAlliedAttackOptions(player, isRushingDefault);
+  }
+  private JBGOtherMoveOptions findAlliedAttackOptions(final GamePlayer player, final boolean rushingMode) {
     final GameData data = jbgData.getData();
 
     // Get enemy players in order of turn
@@ -522,7 +583,8 @@ public class JBGTerritoryManager {
           new ArrayList<>(),
           new ArrayList<>(),
           false,
-          false);
+          false,
+          rushingMode);
     }
     return new JBGOtherMoveOptions(jbgData, alliedAttackMaps, player, true);
   }
@@ -532,6 +594,14 @@ public class JBGTerritoryManager {
       final GamePlayer player,
       final List<Territory> clearedTerritories,
       final List<Territory> territoriesToCheck) {
+    return findEnemyAttackOptions(jbgData, player, clearedTerritories, territoriesToCheck, isRushingDefault);
+  }
+  private static JBGOtherMoveOptions findEnemyAttackOptions(
+      final JBGData jbgData,
+      final GamePlayer player,
+      final List<Territory> clearedTerritories,
+      final List<Territory> territoriesToCheck,
+      final boolean rushingMode) {
     final GameData data = jbgData.getData();
 
     // Get enemy players in order of turn
@@ -566,7 +636,8 @@ public class JBGTerritoryManager {
           new ArrayList<>(alliedTerritories),
           territoriesToCheck,
           true,
-          true);
+          true,
+          rushingMode);
       alliedTerritories.addAll(
           CollectionUtils.getMatches(attackMap.keySet(), Matches.territoryIsLand()));
       enemyTerritories.removeAll(alliedTerritories);
@@ -583,6 +654,27 @@ public class JBGTerritoryManager {
       final Map<Unit, Set<Territory>> transportMoveMap,
       final Map<Unit, Set<Territory>> bombardMap,
       final List<JBGTransport> transportMapList) {
+    findPotentialAttackOptions(
+      jbgData,
+      player,
+      myUnitTerritories,
+      moveMap,
+      unitMoveMap,
+      transportMoveMap,
+      bombardMap,
+      transportMapList,
+      isRushingDefault);
+  }
+  private static void findPotentialAttackOptions(
+      final JBGData jbgData,
+      final GamePlayer player,
+      final List<Territory> myUnitTerritories,
+      final Map<Territory, JBGTerritory> moveMap,
+      final Map<Unit, Set<Territory>> unitMoveMap,
+      final Map<Unit, Set<Territory>> transportMoveMap,
+      final Map<Unit, Set<Territory>> bombardMap,
+      final List<JBGTransport> transportMapList,
+      final boolean rushingMode) {
     final GameData data = jbgData.getData();
 
     final Map<Territory, Set<Territory>> landRoutesMap = new HashMap<>();
@@ -597,7 +689,8 @@ public class JBGTerritoryManager {
         JBGMatches.territoryIsPotentialEnemyOrHasPotentialEnemyUnits(player, data, otherPlayers),
         new ArrayList<>(),
         true,
-        false);
+        false,
+        rushingMode);
     findLandMoveOptions(
         jbgData,
         player,
@@ -610,7 +703,8 @@ public class JBGTerritoryManager {
         new ArrayList<>(),
         true,
         false,
-        true);
+        true,
+        rushingMode);
     findAirMoveOptions(
         jbgData,
         player,
@@ -622,7 +716,8 @@ public class JBGTerritoryManager {
         new ArrayList<>(),
         true,
         false,
-        true);
+        true,
+        rushingMode);
     findAmphibMoveOptions(
         jbgData,
         player,
@@ -633,9 +728,10 @@ public class JBGTerritoryManager {
         JBGMatches.territoryIsPotentialEnemy(player, data, otherPlayers),
         true,
         false,
-        true);
+        true,
+        rushingMode);
     findBombardOptions(
-        jbgData, player, myUnitTerritories, moveMap, bombardMap, transportMapList, false);
+        jbgData, player, myUnitTerritories, moveMap, bombardMap, transportMapList, false, rushingMode);
   }
 
   private static void findDefendOptions(
@@ -648,6 +744,30 @@ public class JBGTerritoryManager {
       final List<JBGTransport> transportMapList,
       final List<Territory> clearedTerritories,
       final boolean isCheckingEnemyAttacks) {
+    findDefendOptions(
+      jbgData,
+      player,
+      myUnitTerritories,
+      moveMap,
+      unitMoveMap,
+      transportMoveMap,
+      transportMapList,
+      clearedTerritories,
+      isCheckingEnemyAttacks,
+      isRushingDefault
+      );
+  }
+  private static void findDefendOptions(
+      final JBGData jbgData,
+      final GamePlayer player,
+      final List<Territory> myUnitTerritories,
+      final Map<Territory, JBGTerritory> moveMap,
+      final Map<Unit, Set<Territory>> unitMoveMap,
+      final Map<Unit, Set<Territory>> transportMoveMap,
+      final List<JBGTransport> transportMapList,
+      final List<Territory> clearedTerritories,
+      final boolean isCheckingEnemyAttacks,
+      final boolean rushingMode) {
     final GameData data = jbgData.getData();
 
     final Map<Territory, Set<Territory>> landRoutesMap = new HashMap<>();
@@ -661,7 +781,8 @@ public class JBGTerritoryManager {
         JBGMatches.territoryHasNoEnemyUnitsOrCleared(player, data, clearedTerritories),
         clearedTerritories,
         false,
-        isCheckingEnemyAttacks);
+        isCheckingEnemyAttacks,
+        rushingMode);
     findLandMoveOptions(
         jbgData,
         player,
@@ -674,7 +795,8 @@ public class JBGTerritoryManager {
         clearedTerritories,
         false,
         isCheckingEnemyAttacks,
-        false);
+        false,
+        rushingMode);
     findAirMoveOptions(
         jbgData,
         player,
@@ -687,7 +809,8 @@ public class JBGTerritoryManager {
         new ArrayList<>(),
         false,
         isCheckingEnemyAttacks,
-        false);
+        false,
+        rushingMode);
     findAmphibMoveOptions(
         jbgData,
         player,
@@ -698,11 +821,16 @@ public class JBGTerritoryManager {
         Matches.isTerritoryAllied(player, data),
         false,
         isCheckingEnemyAttacks,
-        false);
+        false, 
+        rushingMode);
   }
 
   private static JBGOtherMoveOptions findEnemyDefendOptions(
       final JBGData jbgData, final GamePlayer player) {
+    return findEnemyDefendOptions(jbgData, player, isRushingDefault);
+  }
+  private static JBGOtherMoveOptions findEnemyDefendOptions(
+      final JBGData jbgData, final GamePlayer player, final boolean rushingMode) {
     final GameData data = jbgData.getData();
 
     // Get enemy players in order of turn
@@ -732,7 +860,8 @@ public class JBGTerritoryManager {
           transportMoveMap,
           transportMapList,
           clearedTerritories,
-          true);
+          true,
+          rushingMode);
     }
 
     return new JBGOtherMoveOptions(jbgData, enemyMoveMaps, player, false);
@@ -749,6 +878,32 @@ public class JBGTerritoryManager {
       final List<Territory> clearedTerritories,
       final boolean isCombatMove,
       final boolean isCheckingEnemyAttacks) {
+    findNavalMoveOptions(
+          jbgData,
+          player,
+          myUnitTerritories,
+          moveMap,
+          unitMoveMap,
+          transportMoveMap,
+          moveToTerritoryMatch,
+          clearedTerritories,
+          isCombatMove,
+          isCheckingEnemyAttacks,
+          isRushingDefault
+          );
+  }
+  private static void findNavalMoveOptions(
+      final JBGData jbgData,
+      final GamePlayer player,
+      final List<Territory> myUnitTerritories,
+      final Map<Territory, JBGTerritory> moveMap,
+      final Map<Unit, Set<Territory>> unitMoveMap,
+      final Map<Unit, Set<Territory>> transportMoveMap,
+      final Predicate<Territory> moveToTerritoryMatch,
+      final List<Territory> clearedTerritories,
+      final boolean isCombatMove,
+      final boolean isCheckingEnemyAttacks,
+      final boolean rushingMode) {
     final GameData data = jbgData.getData();
 
     for (final Territory myUnitTerritory : myUnitTerritories) {
@@ -857,6 +1012,12 @@ public class JBGTerritoryManager {
             }
           }
         }
+
+        //if force quick process, we only need minial list
+        if (rushingMode && possibleMoveTerritories.size() > 0) {
+          break;
+        } 
+
       }
     }
   }
@@ -874,6 +1035,35 @@ public class JBGTerritoryManager {
       final boolean isCombatMove,
       final boolean isCheckingEnemyAttacks,
       final boolean isIgnoringRelationships) {
+    findLandMoveOptions(
+          jbgData,
+          player,
+          myUnitTerritories,
+          moveMap,
+          unitMoveMap,
+          landRoutesMap,
+          moveToTerritoryMatch,
+          enemyTerritories,
+          clearedTerritories,
+          isCombatMove,
+          isCheckingEnemyAttacks,
+          isIgnoringRelationships,
+          isRushingDefault); 
+  }
+  private static void findLandMoveOptions(
+      final JBGData jbgData,
+      final GamePlayer player,
+      final List<Territory> myUnitTerritories,
+      final Map<Territory, JBGTerritory> moveMap,
+      final Map<Unit, Set<Territory>> unitMoveMap,
+      final Map<Territory, Set<Territory>> landRoutesMap,
+      final Predicate<Territory> moveToTerritoryMatch,
+      final List<Territory> enemyTerritories,
+      final List<Territory> clearedTerritories,
+      final boolean isCombatMove,
+      final boolean isCheckingEnemyAttacks,
+      final boolean isIgnoringRelationships,
+      final boolean rushingMode) {
     final GameData data = jbgData.getData();
 
     for (final Territory myUnitTerritory : myUnitTerritories) {
@@ -990,6 +1180,12 @@ public class JBGTerritoryManager {
             unitMoveMap.put(myLandUnit, unitMoveTerritories);
           }
         }
+
+        //if force quick process, we only need minial list
+        if (rushingMode && possibleMoveTerritories.size() > 0) {
+          break;
+        } 
+
       }
     }
   }
@@ -1006,6 +1202,33 @@ public class JBGTerritoryManager {
       final boolean isCombatMove,
       final boolean isCheckingEnemyAttacks,
       final boolean isIgnoringRelationships) {
+    findAirMoveOptions(
+      jbgData,
+      player,
+      myUnitTerritories,
+      moveMap,
+      unitMoveMap,
+      moveToTerritoryMatch,
+      enemyTerritories,
+      alliedTerritories,
+      isCombatMove,
+      isCheckingEnemyAttacks,
+      isIgnoringRelationships,
+      isRushingDefault);
+  }
+  private static void findAirMoveOptions(
+      final JBGData jbgData,
+      final GamePlayer player,
+      final List<Territory> myUnitTerritories,
+      final Map<Territory, JBGTerritory> moveMap,
+      final Map<Unit, Set<Territory>> unitMoveMap,
+      final Predicate<Territory> moveToTerritoryMatch,
+      final List<Territory> enemyTerritories,
+      final List<Territory> alliedTerritories,
+      final boolean isCombatMove,
+      final boolean isCheckingEnemyAttacks,
+      final boolean isIgnoringRelationships,
+      final boolean rushingMode) {
     final GameData data = jbgData.getData();
 
     // TODO: add carriers to landing possibilities for non-enemy attacks
@@ -1023,7 +1246,8 @@ public class JBGTerritoryManager {
           Matches.territoryIsWater(),
           enemyTerritories,
           false,
-          true);
+          true,
+          rushingMode);
       for (final Unit u : unitMoveMap2.keySet()) {
         if (Matches.unitIsCarrier().test(u)) {
           possibleCarrierTerritories.addAll(unitMoveMap2.get(u));
@@ -1148,6 +1372,12 @@ public class JBGTerritoryManager {
             unitMoveMap.put(myAirUnit, unitMoveTerritories);
           }
         }
+
+        //if force quick process, we only need minial list
+        if (rushingMode && possibleMoveTerritories.size() > 0) {
+          break;
+        } 
+
       }
     }
   }
@@ -1163,6 +1393,31 @@ public class JBGTerritoryManager {
       final boolean isCombatMove,
       final boolean isCheckingEnemyAttacks,
       final boolean isIgnoringRelationships) {
+    findAmphibMoveOptions(
+      jbgData,
+      player,
+      myUnitTerritories,
+      moveMap,
+      transportMapList,
+      landRoutesMap,
+      moveAmphibToTerritoryMatch,
+      isCombatMove,
+      isCheckingEnemyAttacks,
+      isIgnoringRelationships,
+      isRushingDefault);
+  }
+  private static void findAmphibMoveOptions(
+      final JBGData jbgData,
+      final GamePlayer player,
+      final List<Territory> myUnitTerritories,
+      final Map<Territory, JBGTerritory> moveMap,
+      final List<JBGTransport> transportMapList,
+      final Map<Territory, Set<Territory>> landRoutesMap,
+      final Predicate<Territory> moveAmphibToTerritoryMatch,
+      final boolean isCombatMove,
+      final boolean isCheckingEnemyAttacks,
+      final boolean isIgnoringRelationships,
+      final boolean rushingMode) {
     final GameData data = jbgData.getData();
 
     for (final Territory myUnitTerritory : myUnitTerritories) {
@@ -1374,6 +1629,25 @@ public class JBGTerritoryManager {
       final Map<Unit, Set<Territory>> bombardMap,
       final List<JBGTransport> transportMapList,
       final boolean isCheckingEnemyAttacks) {
+    findBombardOptions(
+      jbgData,
+      player,
+      myUnitTerritories,
+      moveMap,
+      bombardMap,
+      transportMapList,
+      isCheckingEnemyAttacks,
+      isRushingDefault);
+  }
+  private static void findBombardOptions(
+      final JBGData jbgData,
+      final GamePlayer player,
+      final List<Territory> myUnitTerritories,
+      final Map<Territory, JBGTerritory> moveMap,
+      final Map<Unit, Set<Territory>> bombardMap,
+      final List<JBGTransport> transportMapList,
+      final boolean isCheckingEnemyAttacks,
+      final boolean rushingMode) {
     final GameData data = jbgData.getData();
 
     // Find all transport unload from and to territories
@@ -1466,6 +1740,12 @@ public class JBGTerritoryManager {
             bombardMap.put(mySeaUnit, bombardToTerritories);
           }
         }
+
+        //if force quick process, we only need minial list
+        if (rushingMode && bombardMap.size() > 0) {
+          break;
+        } 
+
       }
     }
   }

@@ -40,6 +40,11 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 import org.triplea.java.collections.CollectionUtils;
 
+import java.util.concurrent.ThreadLocalRandom;
+import games.strategy.engine.data.JBGConstants;
+import lombok.Getter;
+import lombok.Setter;
+
 /** JBG combat move AI. */
 public class JBGCombatMoveAi {
 
@@ -53,6 +58,17 @@ public class JBGCombatMoveAi {
   private JBGTerritoryManager territoryManager;
   private boolean isDefensive;
   private boolean isBombing;
+  @Setter private int gameTurnIndex = 0;
+  //get ATTK opts
+  private int lastPopulateAttackOptionsTurn = 0;
+  private int delayPeriodForPopulateAttackOptions = 0;
+  //prioritize ATTK
+  private int lastPopulateEnemyAttackTurn = 0;
+  private int delayPeriodForPopulateEnemyAttack = 0;
+  //check contested sea
+  private int lastCalcTransportAttackTurn = 0;
+  private int delayPeriodForCalcTransportAttack = 0;
+
 
   JBGCombatMoveAi(final AbstractJBGAi ai) {
     this.ai = ai;
@@ -62,7 +78,8 @@ public class JBGCombatMoveAi {
 
   Map<Territory, JBGTerritory> doCombatMove(final IMoveDelegate moveDel) {
     JBGLogger.info("Starting combat move phase");
-
+long start = System.currentTimeMillis();
+System.out.println("doCombatMove: step0, turn: " + String.valueOf(gameTurnIndex));
     // Current data at the start of combat move
     data = jbgData.getData();
     player = jbgData.getPlayer();
@@ -74,42 +91,105 @@ public class JBGCombatMoveAi {
             jbgData, jbgData.getMyCapital(), JBGBattleUtils.MEDIUM_RANGE, player);
     isBombing = false;
     JBGLogger.debug("Currently in defensive stance: " + isDefensive);
-
+System.out.println("doCombatMove: step 2: populate attack options --- " + String.valueOf((System.currentTimeMillis() - start)/1000)); start = System.currentTimeMillis();
     // Find the maximum number of units that can attack each territory and max enemy defenders
-    territoryManager.populateAttackOptions();
-    territoryManager.populateEnemyDefenseOptions();
+    if (delayPeriodForPopulateAttackOptions == 0) {
+      delayPeriodForPopulateAttackOptions = randomBetween(
+        JBGConstants.MIN_TURNS_FOR_GET_ATTK_OPTS,
+        JBGConstants.MAX_TURNS_FOR_GET_ATTK_OPTS
+        );
+      lastPopulateAttackOptionsTurn = gameTurnIndex;
+System.out.println("    JBGCombatMove: initing period for populate attack options: "+ String.valueOf(delayPeriodForPopulateAttackOptions) + " " + player.getName());
+    }
+    //first turn will be long
+    if ((gameTurnIndex - lastPopulateAttackOptionsTurn) > delayPeriodForPopulateAttackOptions ) {
+      lastPopulateAttackOptionsTurn = gameTurnIndex;
 
+      territoryManager.populateAttackOptions(false);
+System.out.println("        populate attack options: " + String.valueOf((System.currentTimeMillis() - start)/1000));
+      territoryManager.populateEnemyDefenseOptions(false);
+    }
+    else {
+System.out.println("    JBGCombatMove: rushing Populate Attack Options ...");
+      territoryManager.populateAttackOptions(true);
+System.out.println("        populate attack options: " + String.valueOf((System.currentTimeMillis() - start)/1000));
+      territoryManager.populateEnemyDefenseOptions(true);
+    }
+
+System.out.println("doCombatMove: step3: remove territories that can't be conquered --- " + String.valueOf((System.currentTimeMillis() - start)/1000)); start = System.currentTimeMillis();
     // Remove territories that aren't worth attacking and prioritize the remaining ones
-    final List<JBGTerritory> attackOptions =
+    //
+    //init the period this AI waits between each time it get territories 
+    //because this step is time consuming, so I split it up
+    //I don't do this in constructor, because if so, all AI will be init at the same time(and may be the value is the same, so all slow down will occur on a turn)
+    List<JBGTerritory> attackOptions =
         territoryManager.removeTerritoriesThatCantBeConquered();
     List<Territory> clearedTerritories = new ArrayList<>();
     for (final JBGTerritory patd : attackOptions) {
       clearedTerritories.add(patd.getTerritory());
     }
-    territoryManager.populateEnemyAttackOptions(clearedTerritories, clearedTerritories);
+System.out.println("doCombatMove: step4: populate enemy attack options --- " + String.valueOf((System.currentTimeMillis() - start)/1000)); start = System.currentTimeMillis();
+    if (delayPeriodForPopulateEnemyAttack == 0) {
+      delayPeriodForPopulateEnemyAttack = randomBetween(
+        JBGConstants.MIN_TURNS_FOR_POPULATE_ENEMY_ATTK,
+        JBGConstants.MAX_TURNS_FOR_POPULATE_ENEMY_ATTK
+        );
+System.out.println("    JBGCombatMove: initing period for populate enemy attacks: "+ String.valueOf(delayPeriodForPopulateEnemyAttack) + " " + player.getName());
+      lastPopulateEnemyAttackTurn = gameTurnIndex;
+    }
+    //first turn will be long
+    if ((gameTurnIndex - lastPopulateEnemyAttackTurn) > delayPeriodForPopulateEnemyAttack ) {
+      lastPopulateEnemyAttackTurn = gameTurnIndex;
+System.out.println("        step 4/1: " + String.valueOf((System.currentTimeMillis() - start)/1000));
+      territoryManager.populateEnemyAttackOptions(clearedTerritories, clearedTerritories, false);
+System.out.println("        step 4/2: " + String.valueOf((System.currentTimeMillis() - start)/1000));
+    }
+    else {
+System.out.println("    JBGCombatMove: rushing populate Enemy attack ...");
+      territoryManager.populateEnemyAttackOptions(clearedTerritories, clearedTerritories, true);
+System.out.println("        step 4/2: " + String.valueOf((System.currentTimeMillis() - start)/1000));
+    }
     determineTerritoriesThatCanBeHeld(attackOptions, clearedTerritories);
+System.out.println("doCombatMove: step5: prioritize attacks ---- " + String.valueOf((System.currentTimeMillis() - start)/1000)); start = System.currentTimeMillis();
     prioritizeAttackOptions(player, attackOptions);
     removeTerritoriesThatArentWorthAttacking(attackOptions);
-
     // Determine which territories to attack
     determineTerritoriesToAttack(attackOptions);
-
+System.out.println("doCombatMove: step6: transport/amphib attk ---- " + String.valueOf((System.currentTimeMillis() - start)/1000)); start = System.currentTimeMillis();
     // Determine which territories can be held and remove any that aren't worth attacking
     clearedTerritories = new ArrayList<>();
     final Set<Territory> possibleTransportTerritories = new HashSet<>();
-    for (final JBGTerritory patd : attackOptions) {
-      clearedTerritories.add(patd.getTerritory());
-      if (!patd.getAmphibAttackMap().isEmpty()) {
-        possibleTransportTerritories.addAll(
-            data.getMap().getNeighbors(patd.getTerritory(), Matches.territoryIsWater()));
-      }
-    }
-    possibleTransportTerritories.addAll(clearedTerritories);
-    territoryManager.populateEnemyAttackOptions(
-        clearedTerritories, new ArrayList<>(possibleTransportTerritories));
-    determineTerritoriesThatCanBeHeld(attackOptions, clearedTerritories);
-    removeTerritoriesThatArentWorthAttacking(attackOptions);
 
+    if (delayPeriodForCalcTransportAttack == 0) {
+      delayPeriodForCalcTransportAttack = randomBetween(
+        JBGConstants.MIN_TURNS_FOR_CALC_TRANSPORT_ATTACK,
+        JBGConstants.MAX_TURNS_FOR_CALC_TRANSPORT_ATTACK
+        );
+System.out.println("    JBGCombatMove: initing period for calculate transport attack: "+ String.valueOf(delayPeriodForCalcTransportAttack) + " " + player.getName());
+      lastCalcTransportAttackTurn = gameTurnIndex;
+    }
+    //first turn will be long
+    if ((gameTurnIndex - lastCalcTransportAttackTurn) > delayPeriodForCalcTransportAttack ) {
+      lastCalcTransportAttackTurn = gameTurnIndex;
+
+      for (final JBGTerritory patd : attackOptions) {
+        clearedTerritories.add(patd.getTerritory());
+        if (!patd.getAmphibAttackMap().isEmpty()) {
+          possibleTransportTerritories.addAll(
+              data.getMap().getNeighbors(patd.getTerritory(), Matches.territoryIsWater()));
+        }
+      }
+      possibleTransportTerritories.addAll(clearedTerritories);
+      territoryManager.populateEnemyAttackOptions(
+          clearedTerritories, new ArrayList<>(possibleTransportTerritories));
+      determineTerritoriesThatCanBeHeld(attackOptions, clearedTerritories);
+      removeTerritoriesThatArentWorthAttacking(attackOptions);
+    }
+    else {
+System.out.println("    JBGCombatMove: skipping calculate transport attack ...");
+    }
+
+System.out.println("doCombatMove: step7 - calc unit to attack " + String.valueOf((System.currentTimeMillis() - start)/1000)); start = System.currentTimeMillis();
     // Determine how many units to attack each territory with
     final List<Unit> alreadyMovedUnits =
         moveOneDefenderToLandTerritoriesBorderingEnemy(attackOptions);
@@ -121,23 +201,24 @@ public class JBGCombatMoveAi {
 
     // Determine max enemy counter attack units and remove territories where transports are exposed
     removeTerritoriesWhereTransportsAreExposed();
-
+System.out.println("doCombatMove: step8: remove attacks until capital safe  --- " + String.valueOf((System.currentTimeMillis() - start)/1000)); start = System.currentTimeMillis();
     // Determine if capital can be held if I still own it
     if (jbgData.getMyCapital() != null && jbgData.getMyCapital().getOwner().equals(player)) {
-      removeAttacksUntilCapitalCanBeHeld(
-          attackOptions, jbgData.getPurchaseOptions().getLandOptions());
+      if (false)
+        removeAttacksUntilCapitalCanBeHeld(
+            attackOptions, jbgData.getPurchaseOptions().getLandOptions());
     }
-
+System.out.println("doCombatMove: step9: check contested  sea " + String.valueOf((System.currentTimeMillis() - start)/1000)); start = System.currentTimeMillis();
     // Check if any subs in contested territory that's not being attacked
     checkContestedSeaTerritories();
-
+System.out.println("doCombatMove: step10 " + String.valueOf((System.currentTimeMillis() - start)/1000)); start = System.currentTimeMillis();
     // Calculate attack routes and perform moves
     doMove(territoryManager.getAttackOptions().getTerritoryMap(), moveDel, data, player);
-
+System.out.println("doCombatMove: step11 " + String.valueOf((System.currentTimeMillis() - start)/1000)); start = System.currentTimeMillis();
     // Set strafing territories to avoid retreats
     ai.setStoredStrafingTerritories(territoryManager.getStrafingTerritories());
     JBGLogger.info("Strafing territories: " + territoryManager.getStrafingTerritories());
-
+System.out.println("doCombatMove: step12 " + String.valueOf((System.currentTimeMillis() - start)/1000)); start = System.currentTimeMillis();
     // Log results
     JBGLogger.info("Logging results");
     logAttackMoves(attackOptions);
@@ -170,6 +251,10 @@ public class JBGCombatMoveAi {
 
   boolean isBombing() {
     return isBombing;
+  }
+
+  private int randomBetween(int min, int max) {
+    return ThreadLocalRandom.current().nextInt(min, max + 1);
   }
 
   private void prioritizeAttackOptions(
