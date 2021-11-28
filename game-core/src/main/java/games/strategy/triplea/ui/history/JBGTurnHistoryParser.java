@@ -97,6 +97,13 @@ public class JBGTurnHistoryParser {
   private final StringBuilder stringBuilder = new StringBuilder();
   private Collection<Territory> territories = null;
 
+  private int iCurrentAirOPTagIdx = 0;
+  private int iCurrentSeaAirOPTagIdx = 0;
+  private int iCurrentSeaOPTagIdx = 0;
+  private int iCurrentSeaAirBombOPTagIdx = 0;
+  private int iCurrentAirBombOPTagIdx = 0;
+  private int iCurrentSeaFailOPTagIdx = 0;
+
   public JBGTurnHistoryParser() {
   }
 
@@ -212,7 +219,7 @@ public class JBGTurnHistoryParser {
     StringBuilder sb = new StringBuilder();
     StringBuilder sbDetailedNews = new StringBuilder();
     sb.append("<p>");
-    for (JBGAnalyzableTurnEntry e: lst) {
+  for (JBGAnalyzableTurnEntry e: lst) {
 
       if (e.isJustMobilization() && !mobilizationPlayerList.contains(e.getPlayer())) {
         mobilizationPlayerList.add(e.getPlayer());
@@ -252,10 +259,200 @@ public class JBGTurnHistoryParser {
     if (mobilizationPlayerList.size() > 0) 
       mobilizationNews.append(writeMobilizationHeadlines(mobilizationPlayerList) + "<br><br>");
 
+    //mobilizationNews.append(testAllImageItems());
+
     sb.append("<center><span class=\"headline-detail\">Detailed News from our frontline correspondences</span></center>")
       .append(mobilizationNews.toString())
       .append(sbDetailedNews.toString());
-    return sb.toString();
+    return addImageToContent(sb.toString());
+  }
+
+  private String testAllImageItems() {
+    return
+        "<img src='" + JBGConstants.JBGTURN_NEWS_AIROP1_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>" +
+        "<img src='" + JBGConstants.JBGTURN_NEWS_AIROP2_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>" +
+        "<img src='" + JBGConstants.JBGTURN_NEWS_AIROP3_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>" +
+        "<img src='" + JBGConstants.JBGTURN_NEWS_AIROP4_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>" +
+        "<img src='" + JBGConstants.JBGTURN_NEWS_AIRBOMB1_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>" +
+        "<img src='" + JBGConstants.JBGTURN_NEWS_AIRBOMB2_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>" +
+        "<img src='" + JBGConstants.JBGTURN_NEWS_AIRBOMB3_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>" +
+        "<img src='" + JBGConstants.JBGTURN_NEWS_AIRBOMB4_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>" +
+        "<img src='" + JBGConstants.JBGTURN_NEWS_SEA_AIROP1_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>" +
+        "<img src='" + JBGConstants.JBGTURN_NEWS_SEA_AIROP2_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>" +
+        "<img src='" + JBGConstants.JBGTURN_NEWS_SEA_AIROP3_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>" +
+        "<img src='" + JBGConstants.JBGTURN_NEWS_SEA_AIROP4_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>" +
+        "<img src='" + JBGConstants.JBGTURN_NEWS_SEA_AIRBOMB1_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>" +
+        "<img src='" + JBGConstants.JBGTURN_NEWS_SEA_AIRBOMB2_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>" +
+        "<img src='" + JBGConstants.JBGTURN_NEWS_SEA_AIRBOMB3_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>" +
+        "<img src='" + JBGConstants.JBGTURN_NEWS_SEA_AIRBOMB4_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>" +
+        "<img src='" + JBGConstants.JBGTURN_NEWS_SEAOP_VICTORY1_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>" +
+        "<img src='" + JBGConstants.JBGTURN_NEWS_SEAOP_VICTORY2_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>" +
+        "<img src='" + JBGConstants.JBGTURN_NEWS_SEAOP_VICTORY3_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>" +
+        "<img src='" + JBGConstants.JBGTURN_NEWS_SEAOP_VICTORY4_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>" +
+        "<img src='" + JBGConstants.JBGTURN_NEWS_SEAOP_FAILURE1_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>" +
+        "<img src='" + JBGConstants.JBGTURN_NEWS_SEAOP_FAILURE2_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>" +
+        "<img src='" + JBGConstants.JBGTURN_NEWS_SEAOP_FAILURE3_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>" +
+        "<img src='" + JBGConstants.JBGTURN_NEWS_SEAOP_FAILURE4_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>";
+  }
+  private String getNewsAirOPImageUrl() {
+    String res = null;
+    switch (this.iCurrentAirOPTagIdx) {
+      case 0:
+        res = JBGConstants.JBGTURN_NEWS_AIROP1_IMG_URL;
+        break;
+      case 1:
+        res = JBGConstants.JBGTURN_NEWS_AIROP2_IMG_URL;
+        break;
+      case 2:
+        res = JBGConstants.JBGTURN_NEWS_AIROP3_IMG_URL;
+        break;
+      case 3:
+        res = JBGConstants.JBGTURN_NEWS_AIROP4_IMG_URL;
+        break;
+    }
+    if (this.iCurrentAirOPTagIdx + 1 < 4)
+      this.iCurrentAirOPTagIdx++;
+    else
+      this.iCurrentAirOPTagIdx = 0;
+    return res;
+  }
+  private String getNewsSeaAirOPImageUrl() {
+    String res = null;
+    switch (this.iCurrentSeaAirOPTagIdx) {
+      case 0:
+        res = JBGConstants.JBGTURN_NEWS_SEA_AIROP1_IMG_URL;
+        break;
+      case 1:
+        res = JBGConstants.JBGTURN_NEWS_SEA_AIROP2_IMG_URL;
+        break;
+      case 2:
+        res = JBGConstants.JBGTURN_NEWS_SEA_AIROP3_IMG_URL;
+        break;
+      case 3:
+        res = JBGConstants.JBGTURN_NEWS_SEA_AIROP4_IMG_URL;
+        break;
+    }
+    if (this.iCurrentSeaAirOPTagIdx + 1 < 4)
+      this.iCurrentSeaAirOPTagIdx++;
+    else
+      this.iCurrentSeaAirOPTagIdx = 0;
+    return res;
+  }
+  private String getNewsSeaOPImageUrl() {
+    String res = null;
+    switch (this.iCurrentSeaOPTagIdx) {
+      case 0:
+        res = JBGConstants.JBGTURN_NEWS_SEAOP_VICTORY1_IMG_URL;
+        break;
+      case 1:
+        res = JBGConstants.JBGTURN_NEWS_SEAOP_VICTORY2_IMG_URL;
+        break;
+      case 2:
+        res = JBGConstants.JBGTURN_NEWS_SEAOP_VICTORY3_IMG_URL;
+        break;
+      case 3:
+        res = JBGConstants.JBGTURN_NEWS_SEAOP_VICTORY4_IMG_URL;
+        break;
+    }
+    if (this.iCurrentSeaOPTagIdx + 1 < 4)
+      this.iCurrentSeaOPTagIdx++;
+    else
+      this.iCurrentSeaOPTagIdx = 0;
+    return res;
+  }
+  private String getNewsSeaAirBombOPImageUrl() {
+    String res = null;
+    switch (this.iCurrentSeaAirBombOPTagIdx) {
+      case 0:
+        res = JBGConstants.JBGTURN_NEWS_SEA_AIRBOMB1_IMG_URL;
+        break;
+      case 1:
+        res = JBGConstants.JBGTURN_NEWS_SEA_AIRBOMB2_IMG_URL;
+        break;
+      case 2:
+        res = JBGConstants.JBGTURN_NEWS_SEA_AIRBOMB3_IMG_URL;
+        break;
+      case 3:
+        res = JBGConstants.JBGTURN_NEWS_SEA_AIRBOMB4_IMG_URL;
+        break;
+    }
+    if (this.iCurrentSeaAirBombOPTagIdx + 1 < 4)
+      this.iCurrentSeaAirBombOPTagIdx++;
+    else
+      this.iCurrentSeaAirBombOPTagIdx = 0;
+    return res;
+  }
+  private String getNewsAirBombOPImageUrl() {
+    String res = null;
+    switch (this.iCurrentAirBombOPTagIdx) {
+      case 0:
+        res = JBGConstants.JBGTURN_NEWS_AIRBOMB1_IMG_URL;
+        break;
+      case 1:
+        res = JBGConstants.JBGTURN_NEWS_AIRBOMB2_IMG_URL;
+        break;
+      case 2:
+        res = JBGConstants.JBGTURN_NEWS_AIRBOMB3_IMG_URL;
+        break;
+      case 3:
+        res = JBGConstants.JBGTURN_NEWS_AIRBOMB4_IMG_URL;
+        break;
+    }
+    if (this.iCurrentAirBombOPTagIdx + 1 < 4)
+      this.iCurrentAirBombOPTagIdx++;
+    else
+      this.iCurrentAirBombOPTagIdx = 0;
+    return res;
+  }
+  private String getNewsSeaFailureOPImageUrl() {
+    String res = null;
+    switch (this.iCurrentSeaFailOPTagIdx) {
+      case 0:
+        res = JBGConstants.JBGTURN_NEWS_SEAOP_FAILURE1_IMG_URL;
+        break;
+      case 1:
+        res = JBGConstants.JBGTURN_NEWS_SEAOP_FAILURE2_IMG_URL;
+        break;
+      case 2:
+        res = JBGConstants.JBGTURN_NEWS_SEAOP_FAILURE3_IMG_URL;
+        break;
+      case 3:
+        res = JBGConstants.JBGTURN_NEWS_SEAOP_FAILURE4_IMG_URL;
+        break;
+    }
+    if (this.iCurrentSeaFailOPTagIdx + 1 < 4)
+      this.iCurrentSeaFailOPTagIdx++;
+    else
+      this.iCurrentSeaFailOPTagIdx = 0;
+    return res;
+  }
+  private String addImageToContent(String news) {
+    while (news.indexOf(JBGConstants.JBGTURN_NEWS_AIROP_IMG) >= 0)
+      news = news.replaceFirst(JBGConstants.JBGTURN_NEWS_AIROP_IMG, 
+        "<img src='" + getNewsAirOPImageUrl() + "' width=\"240px\" height=\"auto\"/><br/>"
+        );
+    while (news.indexOf(JBGConstants.JBGTURN_NEWS_AIRBOMB_IMG) >= 0)
+      news = news.replaceFirst(JBGConstants.JBGTURN_NEWS_AIRBOMB_IMG, 
+        "<img src='" + getNewsAirBombOPImageUrl() + "' width=\"240px\" height=\"auto\"/><br/>"
+        );
+    while (news.indexOf(JBGConstants.JBGTURN_NEWS_SEA_AIROP_IMG) >= 0)
+      news = news.replaceFirst(JBGConstants.JBGTURN_NEWS_SEA_AIROP_IMG, 
+        "<img src='" + getNewsSeaAirOPImageUrl() + "' width=\"240px\" height=\"auto\"/><br/>"
+        );
+    while (news.indexOf(JBGConstants.JBGTURN_NEWS_SEA_AIRBOMB_IMG) >= 0)
+      news = news.replaceFirst(JBGConstants.JBGTURN_NEWS_SEA_AIRBOMB_IMG, 
+        "<img src='" + getNewsSeaAirBombOPImageUrl() + "' width=\"240px\" height=\"auto\"/><br/>"
+        );
+    while (news.indexOf(JBGConstants.JBGTURN_NEWS_SEAOP_VICTORY_IMG) >= 0)
+      news = news.replaceFirst(JBGConstants.JBGTURN_NEWS_SEAOP_VICTORY_IMG, 
+        "<img src='" + getNewsSeaOPImageUrl() + "' width=\"240px\" height=\"auto\"/><br/>"
+        );
+    while (news.indexOf(JBGConstants.JBGTURN_NEWS_SEAOP_FAILURE_IMG) >= 0)
+      news = news.replaceFirst(JBGConstants.JBGTURN_NEWS_SEAOP_FAILURE_IMG, 
+        "<img src='" + getNewsSeaFailureOPImageUrl() + "' width=\"240px\" height=\"auto\"/><br/>"
+        );
+
+    return news;
   }
 
   public String parseHTMLSinglePlayerTurn(final GameData data, final boolean isLastTurn, final int posType, final String playerName) {
@@ -297,7 +494,8 @@ public class JBGTurnHistoryParser {
     }
     sb.append("</p><br/>"); //class row
 
-    sb.append("<center><span class=\"headline-detail\">Detailed News from our frontline correspondences</span></center>" + sbDetailedNews.toString());
+    sb.append("<center><span class=\"headline-detail\">Detailed News from our frontline correspondences</span></center>" + 
+      sbDetailedNews.toString());
     return sb.toString();
   }
 

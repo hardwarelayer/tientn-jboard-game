@@ -250,12 +250,30 @@ public interface JBGConstants {
   static final String JBGTURN_NEWS_SEAOP_VICTORY_IMG = "@TURNNEWS_VIC_SEAOP";
   static final String JBGTURN_NEWS_SEAOP_FAILURE_IMG = "@TURNNEWS_FAIL_SEAOP";
   static final String JBGTURN_NEWS_MOBILIZATION_IMG_URL = "file:jbg/assets/turnnews/jbg_mobilization.png";
-  static final String JBGTURN_NEWS_AIROP_IMG_URL = "file:jbg/assets/turnnews/jbg_airop.png";
-  static final String JBGTURN_NEWS_AIRBOMB_IMG_URL = "file:jbg/assets/turnnews/jbg_airbomb.png";
-  static final String JBGTURN_NEWS_SEA_AIROP_IMG_URL = "file:jbg/assets/turnnews/jbg_sea_airop.png";
-  static final String JBGTURN_NEWS_SEA_AIRBOMB_IMG_URL = "file:jbg/assets/turnnews/jbg_sea_airbomb.png";
-  static final String JBGTURN_NEWS_SEAOP_VICTORY_IMG_URL = "file:jbg/assets/turnnews/jbg_seaop.png";
-  static final String JBGTURN_NEWS_SEAOP_FAILURE_IMG_URL = "file:jbg/assets/turnnews/jbg_seaop_failure.png";
+  static final String JBGTURN_NEWS_AIROP1_IMG_URL = "file:jbg/assets/turnnews/jbg_airop.png";
+  static final String JBGTURN_NEWS_AIROP2_IMG_URL = "file:jbg/assets/turnnews/jbg_airop2.png";
+  static final String JBGTURN_NEWS_AIROP3_IMG_URL = "file:jbg/assets/turnnews/jbg_airop3.png";
+  static final String JBGTURN_NEWS_AIROP4_IMG_URL = "file:jbg/assets/turnnews/jbg_airop4.png";
+  static final String JBGTURN_NEWS_AIRBOMB1_IMG_URL = "file:jbg/assets/turnnews/jbg_airbomb.png";
+  static final String JBGTURN_NEWS_AIRBOMB2_IMG_URL = "file:jbg/assets/turnnews/jbg_airbomb2.png";
+  static final String JBGTURN_NEWS_AIRBOMB3_IMG_URL = "file:jbg/assets/turnnews/jbg_airbomb3.png";
+  static final String JBGTURN_NEWS_AIRBOMB4_IMG_URL = "file:jbg/assets/turnnews/jbg_airbomb4.png";
+  static final String JBGTURN_NEWS_SEA_AIROP1_IMG_URL = "file:jbg/assets/turnnews/jbg_sea_airop.png";
+  static final String JBGTURN_NEWS_SEA_AIROP2_IMG_URL = "file:jbg/assets/turnnews/jbg_sea_airop2.png";
+  static final String JBGTURN_NEWS_SEA_AIROP3_IMG_URL = "file:jbg/assets/turnnews/jbg_sea_airop3.png";
+  static final String JBGTURN_NEWS_SEA_AIROP4_IMG_URL = "file:jbg/assets/turnnews/jbg_sea_airop4.png";
+  static final String JBGTURN_NEWS_SEA_AIRBOMB1_IMG_URL = "file:jbg/assets/turnnews/jbg_sea_airbomb.png";
+  static final String JBGTURN_NEWS_SEA_AIRBOMB2_IMG_URL = "file:jbg/assets/turnnews/jbg_sea_airbomb2.png";
+  static final String JBGTURN_NEWS_SEA_AIRBOMB3_IMG_URL = "file:jbg/assets/turnnews/jbg_sea_airbomb3.png";
+  static final String JBGTURN_NEWS_SEA_AIRBOMB4_IMG_URL = "file:jbg/assets/turnnews/jbg_sea_airbomb4.png";
+  static final String JBGTURN_NEWS_SEAOP_VICTORY1_IMG_URL = "file:jbg/assets/turnnews/jbg_seaop.png";
+  static final String JBGTURN_NEWS_SEAOP_VICTORY2_IMG_URL = "file:jbg/assets/turnnews/jbg_seaop2.png";
+  static final String JBGTURN_NEWS_SEAOP_VICTORY3_IMG_URL = "file:jbg/assets/turnnews/jbg_seaop3.png";
+  static final String JBGTURN_NEWS_SEAOP_VICTORY4_IMG_URL = "file:jbg/assets/turnnews/jbg_seaop4.png";
+  static final String JBGTURN_NEWS_SEAOP_FAILURE1_IMG_URL = "file:jbg/assets/turnnews/jbg_seaop_failure.png";
+  static final String JBGTURN_NEWS_SEAOP_FAILURE2_IMG_URL = "file:jbg/assets/turnnews/jbg_seaop_failure2.png";
+  static final String JBGTURN_NEWS_SEAOP_FAILURE3_IMG_URL = "file:jbg/assets/turnnews/jbg_seaop_failure3.png";
+  static final String JBGTURN_NEWS_SEAOP_FAILURE4_IMG_URL = "file:jbg/assets/turnnews/jbg_seaop_failure4.png";
 
   //JBG AI
   static final String JBG_NO_COST_CARE_RULE = "JBG_NO_COST_CARE";

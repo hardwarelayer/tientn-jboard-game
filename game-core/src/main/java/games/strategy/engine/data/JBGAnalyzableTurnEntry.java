@@ -766,42 +766,8 @@ public class JBGAnalyzableTurnEntry {
     sb.append(writePlacesContent());
     sb.append("</p");
 
-    return addImageToBasicNews(sb.toString());
+    return sb.toString(); //moved to JBGTurnHistoryParser addImageToBasicNews(sb.toString());
 
-  }
-
-  private String addImageToBasicNews(String news) {
-    if (news.contains(JBGConstants.JBGTURN_NEWS_AIROP_IMG)) {
-      news = news.replace(JBGConstants.JBGTURN_NEWS_AIROP_IMG, 
-        "<img src='" + JBGConstants.JBGTURN_NEWS_AIROP_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>"
-        );
-    }
-    if (news.contains(JBGConstants.JBGTURN_NEWS_AIRBOMB_IMG)) {
-      news = news.replace(JBGConstants.JBGTURN_NEWS_AIRBOMB_IMG, 
-        "<img src='" + JBGConstants.JBGTURN_NEWS_AIRBOMB_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>"
-        );
-    }
-    if (news.contains(JBGConstants.JBGTURN_NEWS_SEA_AIROP_IMG)) {
-      news = news.replace(JBGConstants.JBGTURN_NEWS_SEA_AIROP_IMG, 
-        "<img src='" + JBGConstants.JBGTURN_NEWS_SEA_AIROP_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>"
-        );
-    }
-    if (news.contains(JBGConstants.JBGTURN_NEWS_SEA_AIRBOMB_IMG)) {
-      news = news.replace(JBGConstants.JBGTURN_NEWS_SEA_AIRBOMB_IMG, 
-        "<img src='" + JBGConstants.JBGTURN_NEWS_SEA_AIRBOMB_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>"
-        );
-    }
-    if (news.contains(JBGConstants.JBGTURN_NEWS_SEAOP_VICTORY_IMG)) {
-      news = news.replace(JBGConstants.JBGTURN_NEWS_SEAOP_VICTORY_IMG, 
-        "<img src='" + JBGConstants.JBGTURN_NEWS_SEAOP_VICTORY_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>"
-        );
-    }
-    if (news.contains(JBGConstants.JBGTURN_NEWS_SEAOP_FAILURE_IMG)) {
-      news = news.replace(JBGConstants.JBGTURN_NEWS_SEAOP_FAILURE_IMG, 
-        "<img src='" + JBGConstants.JBGTURN_NEWS_SEAOP_FAILURE_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>"
-        );
-    }
-    return news;
   }
 
   public String toStringWithBasicNews() {
