@@ -28,3 +28,8 @@ cp ../j_swing_tile_set/jbg_sea_airbomb.png game-headed/jbg/assets/turnnews/jbg_s
 cp ../j_swing_tile_set/jbg_sea_airbomb2.png game-headed/jbg/assets/turnnews/jbg_sea_airbomb2.png
 cp ../j_swing_tile_set/jbg_sea_airbomb3.png game-headed/jbg/assets/turnnews/jbg_sea_airbomb3.png
 cp ../j_swing_tile_set/jbg_sea_airbomb4.png game-headed/jbg/assets/turnnews/jbg_sea_airbomb4.png
+cp ../j_swing_tile_set/jbg_amphib_op.png game-headed/jbg/assets/turnnews/jbg_amphib_op.png
+cp ../j_swing_tile_set/jbg_amphib_op2.png game-headed/jbg/assets/turnnews/jbg_amphib_op2.png
+cp ../j_swing_tile_set/jbg_amphib_op3.png game-headed/jbg/assets/turnnews/jbg_amphib_op3.png
+cp ../j_swing_tile_set/jbg_amphib_op4.png game-headed/jbg/assets/turnnews/jbg_amphib_op4.png
+

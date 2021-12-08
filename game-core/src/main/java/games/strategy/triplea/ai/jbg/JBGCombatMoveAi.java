@@ -89,6 +89,10 @@ System.out.println("doCombatMove: step0, turn: " + String.valueOf(gameTurnIndex)
     isDefensive =
         !JBGBattleUtils.territoryHasLocalLandSuperiority(
             jbgData, jbgData.getMyCapital(), JBGBattleUtils.MEDIUM_RANGE, player);
+    Map<String, JBGGamePlayerExtInfo> jbgAiInterractLst = data.getJBGAiInterracts();
+    boolean isCapitolInDanger = jbgAiInterractLst.get(player.getName()).isCapitolInDanger();
+if (isCapitolInDanger)
+  System.out.println("JBGCombatMoveAi: capital is in danger!!!");
     isBombing = false;
     JBGLogger.debug("Currently in defensive stance: " + isDefensive);
 System.out.println("doCombatMove: step 2: populate attack options --- " + String.valueOf((System.currentTimeMillis() - start)/1000)); start = System.currentTimeMillis();
@@ -101,8 +105,11 @@ System.out.println("doCombatMove: step 2: populate attack options --- " + String
       lastPopulateAttackOptionsTurn = gameTurnIndex;
 System.out.println("    JBGCombatMove: initing period for populate attack options: "+ String.valueOf(delayPeriodForPopulateAttackOptions) + " " + player.getName());
     }
-    //first turn will be long
-    if ((gameTurnIndex - lastPopulateAttackOptionsTurn) > delayPeriodForPopulateAttackOptions ) {
+System.out.println("gameTurnIndex:" + String.valueOf(gameTurnIndex) + 
+  "lastPopulateAttackOptionsTurn: " + String.valueOf(lastPopulateAttackOptionsTurn) +
+  "delayPeriodForPopulateAttackOptions: " + String.valueOf(delayPeriodForPopulateAttackOptions));
+    //full turn will be long
+    if (isCapitolInDanger || (gameTurnIndex - lastPopulateAttackOptionsTurn) > delayPeriodForPopulateAttackOptions ) {
       lastPopulateAttackOptionsTurn = gameTurnIndex;
 
       territoryManager.populateAttackOptions(false);

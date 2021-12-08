@@ -108,6 +108,8 @@ public abstract class AbstractJBGAi extends AbstractAi {
   int iCapitolDangerLevel = 0;
   int iLastCapitolDangerCount = 0;
   int iLastCapitolDangerTurn = -1;
+  boolean bIsHumanAlly = false;
+  boolean bIsHumanAllyCheck = false;
   //
 
   private final JBGOddsCalculator calc;
@@ -194,6 +196,9 @@ public abstract class AbstractJBGAi extends AbstractAi {
 
     doJBGEventMessaging(data, "Start moving ...");
 
+if (this.bIsHumanAlly)
+  System.out.println("---->This player is human ally!!!");
+
     checkPlayerCapitolDangerLevel(player, data);
 
     if (nonCombat) {
@@ -275,6 +280,9 @@ public abstract class AbstractJBGAi extends AbstractAi {
       boolean factoryMatched = false;
       boolean landUnitsMatched = false;
       boolean lowPUs = false;
+
+      //to increase difficulties for human
+      if (this.bIsHumanAlly) return false;
 
       //cannot produce
       if (totalFactories < 1) return false;
@@ -445,6 +453,28 @@ System.out.println("Neighbor neutral terr danger: " + neighborT.getName() + " ha
 
     //in TripleA, the delegate may be dismissed or disable for some turns once player lost capitol 
     private void checkPlayerCapitolDangerLevel(GamePlayer player, GameData data) {
+
+      if (!this.bIsHumanAllyCheck) {
+        final String humanPlayerName = data.getHumanPlayerName();
+        GamePlayer humanPlayer = null;
+        for (final GamePlayer pl : data.getPlayerList().getPlayers()) {
+          if (pl.getName().equals(humanPlayerName)) {
+            humanPlayer = pl;
+            break;
+          }
+        }
+        this.bIsHumanAlly = false;
+        if (humanPlayer != null)
+          this.bIsHumanAlly = isTwoPlayerAllied(data, player, humanPlayer);
+        this.bIsHumanAllyCheck = true;
+      }
+
+      //to increase game difficulties, if AI is ally of human, not check
+      if (this.bIsHumanAlly) {
+        this.iCapitolDangerLevel = 0;
+        return;
+      }
+
       List<Territory> capitols = TerritoryAttachment.getAllCapitals(player, data);
       if (capitols == null || capitols.size() < 1) {
         this.iLastCapitolDangerTurn = data.getJbgInternalTurnStep();
@@ -521,8 +551,11 @@ System.out.println("----Revoke JBGAi's purchase!");
 
       checkPlayerCapitolDangerLevel(player, data);
 
+      Map<String, JBGGamePlayerExtInfo> jbgAiInterractLst = data.getJBGAiInterracts();
+
       int iMaxUnitCost = 0;
       if (this.iCapitolDangerLevel > 0 && this.iLastCapitolDangerCount > 0) {
+        jbgAiInterractLst.get(player.getName()).setCapitolInDanger(true);
 System.out.println("    Capitol in danger, enemy units: " + String.valueOf(this.iLastCapitolDangerCount));
         final Resource pus = data.getResourceList().getResource(Constants.PUS);
         final List<ProductionRule> rules = player.getProductionFrontier().getRules();
@@ -596,8 +629,6 @@ System.out.println("~~~~~~~~~~~~~~~~\\\\__//~~~~~~~~~~this player has amphib cap
        //final int totalPu = player.getResources().getQuantity(pus);
       final int totalPu = pusToSpend;
       int leftToSpend = totalPu;
-
-      Map<String, JBGGamePlayerExtInfo> jbgAiInterractLst = data.getJBGAiInterracts();
 
       //though we can call this trigger in move(), 
       //but it will not help Ai to get new units before change to aggressive

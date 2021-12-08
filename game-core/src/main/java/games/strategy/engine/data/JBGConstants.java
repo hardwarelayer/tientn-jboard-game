@@ -249,6 +249,7 @@ public interface JBGConstants {
   static final String JBGTURN_NEWS_SEA_AIRBOMB_IMG = "@TURNNEWS_SEABOMB";
   static final String JBGTURN_NEWS_SEAOP_VICTORY_IMG = "@TURNNEWS_VIC_SEAOP";
   static final String JBGTURN_NEWS_SEAOP_FAILURE_IMG = "@TURNNEWS_FAIL_SEAOP";
+  static final String JBGTURN_NEWS_AMPHIB_IMG = "@TURNNEWS_AMPHIBIOUS_OP";
   static final String JBGTURN_NEWS_MOBILIZATION_IMG_URL = "file:jbg/assets/turnnews/jbg_mobilization.png";
   static final String JBGTURN_NEWS_AIROP1_IMG_URL = "file:jbg/assets/turnnews/jbg_airop.png";
   static final String JBGTURN_NEWS_AIROP2_IMG_URL = "file:jbg/assets/turnnews/jbg_airop2.png";
@@ -274,6 +275,10 @@ public interface JBGConstants {
   static final String JBGTURN_NEWS_SEAOP_FAILURE2_IMG_URL = "file:jbg/assets/turnnews/jbg_seaop_failure2.png";
   static final String JBGTURN_NEWS_SEAOP_FAILURE3_IMG_URL = "file:jbg/assets/turnnews/jbg_seaop_failure3.png";
   static final String JBGTURN_NEWS_SEAOP_FAILURE4_IMG_URL = "file:jbg/assets/turnnews/jbg_seaop_failure4.png";
+  static final String JBGTURN_NEWS_AMPHIB1_IMG_URL = "file:jbg/assets/turnnews/jbg_amphib_op.png";
+  static final String JBGTURN_NEWS_AMPHIB2_IMG_URL = "file:jbg/assets/turnnews/jbg_amphib_op2.png";
+  static final String JBGTURN_NEWS_AMPHIB3_IMG_URL = "file:jbg/assets/turnnews/jbg_amphib_op3.png";
+  static final String JBGTURN_NEWS_AMPHIB4_IMG_URL = "file:jbg/assets/turnnews/jbg_amphib_op4.png";
 
   //JBG AI
   static final String JBG_NO_COST_CARE_RULE = "JBG_NO_COST_CARE";
@@ -296,7 +301,7 @@ public interface JBGConstants {
   static final int CAPITOL_DANGER_LAND = 2; 
   static final int CAPITOL_DANGER_LOST = 3;
   static final int CAPITOL_DANGER_SEA_MOBILIZATION_RATE = 2;
-  static final int CAPITOL_DANGER_LAND_MOBILIZATION_RATE = 3;
+  static final int CAPITOL_DANGER_LAND_MOBILIZATION_RATE = 4;
   static final int CAPITOL_DANGER_ADDITIONAL_MOBILIZATION_RATE = 1;
   static final int CAPITOL_GOOD_AMOUNT_OF_DEF_UNITS = 250;
 

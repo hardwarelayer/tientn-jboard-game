@@ -96,6 +96,7 @@ public class JBGTurnHistoryParser {
   private static final long serialVersionUID = 4880602702815333376L;
   private final StringBuilder stringBuilder = new StringBuilder();
   private Collection<Territory> territories = null;
+  private List<String> seaTerritoryNames = new ArrayList<String>();
 
   private int iCurrentAirOPTagIdx = 0;
   private int iCurrentSeaAirOPTagIdx = 0;
@@ -103,8 +104,18 @@ public class JBGTurnHistoryParser {
   private int iCurrentSeaAirBombOPTagIdx = 0;
   private int iCurrentAirBombOPTagIdx = 0;
   private int iCurrentSeaFailOPTagIdx = 0;
+  private int iCurrentAmphibOPTagIdx = 0;
 
   public JBGTurnHistoryParser() {
+  }
+
+  private void loadSeaZoneNames() {
+    if (territories == null) return;
+    for (Territory t: territories) {
+      if (Matches.territoryIsWater().test(t))
+        if (!seaTerritoryNames.contains(t.getName()))
+          seaTerritoryNames.add(t.getName());
+      }
   }
 
   private void loadTerritories(GameData data) {
@@ -121,6 +132,7 @@ public class JBGTurnHistoryParser {
   public String parse(final GameData data, final boolean isLastTurn, final int posType, final List<String> excludePlayers) {
 
     loadTerritories(data);
+    loadSeaZoneNames();
 
     Collection<GamePlayer> playersAllowed = data.getPlayerList().getPlayers();
     List<JBGAnalyzableTurnEntry> lst = parseFullTurn(data, true, playersAllowed);
@@ -154,6 +166,7 @@ public class JBGTurnHistoryParser {
   public String parseSinglePlayerTurn(final GameData data, final boolean isLastTurn, final int posType, final String playerName) {
 
     loadTerritories(data);
+    loadSeaZoneNames();
 
     Collection<GamePlayer> playersAllowed = new ArrayList<GamePlayer>();
     playersAllowed.add(data.getPlayerList().getPlayerId(playerName));
@@ -210,6 +223,7 @@ public class JBGTurnHistoryParser {
   public String parseHTML(final GameData data, final boolean isLastTurn, final int posType, final List<String> excludePlayers) {
 
     loadTerritories(data);
+    loadSeaZoneNames();
 
     Collection<GamePlayer> playersAllowed = data.getPlayerList().getPlayers();
     List<JBGAnalyzableTurnEntry> lst = parseFullTurn(data, true, playersAllowed);
@@ -293,6 +307,28 @@ public class JBGTurnHistoryParser {
         "<img src='" + JBGConstants.JBGTURN_NEWS_SEAOP_FAILURE2_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>" +
         "<img src='" + JBGConstants.JBGTURN_NEWS_SEAOP_FAILURE3_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>" +
         "<img src='" + JBGConstants.JBGTURN_NEWS_SEAOP_FAILURE4_IMG_URL + "' width=\"240px\" height=\"auto\"/><br/>";
+  }
+  private String getNewsAmphibOPImageUrl() {
+    String res = null;
+    switch (this.iCurrentAmphibOPTagIdx) {
+      case 0:
+        res = JBGConstants.JBGTURN_NEWS_AMPHIB1_IMG_URL;
+        break;
+      case 1:
+        res = JBGConstants.JBGTURN_NEWS_AMPHIB2_IMG_URL;
+        break;
+      case 2:
+        res = JBGConstants.JBGTURN_NEWS_AMPHIB3_IMG_URL;
+        break;
+      case 3:
+        res = JBGConstants.JBGTURN_NEWS_AMPHIB4_IMG_URL;
+        break;
+    }
+    if (this.iCurrentAmphibOPTagIdx + 1 < 4)
+      this.iCurrentAmphibOPTagIdx++;
+    else
+      this.iCurrentAmphibOPTagIdx = 0;
+    return res;
   }
   private String getNewsAirOPImageUrl() {
     String res = null;
@@ -451,12 +487,18 @@ public class JBGTurnHistoryParser {
       news = news.replaceFirst(JBGConstants.JBGTURN_NEWS_SEAOP_FAILURE_IMG, 
         "<img src='" + getNewsSeaFailureOPImageUrl() + "' width=\"240px\" height=\"auto\"/><br/>"
         );
+    while (news.indexOf(JBGConstants.JBGTURN_NEWS_AMPHIB_IMG) >= 0)
+      news = news.replaceFirst(JBGConstants.JBGTURN_NEWS_AMPHIB_IMG, 
+        "<img src='" + getNewsAmphibOPImageUrl() + "' width=\"240px\" height=\"auto\"/><br/>"
+        );
 
     return news;
   }
 
   public String parseHTMLSinglePlayerTurn(final GameData data, final boolean isLastTurn, final int posType, final String playerName) {
+
     loadTerritories(data);
+    loadSeaZoneNames();
 
     Collection<GamePlayer> playersAllowed = new ArrayList<GamePlayer>();
     playersAllowed.add(data.getPlayerList().getPlayerId(playerName));
@@ -510,16 +552,6 @@ public class JBGTurnHistoryParser {
 
   public void clear() {
     stringBuilder.setLength(0);
-  }
-
-  private boolean isTerritorySeaZone(final String s) {
-    if (territories == null) return false;
-    for (Territory t: territories) {
-      if (t.getName().equals(s)) {
-        return Matches.territoryIsWater().test(t);
-      }
-    }
-    return false;
   }
 
   /**
@@ -620,7 +652,7 @@ public class JBGTurnHistoryParser {
           bMoveTakeProvince = true;
           line = line.replaceAll(JBGConstants.HI_TAG_MOVE_TAKE_PROV, "");
         }
-        JBGMove m = new JBGMove(line);
+        JBGMove m = new JBGMove(line, seaTerritoryNames);
         entry.addCombatMove(m);
 
         if (bMoveTakeProvince) {
@@ -636,8 +668,7 @@ public class JBGTurnHistoryParser {
       String tmpStr = item.getInfo();
       List<String> lines = Arrays.asList(tmpStr.split("\\n"));
       for (String line: lines) {
-        entry.addNormalMove(new JBGMove(line));
-
+        entry.addNormalMove(new JBGMove(line, seaTerritoryNames));
       }
     }
     else if (item.getBlock().equals(JBGConstants.HI_PURCHASE_TITLE)) {
@@ -660,7 +691,7 @@ public class JBGTurnHistoryParser {
             entry.addBattle(e);
           e = new JBGBattleSimpleEvent(line);
           final String location = e.getLocation();
-          if (isTerritorySeaZone(location)) {
+          if (seaTerritoryNames.contains(location)) {
             e.setSeaBattle(true);
           }
         }

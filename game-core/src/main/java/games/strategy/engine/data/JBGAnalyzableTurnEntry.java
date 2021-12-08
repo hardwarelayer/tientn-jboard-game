@@ -152,6 +152,10 @@ public class JBGAnalyzableTurnEntry {
     return true;
   }
 
+  private String getBoldText(final String s) {
+    return new StringBuilder("<b>" + s + "</b>").toString();
+  }
+
   private String writeBattleEventStory(JBGBattleSimpleEvent battleEvent, boolean isHtml) {
       StringBuilder sb = new StringBuilder();
 
@@ -211,12 +215,12 @@ public class JBGAnalyzableTurnEntry {
               sb.append(JBGConstants.JBGTURN_NEWS_AIRBOMB_IMG);
             else 
               sb.append(JBGConstants.JBGTURN_NEWS_SEA_AIRBOMB_IMG);
-            sb.append(player + " bombed " + regionName + " of " + battleEvent.getDefender());
+            sb.append(getBoldText(player) + " bombed " + regionName + " of " + battleEvent.getDefender());
           }
           else {
             if (bIsSeaBattle)
               sb.append(JBGConstants.JBGTURN_NEWS_SEAOP_FAILURE_IMG);
-            sb.append("Failed to capture " + regionName + " from " + battleEvent.getDefender());
+            sb.append("Failed to take " + regionName + " from " + battleEvent.getDefender());
           }
         }
       }
@@ -224,7 +228,10 @@ public class JBGAnalyzableTurnEntry {
 
       //combat moves
       sb.append(lineBreak);
+
+      StringBuilder sbMoveContent = new StringBuilder();
       boolean bFirstCombatMove = true;
+      boolean bIsAmphibLanding = false;
       for (JBGMove move: lstCombatMoves) {
 
         if (move == null) continue;
@@ -233,20 +240,35 @@ public class JBGAnalyzableTurnEntry {
         if (move.getDestination().equals(regionName)) {
           boolean isSquaronMove = troopIsAirforce(move.getTroops());
           if (bFirstCombatMove) {
+
             if (isSquaronMove)
-              sb.append(player + " squarons " + move.getTroops() + " took off from " + move.getDeparture());
-            else
-              sb.append(player + " mobilized " + move.getTroops() + " from " + move.getDeparture());              
+              sbMoveContent.append(getBoldText(player) + " squarons " + move.getTroops() + " took off from " + move.getDeparture());
+            else {
+              if (move.isFromSea())
+                bIsAmphibLanding = true;
+              sbMoveContent.append(getBoldText(player) + " mobilized " + move.getTroops() + " from " + move.getDeparture());              
+            }
+
             bFirstCombatMove = false;
           }
           else {
+
             if (isSquaronMove)
-              sb.append(" and squarons " + move.getTroops() + " took off from " + move.getDeparture());
-            else
-              sb.append(" and " + move.getTroops() + " from " + move.getDeparture());
+              sbMoveContent.append(" and squarons " + move.getTroops() + " took off from " + move.getDeparture());
+            else {
+              if (move.isFromSea())
+                bIsAmphibLanding = true;
+              sbMoveContent.append(" and " + move.getTroops() + " from " + move.getDeparture());
+            }
+
           }
         }
       }
+
+      if (!bIsSeaBattle && bIsAmphibLanding)
+        sb.append(JBGConstants.JBGTURN_NEWS_AMPHIB_IMG);
+      sb.append(sbMoveContent.toString());
+
       if (!bFirstCombatMove) //has at least 1 move
         sb.append(lineBreak);
 
@@ -268,7 +290,7 @@ public class JBGAnalyzableTurnEntry {
         //casualties of both sides
         if (bIsPlayerVictory) {
           if (bIsPlayerAttack) {
-            sb.append(player + " successfully crushed " + battleEvent.getDefenderCasualties());
+            sb.append(getBoldText(player) + " successfully crushed " + battleEvent.getDefenderCasualties());
             if (battleEvent.getAttackerCasualties().length() < 3)
               sb.append(", without any casualty.");
             else
@@ -280,7 +302,7 @@ public class JBGAnalyzableTurnEntry {
               sb.append(", but failed to score any achievement!");
             else
               if (battleEvent.getDefenderCasualties().length() > 2)
-                sb.append(", destroyed " + player + "'s " + battleEvent.getDefenderCasualties());
+                sb.append(", destroyed " + getBoldText(player) + "'s " + battleEvent.getDefenderCasualties());
               else
                 sb.append(", but could not score any hit.");
           }
@@ -292,24 +314,24 @@ public class JBGAnalyzableTurnEntry {
             if (battleEvent.getDefenderCasualties().length() > 2)
               //consider attacker casualties, too ????
               if (battleEvent.getAttackerCasualties().length() > 2)
-                sb.append(player + " lost " + battleEvent.getAttackerCasualties() + ", destroyed " + battleEvent.getDefender() + "'s " + battleEvent.getDefenderCasualties());
+                sb.append(getBoldText(player) + " lost " + battleEvent.getAttackerCasualties() + ", destroyed " + battleEvent.getDefender() + "'s " + battleEvent.getDefenderCasualties());
               else
-                sb.append(player + " destroyed " + battleEvent.getDefender() + "'s " + battleEvent.getDefenderCasualties() + " with minimal casualties.");
+                sb.append(getBoldText(player) + " destroyed " + battleEvent.getDefender() + "'s " + battleEvent.getDefenderCasualties() + " with minimal casualties.");
             else
               if (battleEvent.getAttackerCasualties().length() > 2)
-                sb.append(player + " lost " + battleEvent.getAttackerCasualties() + ", but could not score any hit on " + battleEvent.getDefender());
+                sb.append(getBoldText(player) + " lost " + battleEvent.getAttackerCasualties() + ", but could not score any hit on " + battleEvent.getDefender());
               else
                 sb.append("The two armies only had minor encounters with minimal casualties. ");
           }
           else {
             if (battleEvent.getAttackerCasualties().length() > 2)
               if (battleEvent.getDefenderCasualties().length() > 2)
-                sb.append(player + " lost  " + battleEvent.getDefenderCasualties() + ", and caused " + battleEvent.getAttacker() + "'s losses " + battleEvent.getAttackerCasualties());
+                sb.append(getBoldText(player) + " lost  " + battleEvent.getDefenderCasualties() + ", and caused " + battleEvent.getAttacker() + "'s losses " + battleEvent.getAttackerCasualties());
               else
-                sb.append(player + " lost  " + battleEvent.getDefenderCasualties() + ", but could not score any hit on " + battleEvent.getAttacker() );
+                sb.append(getBoldText(player) + " lost  " + battleEvent.getDefenderCasualties() + ", but could not score any hit on " + battleEvent.getAttacker() );
             else
               if (battleEvent.getDefenderCasualties().length() > 2)
-                sb.append(player + " lost  " + battleEvent.getDefenderCasualties() + ", but could not score any hit on " + battleEvent.getAttacker());
+                sb.append(getBoldText(player) + " lost  " + battleEvent.getDefenderCasualties() + ", but could not score any hit on " + battleEvent.getAttacker());
               else
                 sb.append("The two armies had only minor clashes without loss. ");
 
@@ -349,27 +371,27 @@ public class JBGAnalyzableTurnEntry {
         if (battleEvent.isAttackerWon()) {
           if (battleEvent.getAttackerCasualties().length() > 2)
             if (iRounds < 2)
-              sb.append(player + " quickly seized the territory. ");
+              sb.append(getBoldText(player) + " quickly seized the territory. ");
             else
-              sb.append(player + " got a pyrrhic victory. ");
+              sb.append(getBoldText(player) + " got a pyrrhic victory. ");
           else
-            sb.append(player + " annexed the territory. ");          
+            sb.append(getBoldText(player) + " annexed the territory. ");          
         }
         else {
           if (!isAirforceOnly)
-            sb.append(player + " got a sounding defeat. ");
+            sb.append(getBoldText(player) + " got a sounding defeat. ");
           else //airforce can't win alone
-            sb.append(player + " stopped air operation.");
+            sb.append(getBoldText(player) + " stopped air operation.");
         }
       }
       else if (iScore < 5) {
-        sb.append(player + " won. ");
+        sb.append(getBoldText(player) + " won. ");
       }
       else if (iScore < 25) {
-        sb.append(player + " gained a decisive victory. ");
+        sb.append(getBoldText(player) + " gained a decisive victory. ");
       }
       else {
-        sb.append(player + " gained a strategic victory. ");
+        sb.append(getBoldText(player) + " gained a strategic victory. ");
       }
       sb.append(lineBreak);
 

@@ -17,14 +17,17 @@ public class JBGMove {
   @Getter @Setter private String departure;
   @Getter @Setter private String destination;
   @Getter @Setter private String troops;
+  @Getter @Setter private boolean fromSea;
 
-  public JBGMove(final String dep, final String dest, final String t) {
+  public JBGMove(final String dep, final String dest, final String t, List<String> seaNames) {
     departure = dep;
     destination = dest;
     troops = t;
+
+    if (seaNames.contains(dep)) fromSea = true;
   }
 
-  public JBGMove(final String ln) {
+  public JBGMove(final String ln, List<String> seaNames) {
     if (ln.length() < 1)
       return;
 
@@ -38,6 +41,8 @@ public class JBGMove {
     departure = res.get(0);
     destination = res.get(1);
     troops = res.get(2);
+
+    if (seaNames.contains(departure)) fromSea = true;
   }
 
   @Override
@@ -45,6 +50,7 @@ public class JBGMove {
     StringBuilder sb = new StringBuilder(
       " Dep: " +
       departure + 
+      (fromSea?" Amphibious attack":"Land attack") +
       " Dest: " + destination +
       " Troops: " + troops
       );

@@ -1740,9 +1740,8 @@ games/strategy/triplea/delegate/AbstractUndoableMove.java
  games.strategy.triplea.delegate.AbstractUndoableMove
 games/strategy/triplea/player/AbstractBasePlayer.java
  games.strategy.triplea.player.AbstractBasePlayer
-games/strategy/engine/random/IRandomStats.java
- games.strategy.engine.random.IRandomStats
- games.strategy.engine.random.IRandomStats$DiceType
+games/strategy/engine/data/GameData.java
+ games.strategy.engine.data.GameData
 games/strategy/engine/data/GameDataEventListeners.java
  games.strategy.engine.data.GameDataEventListeners
 games/strategy/triplea/delegate/battle/steps/change/CheckStalemateBattleEnd.java
@@ -1853,8 +1852,8 @@ tools/map/making/ui/skin/MapSkinPanel.java
  tools.map.making.ui.skin.MapSkinPanel
 games/strategy/triplea/delegate/power/calculator/RollValue.java
  games.strategy.triplea.delegate.power.calculator.RollValue
-games/strategy/engine/data/GameData.java
- games.strategy.engine.data.GameData
+games/strategy/engine/data/JBGAnalyzableTurnEntry.java
+ games.strategy.engine.data.JBGAnalyzableTurnEntry
 games/strategy/triplea/ai/pro/ProPoliticsAi.java
  games.strategy.triplea.ai.pro.ProPoliticsAi
 games/strategy/engine/data/ProductionRule.java
@@ -2712,7 +2711,8 @@ games/strategy/triplea/ui/DiceChooser.java
  games.strategy.triplea.ui.DiceChooser
 games/strategy/engine/framework/AutoSaveFileUtils.java
  games.strategy.engine.framework.AutoSaveFileUtils
-games/strategy/engine/data/JBGAnalyzableTurnEntry.java
- games.strategy.engine.data.JBGAnalyzableTurnEntry
+games/strategy/engine/random/IRandomStats.java
+ games.strategy.engine.random.IRandomStats
+ games.strategy.engine.random.IRandomStats$DiceType
 games/strategy/triplea/ui/history/JBGTurnHistoryParser.java
  games.strategy.triplea.ui.history.JBGTurnHistoryParser

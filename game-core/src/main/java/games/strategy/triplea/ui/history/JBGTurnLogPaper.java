@@ -122,16 +122,21 @@ public class JBGTurnLogPaper {
     finally {
       data.releaseReadLock();
     }
-    final int iPaper =
-        JOptionPane.showOptionDialog(
-            this.parent,
-            p,
-            JBGConstants.JBGTURN_NEWS_PAPER_NAME,
-            JOptionPane.DEFAULT_OPTION,
-            JOptionPane.PLAIN_MESSAGE,
-            null,
-            null,
-            null);
+
+    try {
+      final int iPaper =
+          JOptionPane.showOptionDialog(
+              this.parent,
+              p,
+              JBGConstants.JBGTURN_NEWS_PAPER_NAME,
+              JOptionPane.DEFAULT_OPTION,
+              JOptionPane.PLAIN_MESSAGE,
+              null,
+              null,
+              null);
+    } catch (Exception ex) {
+      System.out.println(ex);
+    }
   }
   
   private JPanel makeNewsPaperPanel() {
