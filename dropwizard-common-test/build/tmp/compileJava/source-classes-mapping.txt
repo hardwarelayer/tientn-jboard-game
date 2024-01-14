@@ -1,2 +1,0 @@
-org/triplea/dropwizard/test/DropwizardServerExtension.java
- org.triplea.dropwizard.test.DropwizardServerExtension

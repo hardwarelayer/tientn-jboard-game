@@ -197,7 +197,7 @@ public abstract class AbstractJBGAi extends AbstractAi {
     doJBGEventMessaging(data, "Start moving ...");
 
 if (this.bIsHumanAlly)
-  System.out.println("---->This player is human ally!!!");
+  System.out.println("---->This player is human ally, will never have mobilization or capitol danger!!!");
 
     checkPlayerCapitolDangerLevel(player, data);
 

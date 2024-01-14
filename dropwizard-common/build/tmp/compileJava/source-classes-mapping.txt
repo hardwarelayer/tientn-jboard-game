@@ -1,5 +1,0 @@
-org/triplea/dropwizard/common/ServerConfiguration.java
- org.triplea.dropwizard.common.ServerConfiguration
- org.triplea.dropwizard.common.ServerConfiguration$WebsocketConfig
-org/triplea/dropwizard/common/AuthenticationConfiguration.java
- org.triplea.dropwizard.common.AuthenticationConfiguration

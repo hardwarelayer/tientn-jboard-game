@@ -225,6 +225,31 @@ public class JBGTerritoryBuildingPurchasePanel {
     }
   }
 
+  private void selectAllBuildingToBuy() {
+    DefaultListModel availModel = (DefaultListModel) availListCtl.getModel();
+
+    do {
+      validated = false;
+
+      JBGTerritoryBuildingSelectItem item = (JBGTerritoryBuildingSelectItem) availModel.getElementAt(0);
+
+      if (item == null) {
+        System.out.println("Item is null at 0");
+        break;
+      }
+
+      if (this.spendJCoin + item.getPrice() > this.jCoin) {
+        System.out.println("price is higher than budget " + String.valueOf(this.spendJCoin) + "+" + String.valueOf(item.getPrice()) + ">" + String.valueOf(this.jCoin));
+        break;
+      }
+
+      removeItemFromList(availListCtl, 0);
+      addItemToList(selectListCtl, item);
+      updateSelPrice(item.getPrice());
+    } while (availModel.getSize() > 0);
+    availListCtl.setSelectedIndex(-1);
+  }
+
   private void unSelectBuildingToBuy() {
     int iSelectedIdx = selectListCtl.getSelectedIndex();
     if (iSelectedIdx >= iTotalOriginalSelected) {
@@ -436,15 +461,13 @@ public class JBGTerritoryBuildingPurchasePanel {
     c.gridx = 0;
     c.gridy = 1;
     c.gridwidth = 2;
-    c.gridheight = 2;
+    c.gridheight = 3;
     this.availListCtl = makeScrollList(AVAIL_LIST_NAME, panel, gridbag, c);
 
     ActionListener selectListenerFnc = new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
         selectBuildingToBuy();
-        //shuffleAllListModels();
-        //clearWordListSelection();
       }
     };
     c.gridy = 1;
@@ -453,6 +476,20 @@ public class JBGTerritoryBuildingPurchasePanel {
     c.gridheight = 1;
     JButton btnSelect = makeButtonWithAction("Select", panel, gridbag, c, selectListenerFnc);
     setComponentSize(btnSelect, 80, 50);
+
+    ActionListener selectAllListenerFnc = new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        selectAllBuildingToBuy();
+      }
+    };
+    c.gridy = 2;
+    c.gridx = 2;
+    c.gridwidth = 1;
+    c.gridheight = 1;
+    JButton btnSelectAll = makeButtonWithAction("Select All", panel, gridbag, c, selectAllListenerFnc);
+    setComponentSize(btnSelectAll, 80, 50);
+
     ActionListener unSelectListenerFnc = new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
@@ -461,7 +498,7 @@ public class JBGTerritoryBuildingPurchasePanel {
         //clearWordListSelection();
       }
     };
-    c.gridy = 2;
+    c.gridy = 3;
     c.gridx = 2;
     c.gridwidth = 1;
     c.gridheight = 1;
@@ -472,7 +509,7 @@ public class JBGTerritoryBuildingPurchasePanel {
     c.gridx = 3;
     c.gridy = 1;
     c.gridwidth = 2;
-    c.gridheight = 2;
+    c.gridheight = 3;
     this.selectListCtl = makeScrollList(SELECT_LIST_NAME, panel, gridbag, c);
 
     //3rd row, reserve for building descriptions
