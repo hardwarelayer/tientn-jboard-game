@@ -38,6 +38,9 @@ import games.strategy.engine.data.JBGTerritoryMapBuilder;
 import games.strategy.triplea.ui.JBGTerritoryManagerPanel;
 import games.strategy.triplea.util.UnitCategory;
 
+import javax.swing.*;
+import java.awt.event.*;
+
 public class JBGTerritoryViewCanvasPanel extends JPanel 
     implements ActionListener {
     private static final long serialVersionUID = 5004515340964828564L;
@@ -105,6 +108,35 @@ public class JBGTerritoryViewCanvasPanel extends JPanel
 
         this.setFocusable(true);
 
+final JPopupMenu popupmenu = new JPopupMenu("Edit");
+         JMenuItem cut = new JMenuItem("Cut");
+         JMenuItem copy = new JMenuItem("Copy");
+         JMenuItem paste = new JMenuItem("Paste");
+         JMenu pmenu = new JMenu("...");
+        cut.addActionListener(new ActionListener(){
+            @Override
+         public void actionPerformed(ActionEvent e) {              
+             System.out.println("cut MenuItem clicked.");  
+         }  
+        });  
+        copy.addActionListener(new ActionListener(){  
+            @Override
+            public void actionPerformed(ActionEvent e) {              
+                System.out.println("copy MenuItem clicked.");  
+            }  
+           });  
+        paste.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {              
+                System.out.println("paste MenuItem clicked.");  
+            }
+           });
+         pmenu.add(new JMenuItem("pizza"));
+         pmenu.add(new JMenuItem("cake"));
+
+         popupmenu.add(cut); popupmenu.add(copy); popupmenu.add(paste); popupmenu.add(pmenu);
+
+
         this.addMouseListener(new MouseAdapter() {
             private Color background;
 
@@ -147,6 +179,8 @@ public class JBGTerritoryViewCanvasPanel extends JPanel
                 if (isInRect(e.getX(), e.getY(), panel.getRcExchangeIcon())) {
                     refMaster.openExchangeJCoinDialog(panel);
                 }
+
+                popupmenu.show(panel , e.getX(), e.getY());
             }
         });
 
